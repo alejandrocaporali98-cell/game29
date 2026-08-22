@@ -21,9 +21,17 @@
   --line:rgba(244,241,234,.12);
   --text:#F4F1EA;
   --muted:#8D9BBF;
+  --sugg:var(--sugg);
+  --sheet:var(--sheet);
+  --place:var(--place);
+  --spent:#2A3F6E;
   --gold:#FF6B35;
+  --on-gold:#0C1B3A;
   --green:#5FCB8B;
   --red:#F2506E;
+  --glow:var(--glow);
+  --tint:var(--tint);
+  --tint-2:var(--tint-2);
   --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --serif:"Instrument Serif",Georgia,serif;
 }
@@ -61,14 +69,14 @@ h1 em{font-style:italic;color:var(--gold)}
   border-radius:999px;padding:4px;margin-bottom:14px}
 .modes button{flex:1;border:none;background:none;color:var(--muted);font-family:var(--sans);
   font-size:13px;font-weight:500;padding:9px;border-radius:999px;cursor:pointer}
-.modes button.sel{background:var(--gold);color:#0C1B3A;font-weight:600}
+.modes button.sel{background:var(--gold);color:var(--on-gold);font-weight:600}
 
 .tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
   background:var(--raise);border:1px solid var(--line);border-radius:16px;
   padding:18px;color:var(--text);font-family:var(--sans);cursor:pointer}
-.tile:hover{border-color:rgba(255,107,53,.55)}
+.tile:hover{border-color:var(--tint-2)}
 .tile .ico{font-size:22px;width:44px;height:44px;flex:none;border-radius:12px;
-  background:rgba(255,107,53,.16);display:grid;place-items:center}
+  background:var(--tint);display:grid;place-items:center}
 .tile h3{font-size:15px;font-weight:600;margin-bottom:3px}
 .tile p{font-size:12px;color:var(--muted)}
 .tile .arrow{margin-left:auto;color:var(--muted);font-size:18px}
@@ -86,7 +94,7 @@ h1 em{font-style:italic;color:var(--gold)}
 input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line);
   border-radius:12px;color:var(--text);font-family:var(--sans);font-size:16px;padding:14px;outline:none}
 input[type=text]:focus{border-color:var(--gold)}
-input::placeholder{color:#5F6E96}
+input::placeholder{color:var(--place)}
 
 .list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:2px}
 .list li{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;cursor:pointer}
@@ -96,14 +104,14 @@ input::placeholder{color:#5F6E96}
 .list .sub{font-size:11px;color:var(--muted);margin-top:2px}
 
 /* game */
-.art{position:relative;width:100%;aspect-ratio:1;max-height:190px;border-radius:16px;
-  overflow:hidden;background:var(--raise);margin-bottom:16px;display:grid;place-items:center}
+.art{position:relative;width:min(100%,200px);aspect-ratio:1;margin:0 auto 16px;border-radius:16px;
+  overflow:hidden;background:var(--raise);display:grid;place-items:center}
 .art img{width:100%;height:100%;object-fit:cover;filter:blur(26px) saturate(1.3);
   transform:scale(1.15);transition:filter .5s,transform .5s}
 .art.reveal img{filter:none;transform:none}
 .art .vinyl{position:absolute;width:64px;height:64px;border-radius:50%;
-  border:2px solid rgba(244,241,234,.35);
-  background:radial-gradient(circle,rgba(12,27,58,.92) 0 22%,transparent 22%)}
+  border:2px solid color-mix(in srgb, var(--text) 35%, transparent);
+  background:radial-gradient(circle,color-mix(in srgb, var(--bg) 92%, transparent) 0 22%,transparent 22%)}
 .art.spin .vinyl{animation:spin 2.6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .art.reveal .vinyl{display:none}
@@ -115,12 +123,12 @@ input::placeholder{color:#5F6E96}
 .times{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
 
 .play{width:100%;margin-top:16px;padding:16px;border:none;border-radius:14px;
-  background:var(--gold);color:#0C1B3A;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer}
+  background:var(--gold);color:var(--on-gold);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer}
 .play:active{opacity:.85}
 
 .guesswrap{position:relative;margin-top:14px}
 .sugg{list-style:none;position:absolute;left:0;right:0;bottom:100%;margin-bottom:6px;z-index:9;
-  background:#1B2F5C;border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:200px}
+  background:var(--sugg);border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:200px}
 .sugg li{padding:12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--line)}
 .sugg li:last-child{border:none}
 .sugg li:hover{background:var(--raise)}
@@ -143,7 +151,7 @@ input::placeholder{color:#5F6E96}
 .shake{animation:sh .3s}
 @keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
-.err{background:rgba(242,80,110,.12);border:1px solid rgba(242,80,110,.5);
+.err{background:color-mix(in srgb, var(--red) 14%, transparent);border:1px solid color-mix(in srgb, var(--red) 55%, transparent);
   border-radius:12px;padding:12px;font-size:12px;line-height:1.5;margin-top:10px}
 .load{font-size:12px;color:var(--muted);padding:14px;text-align:center}
 .foot{margin-top:18px;text-align:center;font-size:12px;color:var(--muted)}
@@ -151,16 +159,71 @@ input::placeholder{color:#5F6E96}
   font-size:12px;text-decoration:underline;cursor:pointer}
 
 /* sheets */
-.sheet{position:fixed;inset:0;background:rgba(6,14,32,.78);display:none;
+.sheet{position:fixed;inset:0;background:color-mix(in srgb, var(--bg) 80%, #000);display:none;
   align-items:flex-end;justify-content:center;z-index:40;padding:16px}
 .sheet.on{display:flex}
-.sheet .inner{width:100%;max-width:440px;background:#122246;border:1px solid var(--line);
+.sheet .inner{width:100%;max-width:440px;background:var(--sheet);border:1px solid var(--line);
   border-radius:20px;padding:18px;animation:up .3s ease}
 @keyframes up{from{transform:translateY(24px);opacity:0}}
 .sheet h3{font-size:15px;font-weight:600;margin-bottom:10px}
 .sheet img.card{width:100%;border-radius:12px;display:block;margin-bottom:12px}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* --- paletas --- */
+body[data-theme="neon"]{--bg:#0B0B12;--raise:#171722;--sugg:#1F1F2E;--sheet:#14141E;
+  --line:rgba(240,255,220,.12);--text:#F0FFE0;--muted:#8A8FA0;--place:#5A5F70;--spent:#2C3320;
+  --gold:#B4FF3D;--on-gold:#0B0B12;--green:#B4FF3D;--red:#FF4D6D;
+  --glow:rgba(180,255,61,.10);--tint:rgba(180,255,61,.14);--tint-2:rgba(180,255,61,.5)}
+body[data-theme="cassette"]{--bg:#0E2B2E;--raise:#15393D;--sugg:#1B474B;--sheet:#122F33;
+  --line:rgba(233,223,200,.13);--text:#E9DFC8;--muted:#7FA5A8;--place:#54767A;--spent:#265257;
+  --gold:#FF3D7F;--on-gold:#0E2B2E;--green:#6FE0BC;--red:#FF8A5B;
+  --glow:rgba(255,61,127,.10);--tint:rgba(255,61,127,.15);--tint-2:rgba(255,61,127,.5)}
+body[data-theme="ciruela"]{--bg:#241033;--raise:#331A46;--sugg:#412158;--sheet:#2B1440;
+  --line:rgba(255,240,251,.13);--text:#FFF0FB;--muted:#A98BBF;--place:#77598C;--spent:#4A2C63;
+  --gold:#C77DFF;--on-gold:#241033;--green:#7BE8B5;--red:#FF5C8A;
+  --glow:rgba(199,125,255,.12);--tint:rgba(199,125,255,.16);--tint-2:rgba(199,125,255,.5)}
+body[data-theme="papel"]{--bg:#F2EDE3;--raise:#E7E0D2;--sugg:#DED6C6;--sheet:#EFE9DE;
+  --line:rgba(27,27,27,.14);--text:#1B1B1B;--muted:#6E6559;--place:#9B9284;--spent:#CFC5B2;
+  --gold:#E5533D;--on-gold:#FFF6F0;--green:#2E8B57;--red:#C1352A;
+  --glow:rgba(229,83,61,.08);--tint:rgba(229,83,61,.12);--tint-2:rgba(229,83,61,.5)}
+
+/* --- pistas --- */
+.hints{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.hints li{font-size:12px;padding:8px 11px;border-radius:999px;background:var(--tint);
+  border:1px solid var(--tint-2);color:var(--text)}
+.hints li b{font-weight:600}
+.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.12em}
+.minor{display:flex;gap:8px;margin-top:8px}
+.minor button{flex:1;background:none;border:none;color:var(--muted);font-family:var(--sans);
+  font-size:12px;padding:10px;cursor:pointer;border-radius:10px}
+.minor button:hover{color:var(--text);background:var(--raise)}
+.minor button:disabled{opacity:.35;cursor:default}
+.minor .danger.armed{color:var(--red);font-weight:600}
+.tag{display:inline-block;font-size:11px;color:var(--muted);margin-left:8px;vertical-align:middle}
+
+/* --- selector de tema --- */
+#themeBtn{background:none;border:1px solid var(--line);border-radius:999px;
+  padding:6px 10px;font-size:13px;cursor:pointer;line-height:1}
+.swatches{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px}
+.swatches button{display:flex;align-items:center;gap:10px;background:var(--raise);
+  border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);
+  font-family:var(--sans);font-size:13px;cursor:pointer;text-align:left}
+.swatches button.sel{border-color:var(--gold)}
+.swatches .dot{width:26px;height:26px;border-radius:50%;flex:none;position:relative}
+.swatches .dot i{position:absolute;inset:32%;border-radius:50%}
+
+/* En pantallas grandes la columna de 440px queda flotando sola:
+   le damos un marco para que se lea como una app y no como una web estirada. */
+@media(min-width:720px){
+  body{padding:44px 20px 60px;
+    background-image:radial-gradient(900px 500px at 50% -10%,var(--glow),transparent 70%)}
+  .app{background:linear-gradient(180deg,var(--raise) 0%,var(--bg) 46%);
+    border:1px solid var(--line);border-radius:26px;
+    padding:0 26px 30px;box-shadow:0 28px 70px rgba(0,0,0,.45)}
+  header{padding-top:22px}
+  .art{width:min(100%,230px)}
+}
 </style>
 </head>
 <body>
@@ -168,6 +231,7 @@ input::placeholder{color:#5F6E96}
 
 <header>
   <div class="brand">Spindle</div>
+  <button id="themeBtn" title="Change palette">◐</button>
   <button id="installBtn">⬇ Install app</button>
   <div class="stats">
     <div class="chip">Streak <b id="streak">0</b></div>
@@ -230,7 +294,12 @@ input::placeholder{color:#5F6E96}
         <button id="submit">Guess</button>
         <button class="skip" id="skip">Skip →</button>
       </div>
+      <div class="minor">
+        <button id="hint">💡 Hint</button>
+        <button class="danger" id="giveup">Give up</button>
+      </div>
     </div>
+    <ul class="hints" id="hints"></ul>
     <ul class="rows" id="rows"></ul>
   </div>
 
@@ -256,6 +325,15 @@ input::placeholder{color:#5F6E96}
       <button id="sysShare">Share</button>
       <button class="skip" id="closeShare">Close</button>
     </div>
+  </div>
+</div>
+
+<!-- palette sheet -->
+<div class="sheet" id="themeSheet">
+  <div class="inner">
+    <h3>Palette</h3>
+    <div class="swatches" id="swatches"></div>
+    <div class="actions" style="margin-top:10px"><button id="closeTheme">Done</button></div>
   </div>
 </div>
 
@@ -301,7 +379,7 @@ const MODES={
   hardcore:{stages:[1,2,3],hints:false}
 };
 const S={mode:'classic',artist:null,pool:[],titles:[],used:new Set(),
-  track:null,stage:0,streak:0,best:0,session:[]};
+  track:null,stage:0,streak:0,best:0,session:[],hints:0,gaveUp:false};
 
 const $=id=>document.getElementById(id);
 const audio=$('audio');
@@ -377,13 +455,17 @@ async function loadArtist(a){
 function newRound(){
   if(S.used.size>=S.pool.length)S.used=new Set();
   let t;do{t=S.pool[Math.floor(Math.random()*S.pool.length)]}while(S.used.has(t.id));
-  S.used.add(t.id);S.track=t;S.stage=0;
+  S.used.add(t.id);S.track=t;S.stage=0;S.hints=0;S.gaveUp=false;
   audio.src=t.preview;audio.load();
   $('cover').src=t.album?t.album.cover_big:'';
   $('art').classList.remove('reveal');
   $('done').hidden=true;$('live').hidden=false;
-  $('rows').innerHTML='';$('guess').value='';$('sugg').hidden=true;
+  $('rows').innerHTML='';$('hints').innerHTML='';$('guess').value='';$('sugg').hidden=true;
+  $('hint').disabled=false;$('hint').textContent='💡 Hint';
+  $('hint').style.display=cfg().hints?'':'none';
+  disarm();
   $('seg').style.width='0';
+  $('tLeft').textContent='0:00';
   paint();
 }
 function paint(){
@@ -406,7 +488,7 @@ function play(){
     stopT=setTimeout(stop,ms);
     (function tick(){
       $('now').style.left=(audio.currentTime/total()*100)+'%';
-      $('tLeft').textContent='0:0'+Math.floor(audio.currentTime).toString().padStart(2,'0').slice(-2);
+      $('tLeft').textContent='0:'+Math.floor(audio.currentTime).toString().padStart(2,'0');
       raf=requestAnimationFrame(tick);
     })();
   }).catch(()=>{$('foot').innerHTML='<span class="err">Your browser blocked playback. Tap play again.</span>'});
@@ -448,17 +530,71 @@ function step(txt){
   S.stage++;paint();play();
 }
 
+/* --- Pistas ---------------------------------------------------
+   Tres niveles, de menos a más revelador. No gastan intentos:
+   quedan anotados en el resultado y en la tarjeta para compartir. */
+function hintText(n){
+  const t = S.track;
+  if(n===1) return `Album <b>${escapeHtml(t.album ? t.album.title : '—')}</b>`;
+  if(n===2){
+    const m = Math.floor(t.duration/60), s = String(t.duration%60).padStart(2,'0');
+    const words = t.title.trim().split(/\s+/).length;
+    return `Runs <b>${m}:${s}</b> · <b>${words}</b> word${words>1?'s':''}`;
+  }
+  const mask = t.title.split(' ').map(w =>
+    w.length<=1 ? w : w[0] + '·'.repeat(Math.min(w.length-1,9))).join('   ');
+  return `<span class="mono">${escapeHtml(mask)}</span>`;
+}
+
+$('hint').onclick=()=>{
+  if(S.hints>=3) return;
+  S.hints++;
+  const li=document.createElement('li');
+  li.innerHTML=hintText(S.hints);
+  $('hints').appendChild(li);
+  if(S.hints>=3){$('hint').disabled=true;$('hint').textContent='No hints left'}
+  else $('hint').textContent=`💡 Hint (${3-S.hints} left)`;
+};
+
+/* --- Rendirse -------------------------------------------------
+   Pide confirmación con un segundo toque: revelar la canción
+   rompe la racha y no tiene vuelta atrás. */
+let armT=null;
+function disarm(){
+  clearTimeout(armT);
+  $('giveup').classList.remove('armed');
+  $('giveup').textContent='Give up';
+}
+$('giveup').onclick=()=>{
+  if(!$('giveup').classList.contains('armed')){
+    $('giveup').classList.add('armed');
+    $('giveup').textContent='Reveal the answer?';
+    armT=setTimeout(disarm,4000);
+    return;
+  }
+  disarm();
+  S.gaveUp=true;
+  end(false);
+};
+
 async function end(won){
   stop();
   S.streak=won?S.streak+1:0;
   if(S.streak>S.best){S.best=S.streak;await store.set('best',S.best)}
   $('streak').textContent=S.streak;$('best').textContent=S.best;
-  S.session.push({won,tries:S.stage+1,title:S.track.title});
+  S.session.push({won,tries:S.stage+1,title:S.track.title,hints:S.hints,gaveUp:S.gaveUp});
   $('art').classList.add('reveal');
   $('seg').style.width='100%';
   $('live').hidden=true;$('done').hidden=false;
-  $('verdict').textContent=won?`Got it in ${S.stage+1}`:'Missed';
+  $('verdict').textContent=won?`Got it in ${S.stage+1}`:(S.gaveUp?'Gave up':'Missed');
   $('verdict').className='verdict '+(won?'win':'lose');
+  if(S.hints){
+    const tag=document.createElement('span');
+    tag.className='tag';
+    tag.textContent=`with ${S.hints} hint${S.hints>1?'s':''}`;
+    $('verdict').appendChild(tag);
+  }
+  disarm();
   $('answer').innerHTML='<span></span>';
   $('answer').firstChild.textContent='';
   $('answer').childNodes[0].nodeValue='';
@@ -473,31 +609,36 @@ $('closeShare').onclick=()=>$('shareSheet').classList.remove('on');
 let blobRef=null;
 
 function drawCard(){
+  // los colores salen del tema activo, no van fijos en el código
+  const css=getComputedStyle(document.body);
+  const V=n=>css.getPropertyValue(n).trim();
   const c=document.createElement('canvas');c.width=1080;c.height=1350;
   const x=c.getContext('2d');
-  x.fillStyle='#0C1B3A';x.fillRect(0,0,1080,1350);
-  x.fillStyle='#FF6B35';x.font='600 46px Inter, sans-serif';x.fillText('Spindle',80,140);
-  x.fillStyle='#8D9BBF';x.font='400 34px Inter, sans-serif';
+  x.fillStyle=V('--bg');x.fillRect(0,0,1080,1350);
+  x.fillStyle=V('--gold');x.font='600 46px Inter, sans-serif';x.fillText('Spindle',80,140);
+  x.fillStyle=V('--muted');x.font='400 34px Inter, sans-serif';
   x.fillText(S.mode==='hardcore'?'Hardcore · Artist Mode':'Classic · Artist Mode',80,196);
-  x.fillStyle='#F4F1EA';x.font='400 88px Georgia, serif';
+  x.fillStyle=V('--text');x.font='400 88px Georgia, serif';
   x.fillText(S.artist.name.slice(0,18),80,320);
 
   let y=460;
   S.session.slice(-8).forEach(r=>{
     const max=cfg().stages.length;
     for(let i=0;i<max;i++){
-      x.fillStyle = r.won ? (i<r.tries-1?'#2A3F6E':(i===r.tries-1?'#5FCB8B':'#1B2F5C'))
-                          : (i<r.tries?'#F2506E':'#1B2F5C');
+      x.fillStyle = r.won ? (i<r.tries-1?V('--spent'):(i===r.tries-1?V('--green'):V('--sugg')))
+                          : (i<r.tries?V('--red'):V('--sugg'));
       x.fillRect(80+i*70,y-40,54,54);
     }
-    x.fillStyle='#8D9BBF';x.font='400 30px Inter, sans-serif';
-    x.fillText(r.won?`${r.tries}/${cfg().stages.length}`:'X',80+max*70+24,y);
+    x.fillStyle=V('--muted');x.font='400 30px Inter, sans-serif';
+    let label = r.won ? `${r.tries}/${cfg().stages.length}` : (r.gaveUp ? '—' : 'X');
+    if(r.hints) label += ' 💡'.repeat(Math.min(r.hints,3));
+    x.fillText(label,80+max*70+24,y);
     y+=90;
   });
 
-  x.fillStyle='#F4F1EA';x.font='600 44px Inter, sans-serif';
+  x.fillStyle=V('--text');x.font='600 44px Inter, sans-serif';
   x.fillText(`Streak ${S.streak}   ·   Best ${S.best}`,80,1200);
-  x.fillStyle='#8D9BBF';x.font='400 30px Inter, sans-serif';
+  x.fillStyle=V('--muted');x.font='400 30px Inter, sans-serif';
   x.fillText('Guess the song from real 30s previews',80,1256);
 
   c.toBlob(b=>{blobRef=b;$('cardImg').src=URL.createObjectURL(b)},'image/png');
@@ -514,6 +655,36 @@ $('sysShare').onclick=async()=>{
   }else{$('saveImg').click()}
 };
 
+/* ---------- palette ---------- */
+const THEMES=[
+  {id:'',         n:'Cobalt',   bg:'#0C1B3A', ac:'#FF6B35'},
+  {id:'neon',     n:'Neon',     bg:'#0B0B12', ac:'#B4FF3D'},
+  {id:'cassette', n:'Cassette', bg:'#0E2B2E', ac:'#FF3D7F'},
+  {id:'ciruela',  n:'Plum',     bg:'#241033', ac:'#C77DFF'},
+  {id:'papel',    n:'Paper',    bg:'#F2EDE3', ac:'#E5533D'}
+];
+
+function applyTheme(id){
+  if(id) document.body.dataset.theme=id; else delete document.body.dataset.theme;
+  // la barra del navegador y la splash siguen al tema
+  const bg=getComputedStyle(document.body).getPropertyValue('--bg').trim();
+  document.querySelector('meta[name=theme-color]').setAttribute('content',bg);
+  document.querySelectorAll('#swatches button').forEach(b=>
+    b.classList.toggle('sel',b.dataset.id===id));
+  store.set('theme',id);
+}
+
+THEMES.forEach(t=>{
+  const b=document.createElement('button');
+  b.dataset.id=t.id;
+  b.innerHTML=`<span class="dot" style="background:${t.bg};border:1px solid rgba(128,128,128,.4)">
+    <i style="background:${t.ac}"></i></span><span>${t.n}</span>`;
+  b.onclick=()=>applyTheme(t.id);
+  $('swatches').appendChild(b);
+});
+$('themeBtn').onclick=()=>$('themeSheet').classList.add('on');
+$('closeTheme').onclick=()=>$('themeSheet').classList.remove('on');
+
 /* ---------- install prompt ---------- */
 let deferred=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('installBtn').classList.add('on')});
@@ -528,7 +699,12 @@ $('installBtn').onclick=async()=>{
 $('gotIt').onclick=()=>$('installSheet').classList.remove('on');
 
 /* ---------- boot ---------- */
-(async()=>{const b=await store.get('best');if(b){S.best=+b;$('best').textContent=b}})();
+(async()=>{
+  const b=await store.get('best');
+  if(b){S.best=+b;$('best').textContent=b}
+  const t=await store.get('theme');
+  applyTheme(t||'');
+})();
 
 /* El service worker sólo arranca sobre https (o localhost).
    Dentro de este chat no se registra; en GitHub Pages sí. */
