@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0C1B3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spindle">
+<title>Spindle — Guess the Song</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C1B3A;
+  --raise:#14264D;
+  --line:rgba(244,241,234,.12);
+  --text:#F4F1EA;
+  --muted:#8D9BBF;
+  --gold:#FF6B35;
+  --green:#5FCB8B;
+  --red:#F2506E;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:"Instrument Serif",Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;display:flex;justify-content:center;
+  padding:0 16px calc(24px + env(safe-area-inset-bottom));
+}
+.app{width:100%;max-width:440px}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:calc(14px + env(safe-area-inset-top)) 0 16px}
+.brand{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.stats{display:flex;gap:8px;margin-left:auto}
+.chip{background:var(--raise);border:1px solid var(--line);border-radius:999px;
+  padding:6px 11px;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.chip b{color:var(--text);font-size:12px}
+#installBtn{background:none;border:1px solid var(--line);color:var(--muted);
+  border-radius:999px;padding:6px 11px;font-size:11px;cursor:pointer;display:none}
+#installBtn.on{display:block}
+
+/* screens */
+.screen{display:none}
+.screen.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+
+h1{font-family:var(--serif);font-size:40px;line-height:1.05;font-weight:400;letter-spacing:-.02em;margin-bottom:12px}
+h1 em{font-style:italic;color:var(--gold)}
+.lede{color:var(--muted);font-size:14px;line-height:1.55;margin-bottom:22px}
+
+.modes{display:flex;gap:6px;background:var(--raise);border:1px solid var(--line);
+  border-radius:999px;padding:4px;margin-bottom:14px}
+.modes button{flex:1;border:none;background:none;color:var(--muted);font-family:var(--sans);
+  font-size:13px;font-weight:500;padding:9px;border-radius:999px;cursor:pointer}
+.modes button.sel{background:var(--gold);color:#0C1B3A;font-weight:600}
+
+.tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  background:var(--raise);border:1px solid var(--line);border-radius:16px;
+  padding:18px;color:var(--text);font-family:var(--sans);cursor:pointer}
+.tile:hover{border-color:rgba(255,107,53,.55)}
+.tile .ico{font-size:22px;width:44px;height:44px;flex:none;border-radius:12px;
+  background:rgba(255,107,53,.16);display:grid;place-items:center}
+.tile h3{font-size:15px;font-weight:600;margin-bottom:3px}
+.tile p{font-size:12px;color:var(--muted)}
+.tile .arrow{margin-left:auto;color:var(--muted);font-size:18px}
+
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  margin:28px 0 12px}
+.steps{list-style:none;display:flex;flex-direction:column;gap:14px}
+.steps li{display:flex;gap:14px;font-size:13px;line-height:1.5;color:var(--muted)}
+.steps .n{font-family:var(--serif);font-size:15px;color:var(--gold);flex:none;width:22px}
+.steps b{color:var(--text);font-weight:600}
+
+.back{background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;
+  padding:0 0 14px;font-family:var(--sans)}
+
+input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line);
+  border-radius:12px;color:var(--text);font-family:var(--sans);font-size:16px;padding:14px;outline:none}
+input[type=text]:focus{border-color:var(--gold)}
+input::placeholder{color:#5F6E96}
+
+.list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:2px}
+.list li{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;cursor:pointer}
+.list li:hover{background:var(--raise)}
+.list img{width:42px;height:42px;border-radius:50%;object-fit:cover;flex:none;background:var(--raise)}
+.list .nm{font-size:14px;font-weight:500}
+.list .sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* game */
+.art{position:relative;width:100%;aspect-ratio:1;max-height:190px;border-radius:16px;
+  overflow:hidden;background:var(--raise);margin-bottom:16px;display:grid;place-items:center}
+.art img{width:100%;height:100%;object-fit:cover;filter:blur(26px) saturate(1.3);
+  transform:scale(1.15);transition:filter .5s,transform .5s}
+.art.reveal img{filter:none;transform:none}
+.art .vinyl{position:absolute;width:64px;height:64px;border-radius:50%;
+  border:2px solid rgba(244,241,234,.35);
+  background:radial-gradient(circle,rgba(12,27,58,.92) 0 22%,transparent 22%)}
+.art.spin .vinyl{animation:spin 2.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.art.reveal .vinyl{display:none}
+
+.bar{height:6px;border-radius:999px;background:var(--raise);overflow:hidden;position:relative}
+.bar .seg{position:absolute;top:0;bottom:0;left:0;background:var(--gold);width:0;transition:width .3s}
+.bar .now{position:absolute;top:0;bottom:0;width:2px;background:var(--text);left:0;opacity:0}
+.spin .bar .now{opacity:1}
+.times{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
+
+.play{width:100%;margin-top:16px;padding:16px;border:none;border-radius:14px;
+  background:var(--gold);color:#0C1B3A;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer}
+.play:active{opacity:.85}
+
+.guesswrap{position:relative;margin-top:14px}
+.sugg{list-style:none;position:absolute;left:0;right:0;bottom:100%;margin-bottom:6px;z-index:9;
+  background:#1B2F5C;border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:200px}
+.sugg li{padding:12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--line)}
+.sugg li:last-child{border:none}
+.sugg li:hover{background:var(--raise)}
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions button{flex:1;padding:13px;border-radius:12px;border:1px solid var(--line);
+  background:none;color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer}
+.actions .skip{color:var(--muted)}
+
+.rows{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.rows li{font-size:12px;padding:11px 12px;border-radius:10px;background:var(--raise);
+  color:var(--muted);display:flex;gap:8px;align-items:center}
+.rows li .mk{color:var(--red)}
+.rows li.skipped .mk{color:var(--muted)}
+
+.verdict{font-family:var(--serif);font-size:26px;margin-bottom:4px}
+.verdict.win{color:var(--green)}
+.verdict.lose{color:var(--red)}
+.answer{font-size:15px;font-weight:600}
+.answer span{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:3px}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.err{background:rgba(242,80,110,.12);border:1px solid rgba(242,80,110,.5);
+  border-radius:12px;padding:12px;font-size:12px;line-height:1.5;margin-top:10px}
+.load{font-size:12px;color:var(--muted);padding:14px;text-align:center}
+.foot{margin-top:18px;text-align:center;font-size:12px;color:var(--muted)}
+.foot button{background:none;border:none;color:var(--muted);font-family:var(--sans);
+  font-size:12px;text-decoration:underline;cursor:pointer}
+
+/* sheets */
+.sheet{position:fixed;inset:0;background:rgba(6,14,32,.78);display:none;
+  align-items:flex-end;justify-content:center;z-index:40;padding:16px}
+.sheet.on{display:flex}
+.sheet .inner{width:100%;max-width:440px;background:#122246;border:1px solid var(--line);
+  border-radius:20px;padding:18px;animation:up .3s ease}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+.sheet h3{font-size:15px;font-weight:600;margin-bottom:10px}
+.sheet img.card{width:100%;border-radius:12px;display:block;margin-bottom:12px}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="brand">Spindle</div>
+  <button id="installBtn">⬇ Install app</button>
+  <div class="stats">
+    <div class="chip">Streak <b id="streak">0</b></div>
+    <div class="chip">Best <b id="best">0</b></div>
+  </div>
+</header>
+
+<!-- HOME -->
+<section class="screen on" id="s-home">
+  <h1>Guess the song, <em>live</em></h1>
+  <p class="lede">Real 30-second previews, pulled fresh every round. Pick an artist — Spindle quizzes you on their actual catalog.</p>
+
+  <div class="modes">
+    <button class="sel" data-mode="classic">Classic</button>
+    <button data-mode="hardcore">Hardcore</button>
+  </div>
+
+  <button class="tile" id="toArtist">
+    <span class="ico">🎤</span>
+    <span>
+      <h3>Artist Mode</h3>
+      <p id="modeSub">Search any artist, guess their songs</p>
+    </span>
+    <span class="arrow">→</span>
+  </button>
+
+  <div class="eyebrow">How it works</div>
+  <ol class="steps">
+    <li><span class="n">01</span><span>Pick an artist — Spindle fetches their <b>real catalog</b> live</span></li>
+    <li><span class="n">02</span><span>Tap play — you get <b>1 second</b> to start, growing each guess</span></li>
+    <li><span class="n">03</span><span>Guess right, <b>share your result</b> as a card</span></li>
+  </ol>
+</section>
+
+<!-- ARTIST PICKER -->
+<section class="screen" id="s-pick">
+  <button class="back" data-go="s-home">←</button>
+  <h1>Pick an artist</h1>
+  <p class="lede">Start typing an artist name — Drake, Adele, Tame Impala, anyone on Deezer.</p>
+  <input type="text" id="q" placeholder="Search artists" autocomplete="off">
+  <ul class="list" id="artists"></ul>
+</section>
+
+<!-- GAME -->
+<section class="screen" id="s-game">
+  <button class="back" data-go="s-pick">←</button>
+
+  <div class="art" id="art"><img id="cover" alt=""><div class="vinyl"></div></div>
+
+  <div class="bar"><div class="seg" id="seg"></div><div class="now" id="now"></div></div>
+  <div class="times"><span id="tLeft">0:00</span><span id="tRight">1s unlocked</span></div>
+
+  <button class="play" id="play">▶ Play 1s</button>
+
+  <div id="live">
+    <div class="guesswrap">
+      <ul class="sugg" id="sugg" hidden></ul>
+      <input type="text" id="guess" placeholder="Guess the song" autocomplete="off">
+      <div class="actions">
+        <button id="submit">Guess</button>
+        <button class="skip" id="skip">Skip →</button>
+      </div>
+    </div>
+    <ul class="rows" id="rows"></ul>
+  </div>
+
+  <div id="done" hidden>
+    <div class="verdict" id="verdict"></div>
+    <div class="answer" id="answer"></div>
+    <div class="actions" style="margin-top:16px">
+      <button id="next">Next song →</button>
+      <button class="skip" id="shareBtn">Share session</button>
+    </div>
+  </div>
+
+  <p class="foot" id="foot"></p>
+</section>
+
+<!-- share sheet -->
+<div class="sheet" id="shareSheet">
+  <div class="inner">
+    <h3>Result card</h3>
+    <img class="card" id="cardImg" alt="Result card">
+    <div class="actions">
+      <button id="saveImg">Save image</button>
+      <button id="sysShare">Share</button>
+      <button class="skip" id="closeShare">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- install sheet -->
+<div class="sheet" id="installSheet">
+  <div class="inner">
+    <h3>Add Spindle to your Home Screen</h3>
+    <p class="lede" id="installTip"></p>
+    <div class="actions"><button id="gotIt">Got it</button></div>
+  </div>
+</div>
+
+<audio id="audio" preload="auto"></audio>
+</div>
+
+<script>
+/* ---------- Deezer via JSONP (no CORS headers, no proxy needed) ---------- */
+function deezer(path, params={}){
+  return new Promise((res,rej)=>{
+    const cb='dz'+Math.random().toString(36).slice(2);
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{clean();rej(new Error('timeout'))},9000);
+    function clean(){clearTimeout(t);delete window[cb];s.remove()}
+    window[cb]=d=>{clean();res(d)};
+    s.onerror=()=>{clean();rej(new Error('net'))};
+    s.src='https://api.deezer.com'+path+'?'+new URLSearchParams({...params,output:'jsonp',callback:cb});
+    document.head.appendChild(s);
+  });
+}
+
+/* ---------- storage (window.storage here; swap for localStorage when you host it) ---------- */
+const mem={};
+const store={
+  async get(k){try{if(window.storage){const r=await window.storage.get(k);return r?r.value:null}}catch(e){}
+    /* return localStorage.getItem(k); */ return mem[k]??null},
+  async set(k,v){mem[k]=String(v);try{if(window.storage)await window.storage.set(k,String(v))}catch(e){}
+    /* localStorage.setItem(k,String(v)); */}
+};
+
+/* ---------- state ---------- */
+const MODES={
+  classic:{stages:[1,2,4,7,11,16],hints:true},
+  hardcore:{stages:[1,2,3],hints:false}
+};
+const S={mode:'classic',artist:null,pool:[],titles:[],used:new Set(),
+  track:null,stage:0,streak:0,best:0,session:[]};
+
+const $=id=>document.getElementById(id);
+const audio=$('audio');
+let stopT=null,raf=null;
+const cfg=()=>MODES[S.mode];
+const total=()=>cfg().stages[cfg().stages.length-1];
+
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/\(.*?\)|\[.*?\]/g,'').replace(/ - .*$/,'').replace(/feat\.?.*$/,'')
+  .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+
+function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.id===id));
+  if(id!=='s-game')stop();}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+
+/* ---------- mode ---------- */
+document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.modes button').forEach(x=>x.classList.remove('sel'));
+  b.classList.add('sel'); S.mode=b.dataset.mode;
+  $('modeSub').textContent = S.mode==='hardcore'
+    ? '3 guesses, 3 seconds, no suggestions'
+    : 'Search any artist, guess their songs';
+});
+$('toArtist').onclick=()=>{go('s-pick');$('q').focus()};
+
+/* ---------- artist search ---------- */
+let sT;
+$('q').oninput=e=>{clearTimeout(sT);const q=e.target.value.trim();
+  if(q.length<2){$('artists').innerHTML='';return}
+  sT=setTimeout(()=>findArtists(q),320)};
+
+async function findArtists(q){
+  $('artists').innerHTML='<div class="load">searching…</div>';
+  try{
+    const d=await deezer('/search/artist',{q,limit:8});
+    const list=d.data||[];
+    if(!list.length){$('artists').innerHTML='<div class="load">No artist by that name.</div>';return}
+    $('artists').innerHTML='';
+    list.forEach(a=>{
+      const li=document.createElement('li');
+      li.innerHTML=`<img src="${a.picture_small}" alt=""><div><div class="nm"></div>
+        <div class="sub">${(a.nb_fan||0).toLocaleString('en')} fans</div></div>`;
+      li.querySelector('.nm').textContent=a.name;
+      li.onclick=()=>loadArtist(a);
+      $('artists').appendChild(li);
+    });
+  }catch(e){
+    $('artists').innerHTML='<div class="err">Can\'t reach Deezer right now. Check your connection and search again.</div>';
+  }
+}
+
+async function loadArtist(a){
+  $('artists').innerHTML='<div class="load">loading catalog…</div>';
+  try{
+    const d=await deezer(`/artist/${a.id}/top`,{limit:50});
+    const seen=new Set(),pool=[];
+    (d.data||[]).forEach(t=>{
+      if(!t.preview)return;
+      const k=norm(t.title);
+      if(!k||seen.has(k))return;
+      seen.add(k);pool.push(t);
+    });
+    if(pool.length<4){$('artists').innerHTML='<div class="err">Too few previews for that artist. Try another one.</div>';return}
+    S.artist=a;S.pool=pool;S.titles=pool.map(t=>t.title);S.used=new Set();S.session=[];
+    $('foot').innerHTML=`${a.name} · ${pool.length} songs in rotation`;
+    go('s-game');newRound();
+  }catch(e){
+    $('artists').innerHTML='<div class="err">Couldn\'t load that catalog. Try again.</div>';
+  }
+}
+
+/* ---------- rounds ---------- */
+function newRound(){
+  if(S.used.size>=S.pool.length)S.used=new Set();
+  let t;do{t=S.pool[Math.floor(Math.random()*S.pool.length)]}while(S.used.has(t.id));
+  S.used.add(t.id);S.track=t;S.stage=0;
+  audio.src=t.preview;audio.load();
+  $('cover').src=t.album?t.album.cover_big:'';
+  $('art').classList.remove('reveal');
+  $('done').hidden=true;$('live').hidden=false;
+  $('rows').innerHTML='';$('guess').value='';$('sugg').hidden=true;
+  $('seg').style.width='0';
+  paint();
+}
+function paint(){
+  const s=cfg().stages[S.stage];
+  $('seg').style.width=(s/total()*100)+'%';
+  $('tRight').textContent=s+'s unlocked';
+  $('play').textContent=`▶ Play ${s}s`;
+  const last=S.stage>=cfg().stages.length-1;
+  $('skip').textContent=last?'Give up':`Skip +${cfg().stages[S.stage+1]-s}s`;
+}
+
+/* ---------- playback ---------- */
+$('play').onclick=play;
+function play(){
+  stop();
+  const ms=cfg().stages[S.stage]*1000;
+  audio.currentTime=0;
+  audio.play().then(()=>{
+    $('art').classList.add('spin');
+    stopT=setTimeout(stop,ms);
+    (function tick(){
+      $('now').style.left=(audio.currentTime/total()*100)+'%';
+      $('tLeft').textContent='0:0'+Math.floor(audio.currentTime).toString().padStart(2,'0').slice(-2);
+      raf=requestAnimationFrame(tick);
+    })();
+  }).catch(()=>{$('foot').innerHTML='<span class="err">Your browser blocked playback. Tap play again.</span>'});
+}
+function stop(){clearTimeout(stopT);cancelAnimationFrame(raf);audio.pause();$('art').classList.remove('spin')}
+
+/* ---------- guessing ---------- */
+$('guess').oninput=()=>{
+  if(!cfg().hints){$('sugg').hidden=true;return}
+  const v=norm($('guess').value);
+  if(!v){$('sugg').hidden=true;return}
+  const hits=S.titles.filter(t=>norm(t).includes(v)).slice(0,6);
+  if(!hits.length){$('sugg').hidden=true;return}
+  $('sugg').innerHTML='';
+  hits.forEach(t=>{const li=document.createElement('li');li.textContent=t;
+    li.onclick=()=>{$('guess').value=t;$('sugg').hidden=true;submit()};$('sugg').appendChild(li)});
+  $('sugg').hidden=false;
+};
+$('guess').onkeydown=e=>{if(e.key==='Enter')submit()};
+$('submit').onclick=submit;
+$('skip').onclick=()=>step(null);
+
+function submit(){
+  const v=$('guess').value.trim();
+  if(!v)return;
+  $('sugg').hidden=true;
+  if(norm(v)===norm(S.track.title))return end(true);
+  step(v);
+}
+function step(txt){
+  const li=document.createElement('li');
+  li.innerHTML=`<span class="mk">${txt?'✕':'→'}</span><span></span>`;
+  li.lastChild.textContent=txt||'Skipped';
+  if(!txt)li.className='skipped';
+  $('rows').appendChild(li);
+  $('guess').value='';
+  const box=$('guess');box.classList.add('shake');setTimeout(()=>box.classList.remove('shake'),320);
+  if(S.stage>=cfg().stages.length-1)return end(false);
+  S.stage++;paint();play();
+}
+
+async function end(won){
+  stop();
+  S.streak=won?S.streak+1:0;
+  if(S.streak>S.best){S.best=S.streak;await store.set('best',S.best)}
+  $('streak').textContent=S.streak;$('best').textContent=S.best;
+  S.session.push({won,tries:S.stage+1,title:S.track.title});
+  $('art').classList.add('reveal');
+  $('seg').style.width='100%';
+  $('live').hidden=true;$('done').hidden=false;
+  $('verdict').textContent=won?`Got it in ${S.stage+1}`:'Missed';
+  $('verdict').className='verdict '+(won?'win':'lose');
+  $('answer').innerHTML='<span></span>';
+  $('answer').firstChild.textContent='';
+  $('answer').childNodes[0].nodeValue='';
+  $('answer').innerHTML=`${escapeHtml(S.track.title)}<span>${escapeHtml(S.artist.name)} · ${escapeHtml(S.track.album?S.track.album.title:'')}</span>`;
+}
+const escapeHtml=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('next').onclick=newRound;
+
+/* ---------- share card ---------- */
+$('shareBtn').onclick=()=>{drawCard();$('shareSheet').classList.add('on')};
+$('closeShare').onclick=()=>$('shareSheet').classList.remove('on');
+let blobRef=null;
+
+function drawCard(){
+  const c=document.createElement('canvas');c.width=1080;c.height=1350;
+  const x=c.getContext('2d');
+  x.fillStyle='#0C1B3A';x.fillRect(0,0,1080,1350);
+  x.fillStyle='#FF6B35';x.font='600 46px Inter, sans-serif';x.fillText('Spindle',80,140);
+  x.fillStyle='#8D9BBF';x.font='400 34px Inter, sans-serif';
+  x.fillText(S.mode==='hardcore'?'Hardcore · Artist Mode':'Classic · Artist Mode',80,196);
+  x.fillStyle='#F4F1EA';x.font='400 88px Georgia, serif';
+  x.fillText(S.artist.name.slice(0,18),80,320);
+
+  let y=460;
+  S.session.slice(-8).forEach(r=>{
+    const max=cfg().stages.length;
+    for(let i=0;i<max;i++){
+      x.fillStyle = r.won ? (i<r.tries-1?'#2A3F6E':(i===r.tries-1?'#5FCB8B':'#1B2F5C'))
+                          : (i<r.tries?'#F2506E':'#1B2F5C');
+      x.fillRect(80+i*70,y-40,54,54);
+    }
+    x.fillStyle='#8D9BBF';x.font='400 30px Inter, sans-serif';
+    x.fillText(r.won?`${r.tries}/${cfg().stages.length}`:'X',80+max*70+24,y);
+    y+=90;
+  });
+
+  x.fillStyle='#F4F1EA';x.font='600 44px Inter, sans-serif';
+  x.fillText(`Streak ${S.streak}   ·   Best ${S.best}`,80,1200);
+  x.fillStyle='#8D9BBF';x.font='400 30px Inter, sans-serif';
+  x.fillText('Guess the song from real 30s previews',80,1256);
+
+  c.toBlob(b=>{blobRef=b;$('cardImg').src=URL.createObjectURL(b)},'image/png');
+}
+$('saveImg').onclick=()=>{
+  if(!blobRef)return;
+  const a=document.createElement('a');a.href=URL.createObjectURL(blobRef);a.download='spindle.png';a.click();
+};
+$('sysShare').onclick=async()=>{
+  if(!blobRef)return;
+  const file=new File([blobRef],'spindle.png',{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],text:`Spindle · ${S.artist.name}`})}catch(e){}
+  }else{$('saveImg').click()}
+};
+
+/* ---------- install prompt ---------- */
+let deferred=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('installBtn').classList.add('on')});
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if(isIOS&&!standalone)$('installBtn').classList.add('on');
+$('installBtn').onclick=async()=>{
+  if(deferred){deferred.prompt();deferred=null;$('installBtn').classList.remove('on');return}
+  $('installTip').textContent='Tap the Share button in Safari, then choose "Add to Home Screen".';
+  $('installSheet').classList.add('on');
+};
+$('gotIt').onclick=()=>$('installSheet').classList.remove('on');
+
+/* ---------- boot ---------- */
+(async()=>{const b=await store.get('best');if(b){S.best=+b;$('best').textContent=b}})();
+
+/* El service worker sólo arranca sobre https (o localhost).
+   Dentro de este chat no se registra; en GitHub Pages sí. */
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
