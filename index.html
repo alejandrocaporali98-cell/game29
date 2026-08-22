@@ -28,6 +28,7 @@
   --gold:#FF6B35;
   --on-gold:#0C1B3A;
   --green:#5FCB8B;
+  --amber:#F5B942;
   --red:#F2506E;
   --glow:var(--glow);
   --tint:var(--tint);
@@ -183,15 +184,41 @@ body[data-theme="ciruela"]{--bg:#241033;--raise:#331A46;--sugg:#412158;--sheet:#
   --line:rgba(255,240,251,.13);--text:#FFF0FB;--muted:#A98BBF;--place:#77598C;--spent:#4A2C63;
   --gold:#C77DFF;--on-gold:#241033;--green:#7BE8B5;--red:#FF5C8A;
   --glow:rgba(199,125,255,.12);--tint:rgba(199,125,255,.16);--tint-2:rgba(199,125,255,.5)}
-body[data-theme="papel"]{--bg:#F2EDE3;--raise:#E7E0D2;--sugg:#DED6C6;--sheet:#EFE9DE;
+body[data-theme="papel"]{--amber:#B07A12;--bg:#F2EDE3;--raise:#E7E0D2;--sugg:#DED6C6;--sheet:#EFE9DE;
   --line:rgba(27,27,27,.14);--text:#1B1B1B;--muted:#6E6559;--place:#9B9284;--spent:#CFC5B2;
   --gold:#E5533D;--on-gold:#FFF6F0;--green:#2E8B57;--red:#C1352A;
   --glow:rgba(229,83,61,.08);--tint:rgba(229,83,61,.12);--tint-2:rgba(229,83,61,.5)}
 
+body[data-theme="studio"]{
+  --bg:#000000;--raise:#141416;--sugg:#242427;--sheet:#1C1C1E;
+  --line:rgba(255,255,255,.09);--text:#F5F5F7;--muted:#A9AAAF;--place:#7C7D83;--spent:#2E2E32;
+  --gold:#64D2FF;--on-gold:#000000;--green:#30D158;--amber:#FFD60A;--red:#FF453A;
+  --glow:rgba(48,209,88,.13);--tint:rgba(100,210,255,.13);--tint-2:rgba(100,210,255,.42)}
+
+/* Studio cambia también la tipografía: una sola familia, titulares
+   apretados y sin serif. El acento va en el degradado, no en la letra. */
+body[data-theme="studio"] h1{font-family:var(--sans);font-weight:600;
+  font-size:clamp(34px,8.4vw,52px);letter-spacing:-.035em;line-height:1.06}
+body[data-theme="studio"] h1 em{font-style:normal;
+  background:linear-gradient(96deg,#64D2FF,#30D158 52%,#FFD60A);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+body[data-theme="studio"] .verdict{font-family:var(--sans);font-weight:600;
+  font-size:23px;letter-spacing:-.025em}
+body[data-theme="studio"] .eyebrow{font-weight:600;letter-spacing:.06em;font-size:11.5px}
+body[data-theme="studio"] .steps .n{font-family:var(--sans);font-weight:600;font-size:12px;
+  letter-spacing:.06em;padding-top:2px}
+body[data-theme="studio"] .card,
+body[data-theme="studio"] .tile{border-radius:22px}
+body[data-theme="studio"] .play,
+body[data-theme="studio"] .actions button,
+body[data-theme="studio"] .chip{border-radius:980px}
+body[data-theme="studio"] .lede{color:var(--muted);line-height:1.52}
+
 /* --- pistas --- */
 .hints{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.hints li{font-size:12px;padding:8px 11px;border-radius:999px;background:var(--tint);
-  border:1px solid var(--tint-2);color:var(--text)}
+.hints li{font-size:12px;padding:8px 11px;border-radius:999px;
+  background:color-mix(in srgb, var(--amber) 13%, transparent);
+  border:1px solid color-mix(in srgb, var(--amber) 30%, transparent);color:var(--text)}
 .hints li b{font-weight:600}
 .mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.12em}
 .minor{display:flex;gap:8px;margin-top:8px}
@@ -656,7 +683,9 @@ $('sysShare').onclick=async()=>{
 };
 
 /* ---------- palette ---------- */
+const DEFAULT_THEME='studio';
 const THEMES=[
+  {id:'studio',   n:'Studio',   bg:'#000000', ac:'#30D158'},
   {id:'',         n:'Cobalt',   bg:'#0C1B3A', ac:'#FF6B35'},
   {id:'neon',     n:'Neon',     bg:'#0B0B12', ac:'#B4FF3D'},
   {id:'cassette', n:'Cassette', bg:'#0E2B2E', ac:'#FF3D7F'},
@@ -703,7 +732,7 @@ $('gotIt').onclick=()=>$('installSheet').classList.remove('on');
   const b=await store.get('best');
   if(b){S.best=+b;$('best').textContent=b}
   const t=await store.get('theme');
-  applyTheme(t||'');
+  applyTheme(t===null?DEFAULT_THEME:t);
 })();
 
 /* El service worker sólo arranca sobre https (o localhost).
