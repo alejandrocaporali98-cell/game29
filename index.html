@@ -438,18 +438,20 @@ const store={
 };
 
 /* ---------- state ---------- */
+const REWARD=15;   // premio por acertar: 15s de la canción
 const MODES={
   classic:{stages:[1,2,4,7,11,16],hints:true},
   hardcore:{stages:[1,2,3],hints:false}
 };
 const S={mode:'classic',artist:null,pool:[],titles:[],used:new Set(),
-  track:null,stage:0,streak:0,best:0,session:[],hints:0,gaveUp:false};
+  track:null,stage:0,streak:0,best:0,session:[],hints:0,gaveUp:false,over:false};
 
 const $=id=>document.getElementById(id);
 const audio=$('audio');
 let stopT=null,raf=null;
 const cfg=()=>MODES[S.mode];
 const total=()=>cfg().stages[cfg().stages.length-1];
+const window_=()=>S.over?REWARD:total();   // escala de la barra
 
 const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/\(.*?\)|\[.*?\]/g,'').replace(/ - .*$/,'').replace(/feat\.?.*$/,'')
@@ -519,7 +521,8 @@ async function loadArtist(a){
 function newRound(){
   if(S.used.size>=S.pool.length)S.used=new Set();
   let t;do{t=S.pool[Math.floor(Math.random()*S.pool.length)]}while(S.used.has(t.id));
-  S.used.add(t.id);S.track=t;S.stage=0;S.hints=0;S.gaveUp=false;
+  stop();
+  S.used.add(t.id);S.track=t;S.stage=0;S.hints=0;S.gaveUp=false;S.over=false;
   audio.src=t.preview;audio.load();
   $('cover').src=t.album?t.album.cover_big:'';
   $('art').classList.remove('reveal');
@@ -545,13 +548,13 @@ function paint(){
 $('play').onclick=play;
 function play(){
   stop();
-  const ms=cfg().stages[S.stage]*1000;
+  const ms=(S.over?REWARD:cfg().stages[S.stage])*1000;
   audio.currentTime=0;
   audio.play().then(()=>{
     $('art').classList.add('spin');
     stopT=setTimeout(stop,ms);
     (function tick(){
-      $('now').style.left=(audio.currentTime/total()*100)+'%';
+      $('now').style.left=(audio.currentTime/window_()*100)+'%';
       $('tLeft').textContent='0:'+Math.floor(audio.currentTime).toString().padStart(2,'0');
       raf=requestAnimationFrame(tick);
     })();
@@ -647,8 +650,12 @@ async function end(won){
   if(S.streak>S.best){S.best=S.streak;await store.set('best',S.best)}
   $('streak').textContent=S.streak;$('best').textContent=S.best;
   S.session.push({won,tries:S.stage+1,title:S.track.title,hints:S.hints,gaveUp:S.gaveUp});
+  S.over=true;
   $('art').classList.add('reveal');
   $('seg').style.width='100%';
+  $('play').textContent=`▶ Play ${REWARD}s`;
+  // el premio por acertar es oír de verdad la canción, no solo el fragmento
+  if(won) setTimeout(play,260);
   $('live').hidden=true;$('done').hidden=false;
   $('verdict').textContent=won?`Got it in ${S.stage+1}`:(S.gaveUp?'Gave up':'Missed');
   $('verdict').className='verdict '+(won?'win':'lose');
