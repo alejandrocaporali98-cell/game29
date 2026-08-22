@@ -438,7 +438,8 @@ const store={
 };
 
 /* ---------- state ---------- */
-const REWARD=15;   // premio por acertar: 15s de la canción
+const REWARD=15;    // duración del premio
+const PREVIEW=30;   // los previews de Deezer duran 30s
 const MODES={
   classic:{stages:[1,2,4,7,11,16],hints:true},
   hardcore:{stages:[1,2,3],hints:false}
@@ -451,7 +452,11 @@ const audio=$('audio');
 let stopT=null,raf=null;
 const cfg=()=>MODES[S.mode];
 const total=()=>cfg().stages[cfg().stages.length-1];
-const window_=()=>S.over?REWARD:total();   // escala de la barra
+const window_=()=>S.over?PREVIEW:total();   // la barra pasa a mostrar el preview entero
+/* El premio no rebobina: arranca donde el jugador dejó de oír y sigue
+   hacia adelante. Los previews de Deezer están recortados del centro
+   del tema, así que avanzar suele llevar al estribillo. */
+const rewardStart=()=>Math.min(cfg().stages[S.stage], PREVIEW-REWARD);
 
 const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/\(.*?\)|\[.*?\]/g,'').replace(/ - .*$/,'').replace(/feat\.?.*$/,'')
@@ -548,8 +553,9 @@ function paint(){
 $('play').onclick=play;
 function play(){
   stop();
-  const ms=(S.over?REWARD:cfg().stages[S.stage])*1000;
-  audio.currentTime=0;
+  const from=S.over?rewardStart():0;
+  const ms=(S.over?Math.min(REWARD,PREVIEW-from):cfg().stages[S.stage])*1000;
+  audio.currentTime=from;
   audio.play().then(()=>{
     $('art').classList.add('spin');
     stopT=setTimeout(stop,ms);
@@ -653,7 +659,8 @@ async function end(won){
   S.over=true;
   $('art').classList.add('reveal');
   $('seg').style.width='100%';
-  $('play').textContent=`▶ Play ${REWARD}s`;
+  $('play').textContent=`▶ Play ${REWARD}s more`;
+  $('seg').style.width='100%';
   // el premio por acertar es oír de verdad la canción, no solo el fragmento
   if(won) setTimeout(play,260);
   $('live').hidden=true;$('done').hidden=false;
