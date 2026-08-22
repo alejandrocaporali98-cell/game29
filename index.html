@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0C1B3A">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Spindle">
@@ -16,25 +17,72 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0C1B3A;
-  --raise:#14264D;
-  --line:rgba(244,241,234,.12);
-  --text:#F4F1EA;
-  --muted:#8D9BBF;
-  --sugg:var(--sugg);
-  --sheet:var(--sheet);
-  --place:var(--place);
-  --spent:#2A3F6E;
-  --gold:#FF6B35;
-  --on-gold:#0C1B3A;
-  --green:#5FCB8B;
-  --amber:#F5B942;
-  --red:#F2506E;
-  --glow:var(--glow);
-  --tint:var(--tint);
-  --tint-2:var(--tint-2);
+  /* Superficies escalonadas: el ritmo lo dan los grises, no los bordes */
+  --bg:#000000;
+  --raise:#141416;
+  --sugg:#242427;
+  --sheet:#1C1C1E;
+  --line:rgba(255,255,255,.09);
+  /* Texto en tres niveles */
+  --text:#F5F5F7;
+  --muted:#A9AAAF;
+  --place:#7C7D83;
+  --spent:#2E2E32;
+  /* Semáforo: cada color significa una cosa y sólo una */
+  --gold:#64D2FF;      /* acento de interfaz y enlaces */
+  --on-gold:#000000;
+  --green:#30D158;     /* acierto */
+  --amber:#FFD60A;     /* pista */
+  --red:#FF453A;       /* fallo */
+  --glow:rgba(48,209,88,.13);
+  --tint:rgba(100,210,255,.13);
+  --tint-2:rgba(100,210,255,.42);
   --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
+/* Mismo sistema en claro: superficies, tres niveles de texto y el
+   mismo semáforo, con los tonos oscurecidos para que contrasten
+   sobre blanco. Por defecto sigue el ajuste del teléfono. */
+@media (prefers-color-scheme: light){
+  :root:not([data-mode="dark"]){
+  --bg:#FFFFFF;
+  --raise:#F5F5F7;
+  --sugg:#EBEBED;
+  --sheet:#FFFFFF;
+  --line:rgba(0,0,0,.11);
+  --text:#1D1D1F;
+  --muted:#6E6E73;
+  --place:#A1A1A6;
+  --spent:#D6D6DA;
+  --gold:#0071E3;
+  --on-gold:#FFFFFF;
+  --green:#248A3D;
+  --amber:#8F6400;
+  --red:#D70015;
+  --glow:rgba(0,113,227,.08);
+  --tint:rgba(0,113,227,.10);
+  --tint-2:rgba(0,113,227,.38);
+  }
+}
+:root[data-mode="light"]{
+  --bg:#FFFFFF;
+  --raise:#F5F5F7;
+  --sugg:#EBEBED;
+  --sheet:#FFFFFF;
+  --line:rgba(0,0,0,.11);
+  --text:#1D1D1F;
+  --muted:#6E6E73;
+  --place:#A1A1A6;
+  --spent:#D6D6DA;
+  --gold:#0071E3;
+  --on-gold:#FFFFFF;
+  --green:#248A3D;
+  --amber:#8F6400;
+  --red:#D70015;
+  --glow:rgba(0,113,227,.08);
+  --tint:rgba(0,113,227,.10);
+  --tint-2:rgba(0,113,227,.38);
+}
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%}
 body{
@@ -52,6 +100,8 @@ header{display:flex;align-items:center;justify-content:space-between;gap:10px;
 .chip{background:var(--raise);border:1px solid var(--line);border-radius:999px;
   padding:6px 11px;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center}
 .chip b{color:var(--text);font-size:12px}
+#modeBtn{background:none;border:1px solid var(--line);color:var(--muted);
+  border-radius:980px;padding:6px 10px;font-size:13px;line-height:1;cursor:pointer}
 #installBtn{background:none;border:1px solid var(--line);color:var(--muted);
   border-radius:999px;padding:6px 11px;font-size:11px;cursor:pointer;display:none}
 #installBtn.on{display:block}
@@ -78,7 +128,7 @@ h1 em{font-style:normal;
 .modes button.sel{background:var(--gold);color:var(--on-gold);font-weight:600}
 
 .tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
-  background:var(--raise);border:1px solid var(--line);border-radius:16px;
+  background:var(--raise);border:1px solid var(--line);border-radius:22px;
   padding:18px;color:var(--text);font-family:var(--sans);cursor:pointer}
 .tile:hover{border-color:var(--tint-2)}
 .tile .ico{font-size:22px;width:44px;height:44px;flex:none;border-radius:12px;
@@ -129,7 +179,7 @@ input::placeholder{color:var(--place)}
 .spin .bar .now{opacity:1}
 .times{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
 
-.play{width:100%;margin-top:16px;padding:16px;border:none;border-radius:14px;
+.play{width:100%;margin-top:16px;padding:16px;border:none;border-radius:980px;
   background:var(--gold);color:var(--on-gold);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer}
 .play:active{opacity:.85}
 
@@ -140,7 +190,7 @@ input::placeholder{color:var(--place)}
 .sugg li:last-child{border:none}
 .sugg li:hover{background:var(--raise)}
 .actions{display:flex;gap:8px;margin-top:10px}
-.actions button{flex:1;padding:13px;border-radius:12px;border:1px solid var(--line);
+.actions button{flex:1;padding:13px;border-radius:980px;border:1px solid var(--line);
   background:none;color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer}
 .actions .skip{color:var(--muted)}
 
@@ -178,66 +228,6 @@ input::placeholder{color:var(--place)}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* --- paletas --- */
-body[data-theme="neon"]{--bg:#0B0B12;--raise:#171722;--sugg:#1F1F2E;--sheet:#14141E;
-  --line:rgba(240,255,220,.12);--text:#F0FFE0;--muted:#8A8FA0;--place:#5A5F70;--spent:#2C3320;
-  --gold:#B4FF3D;--on-gold:#0B0B12;--green:#B4FF3D;--red:#FF4D6D;
-  --glow:rgba(180,255,61,.10);--tint:rgba(180,255,61,.14);--tint-2:rgba(180,255,61,.5)}
-body[data-theme="cassette"]{--bg:#0E2B2E;--raise:#15393D;--sugg:#1B474B;--sheet:#122F33;
-  --line:rgba(233,223,200,.13);--text:#E9DFC8;--muted:#7FA5A8;--place:#54767A;--spent:#265257;
-  --gold:#FF3D7F;--on-gold:#0E2B2E;--green:#6FE0BC;--red:#FF8A5B;
-  --glow:rgba(255,61,127,.10);--tint:rgba(255,61,127,.15);--tint-2:rgba(255,61,127,.5)}
-body[data-theme="ciruela"]{--bg:#241033;--raise:#331A46;--sugg:#412158;--sheet:#2B1440;
-  --line:rgba(255,240,251,.13);--text:#FFF0FB;--muted:#A98BBF;--place:#77598C;--spent:#4A2C63;
-  --gold:#C77DFF;--on-gold:#241033;--green:#7BE8B5;--red:#FF5C8A;
-  --glow:rgba(199,125,255,.12);--tint:rgba(199,125,255,.16);--tint-2:rgba(199,125,255,.5)}
-
-body[data-theme="studio"]{
-  --bg:#000000;--raise:#141416;--sugg:#242427;--sheet:#1C1C1E;
-  --line:rgba(255,255,255,.09);--text:#F5F5F7;--muted:#A9AAAF;--place:#7C7D83;--spent:#2E2E32;
-  --gold:#64D2FF;--on-gold:#000000;--green:#30D158;--amber:#FFD60A;--red:#FF453A;
-  --glow:rgba(48,209,88,.13);--tint:rgba(100,210,255,.13);--tint-2:rgba(100,210,255,.42)}
-
-/* Blue Note: tinta densa, papel envejecido y el cian de las portadas
-   duotono de Reid Miles. */
-body[data-theme="bluenote"]{
-  --bg:#0F1319;--raise:#1A202A;--sugg:#232B37;--sheet:#151A22;
-  --line:rgba(239,231,214,.13);--text:#EFE7D6;--muted:#8B8878;--place:#5E5C52;--spent:#2C3644;
-  --gold:#2FA8D8;--on-gold:#0F1319;--green:#8FBF6A;--amber:#E0A020;--red:#D4553F;
-  --glow:rgba(47,168,216,.11);--tint:rgba(47,168,216,.14);--tint-2:rgba(47,168,216,.45)}
-
-/* Riso: dos tintas planas sobre papel de periódico. El texto es azul,
-   nunca negro, que es lo que delata a una risografía de verdad. */
-body[data-theme="riso"]{
-  --bg:#F4F1E6;--raise:#E9E4D3;--sugg:#DED8C3;--sheet:#F0EDE1;
-  --line:rgba(22,33,92,.16);--text:#16215C;--muted:#5B6494;--place:#9096B5;--spent:#C9C6DA;
-  --gold:#FF48A0;--on-gold:#FFFFFF;--green:#00875A;--amber:#C98A00;--red:#E5352B;
-  --glow:rgba(255,72,160,.09);--tint:rgba(255,72,160,.13);--tint-2:rgba(255,72,160,.45)}
-
-/* Phosphor: monitor de fósforo ámbar. Un solo color emitiendo luz
-   sobre negro cálido, como el visor de un equipo viejo. */
-body[data-theme="phosphor"]{
-  --bg:#0B0A07;--raise:#17130B;--sugg:#211B10;--sheet:#120F09;
-  --line:rgba(255,176,0,.16);--text:#FFC46B;--muted:#9C7638;--place:#6B5227;--spent:#3A2C12;
-  --gold:#FFB000;--on-gold:#0B0A07;--green:#9BE85B;--amber:#FFD98A;--red:#FF5A3C;
-  --glow:rgba(255,176,0,.13);--tint:rgba(255,176,0,.12);--tint-2:rgba(255,176,0,.42)}
-
-/* 2-Tone: la gráfica de los sellos de ska. Blanco y negro sin más,
-   con el blanco haciendo de acento. */
-body[data-theme="tone"]{
-  --bg:#0C0C0C;--raise:#191919;--sugg:#242424;--sheet:#141414;
-  --line:rgba(255,255,255,.16);--text:#FAFAFA;--muted:#9A9A9A;--place:#6A6A6A;--spent:#333333;
-  --gold:#FAFAFA;--on-gold:#0C0C0C;--green:#39C46E;--amber:#E8C547;--red:#E04B3A;
-  --glow:rgba(255,255,255,.07);--tint:rgba(255,255,255,.10);--tint-2:rgba(255,255,255,.35)}
-
-/* Chicha: los carteles fluorescentes de la cumbia peruana, tinta
-   naranja y magenta sobre fondo saturado. */
-body[data-theme="chicha"]{
-  --bg:#16000F;--raise:#28061B;--sugg:#380C27;--sheet:#1D0314;
-  --line:rgba(255,222,240,.14);--text:#FFE9F5;--muted:#C07596;--place:#8A4E68;--spent:#4A1230;
-  --gold:#FF5E00;--on-gold:#16000F;--green:#4BE08A;--amber:#FFD000;--red:#FF2D78;
-  --glow:rgba(255,94,0,.14);--tint:rgba(255,94,0,.15);--tint-2:rgba(255,94,0,.5)}
-
 /* --- pistas --- */
 .hints{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .hints li{font-size:12px;padding:8px 11px;border-radius:999px;
@@ -253,17 +243,6 @@ body[data-theme="chicha"]{
 .minor .danger.armed{color:var(--red);font-weight:600}
 .tag{display:inline-block;font-size:11px;color:var(--muted);margin-left:8px;vertical-align:middle}
 
-/* --- selector de tema --- */
-#themeBtn{background:none;border:1px solid var(--line);border-radius:999px;
-  padding:6px 10px;font-size:13px;cursor:pointer;line-height:1}
-.swatches{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px;
-  max-height:52vh;overflow:auto;padding:2px}
-.swatches button{display:flex;align-items:center;gap:10px;background:var(--raise);
-  border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);
-  font-family:var(--sans);font-size:13px;cursor:pointer;text-align:left}
-.swatches button.sel{border-color:var(--gold)}
-.swatches .dot{width:26px;height:26px;border-radius:50%;flex:none;position:relative}
-.swatches .dot i{position:absolute;inset:32%;border-radius:50%}
 
 /* En pantallas grandes la columna de 440px queda flotando sola:
    le damos un marco para que se lea como una app y no como una web estirada. */
@@ -283,7 +262,7 @@ body[data-theme="chicha"]{
 
 <header>
   <div class="brand">Spindle</div>
-  <button id="themeBtn" title="Change palette">◐</button>
+  <button id="modeBtn" title="Light or dark">◐</button>
   <button id="installBtn">⬇ Install app</button>
   <div class="stats">
     <div class="chip">Streak <b id="streak">0</b></div>
@@ -377,15 +356,6 @@ body[data-theme="chicha"]{
       <button id="sysShare">Share</button>
       <button class="skip" id="closeShare">Close</button>
     </div>
-  </div>
-</div>
-
-<!-- palette sheet -->
-<div class="sheet" id="themeSheet">
-  <div class="inner">
-    <h3>Palette</h3>
-    <div class="swatches" id="swatches"></div>
-    <div class="actions" style="margin-top:10px"><button id="closeTheme">Done</button></div>
   </div>
 </div>
 
@@ -724,41 +694,28 @@ $('sysShare').onclick=async()=>{
   }else{$('saveImg').click()}
 };
 
-/* ---------- palette ---------- */
-const DEFAULT_THEME='studio';
-const THEMES=[
-  {id:'studio',   n:'Studio',   bg:'#000000', ac:'#30D158'},
-  {id:'',         n:'Cobalt',   bg:'#0C1B3A', ac:'#FF6B35'},
-  {id:'bluenote', n:'Blue Note',bg:'#0F1319', ac:'#2FA8D8'},
-  {id:'riso',     n:'Riso',     bg:'#F4F1E6', ac:'#FF48A0'},
-  {id:'phosphor', n:'Phosphor', bg:'#0B0A07', ac:'#FFB000'},
-  {id:'tone',     n:'2-Tone',   bg:'#0C0C0C', ac:'#FAFAFA'},
-  {id:'chicha',   n:'Chicha',   bg:'#16000F', ac:'#FF5E00'},
-  {id:'neon',     n:'Neon',     bg:'#0B0B12', ac:'#B4FF3D'},
-  {id:'cassette', n:'Cassette', bg:'#0E2B2E', ac:'#FF3D7F'},
-  {id:'ciruela',  n:'Plum',     bg:'#241033', ac:'#C77DFF'}
-];
+/* ---------- claro / oscuro ----------
+   Tres estados: auto sigue al sistema, y los otros dos lo fuerzan. */
+const MODE_ICON={auto:'◐',light:'☀',dark:'☾'};
+let mode='auto';
 
-function applyTheme(id){
-  if(id) document.body.dataset.theme=id; else delete document.body.dataset.theme;
-  // la barra del navegador y la splash siguen al tema
+function applyMode(m){
+  mode=m;
+  if(m==='auto') delete document.documentElement.dataset.mode;
+  else document.documentElement.dataset.mode=m;
+  $('modeBtn').textContent=MODE_ICON[m];
+  $('modeBtn').title=`Appearance: ${m}`;
+  // la barra del navegador sigue al fondo real, sea cual sea el origen
   const bg=getComputedStyle(document.body).getPropertyValue('--bg').trim();
   document.querySelector('meta[name=theme-color]').setAttribute('content',bg);
-  document.querySelectorAll('#swatches button').forEach(b=>
-    b.classList.toggle('sel',b.dataset.id===id));
-  store.set('theme',id);
+  store.set('mode',m);
 }
-
-THEMES.forEach(t=>{
-  const b=document.createElement('button');
-  b.dataset.id=t.id;
-  b.innerHTML=`<span class="dot" style="background:${t.bg};border:1px solid rgba(128,128,128,.4)">
-    <i style="background:${t.ac}"></i></span><span>${t.n}</span>`;
-  b.onclick=()=>applyTheme(t.id);
-  $('swatches').appendChild(b);
+$('modeBtn').onclick=()=>{
+  applyMode(mode==='auto'?'light':mode==='light'?'dark':'auto');
+};
+matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{
+  if(mode==='auto') applyMode('auto');
 });
-$('themeBtn').onclick=()=>$('themeSheet').classList.add('on');
-$('closeTheme').onclick=()=>$('themeSheet').classList.remove('on');
 
 /* ---------- install prompt ---------- */
 let deferred=null;
@@ -777,8 +734,7 @@ $('gotIt').onclick=()=>$('installSheet').classList.remove('on');
 (async()=>{
   const b=await store.get('best');
   if(b){S.best=+b;$('best').textContent=b}
-  const t=await store.get('theme');
-  applyTheme(t===null?DEFAULT_THEME:t);
+  applyMode(await store.get('mode') || 'auto');
 })();
 
 /* El service worker sólo arranca sobre https (o localhost).
