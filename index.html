@@ -555,7 +555,11 @@ function play(){
   stop();
   const from=S.over?rewardStart():0;
   const ms=(S.over?Math.min(REWARD,PREVIEW-from):cfg().stages[S.stage])*1000;
-  audio.currentTime=from;
+  if(from>0 && audio.readyState<1){
+    audio.addEventListener('loadedmetadata',play,{once:true});
+    return;
+  }
+  try{audio.currentTime=from}catch(e){}
   audio.play().then(()=>{
     $('art').classList.add('spin');
     stopT=setTimeout(stop,ms);
@@ -660,7 +664,6 @@ async function end(won){
   $('art').classList.add('reveal');
   $('seg').style.width='100%';
   $('play').textContent=`▶ Play ${REWARD}s more`;
-  $('seg').style.width='100%';
   // el premio por acertar es oír de verdad la canción, no solo el fragmento
   if(won) setTimeout(play,260);
   $('live').hidden=true;$('done').hidden=false;
