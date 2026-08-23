@@ -29,259 +29,183 @@
   --place:#7C7D83;
   --spent:#2E2E32;
   /* Semáforo: cada color significa una cosa y sólo una */
-  --gold:#64D2FF;      /* acento de interfaz y enlaces */
-  --on-gold:#000000;
-  --green:#30D158;     /* acierto */
-  --amber:#FFD60A;     /* pista */
-  --red:#FF453A;       /* fallo */
+  --accent:#64D2FF;
+  --on-accent:#000000;
+  --green:#30D158;
+  --amber:#FFD60A;
+  --red:#FF453A;
   --glow:rgba(48,209,88,.13);
   --tint:rgba(100,210,255,.13);
-  --tint-2:rgba(100,210,255,.42);
   --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
-/* Mismo sistema en claro: superficies, tres niveles de texto y el
-   mismo semáforo, con los tonos oscurecidos para que contrasten
-   sobre blanco. Por defecto sigue el ajuste del teléfono. */
+
+/* Mismo sistema en claro: los tonos del semáforo se oscurecen para
+   que contrasten sobre blanco. Por defecto sigue el ajuste del móvil. */
 @media (prefers-color-scheme: light){
   :root:not([data-mode="dark"]){
-  --bg:#FFFFFF;
-  --raise:#F5F5F7;
-  --sugg:#EBEBED;
-  --sheet:#FFFFFF;
-  --line:rgba(0,0,0,.11);
-  --text:#1D1D1F;
-  --muted:#6E6E73;
-  --place:#A1A1A6;
-  --spent:#D6D6DA;
-  --gold:#0071E3;
-  --on-gold:#FFFFFF;
-  --green:#248A3D;
-  --amber:#8F6400;
-  --red:#D70015;
-  --glow:rgba(0,113,227,.08);
-  --tint:rgba(0,113,227,.10);
-  --tint-2:rgba(0,113,227,.38);
+    --bg:#FFFFFF;--raise:#F5F5F7;--sugg:#EBEBED;--sheet:#FFFFFF;
+    --line:rgba(0,0,0,.11);--text:#1D1D1F;--muted:#6E6E73;--place:#A1A1A6;--spent:#D6D6DA;
+    --accent:#0071E3;--on-accent:#FFFFFF;--green:#248A3D;--amber:#8F6400;--red:#D70015;
+    --glow:rgba(0,113,227,.08);--tint:rgba(0,113,227,.10);
   }
 }
 :root[data-mode="light"]{
-  --bg:#FFFFFF;
-  --raise:#F5F5F7;
-  --sugg:#EBEBED;
-  --sheet:#FFFFFF;
-  --line:rgba(0,0,0,.11);
-  --text:#1D1D1F;
-  --muted:#6E6E73;
-  --place:#A1A1A6;
-  --spent:#D6D6DA;
-  --gold:#0071E3;
-  --on-gold:#FFFFFF;
-  --green:#248A3D;
-  --amber:#8F6400;
-  --red:#D70015;
-  --glow:rgba(0,113,227,.08);
-  --tint:rgba(0,113,227,.10);
-  --tint-2:rgba(0,113,227,.38);
+  --bg:#FFFFFF;--raise:#F5F5F7;--sugg:#EBEBED;--sheet:#FFFFFF;
+  --line:rgba(0,0,0,.11);--text:#1D1D1F;--muted:#6E6E73;--place:#A1A1A6;--spent:#D6D6DA;
+  --accent:#0071E3;--on-accent:#FFFFFF;--green:#248A3D;--amber:#8F6400;--red:#D70015;
+  --glow:rgba(0,113,227,.08);--tint:rgba(0,113,227,.10);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%}
-body{
-  background:var(--bg);color:var(--text);font-family:var(--sans);
+body{background:var(--bg);color:var(--text);font-family:var(--sans);
   -webkit-font-smoothing:antialiased;display:flex;justify-content:center;
-  padding:0 16px calc(24px + env(safe-area-inset-bottom));
-}
+  padding:0 16px calc(24px + env(safe-area-inset-bottom))}
 .app{width:100%;max-width:440px}
 
-/* header */
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:calc(14px + env(safe-area-inset-top)) 0 16px}
+/* cabecera */
+header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area-inset-top)) 0 16px}
 .brand{font-size:17px;font-weight:600;letter-spacing:-.01em}
-.stats{display:flex;gap:8px;margin-left:auto}
-.chip{background:var(--raise);border:1px solid var(--line);border-radius:999px;
-  padding:6px 11px;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center}
-.chip b{color:var(--text);font-size:12px}
-#modeBtn{background:none;border:1px solid var(--line);color:var(--muted);
-  border-radius:980px;padding:6px 10px;font-size:13px;line-height:1;cursor:pointer}
-#installBtn{background:none;border:1px solid var(--line);color:var(--muted);
-  border-radius:999px;padding:6px 11px;font-size:11px;cursor:pointer;display:none}
+.chip{background:var(--raise);border:1px solid var(--line);border-radius:980px;
+  padding:6px 11px;font-size:11px;color:var(--muted);margin-left:auto}
+.chip b{color:var(--text);font-size:12px;margin-left:5px}
+#modeBtn,#installBtn{background:none;border:1px solid var(--line);color:var(--muted);
+  border-radius:980px;padding:6px 10px;font-size:12px;line-height:1;cursor:pointer}
+#installBtn{display:none}
 #installBtn.on{display:block}
 
-/* screens */
+/* pantallas */
 .screen{display:none}
 .screen.on{display:block;animation:fade .25s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}}
 
-/* Una sola familia en toda la app: titulares apretados, sin serif.
-   El acento vive en el degradado, no en un cambio de letra. */
 h1{font-family:var(--sans);font-weight:600;font-size:clamp(34px,8.4vw,52px);
   letter-spacing:-.035em;line-height:1.06;margin-bottom:12px}
 h1 em{font-style:normal;
-  background:linear-gradient(96deg,var(--gold),var(--green) 52%,var(--amber));
+  background:linear-gradient(96deg,var(--accent),var(--green) 52%,var(--amber));
   -webkit-background-clip:text;background-clip:text;color:transparent}
-
 .lede{color:var(--muted);font-size:14px;line-height:1.52;margin-bottom:22px}
+.eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--place);margin:28px 0 12px}
 
 .modes{display:flex;gap:6px;background:var(--raise);border:1px solid var(--line);
-  border-radius:999px;padding:4px;margin-bottom:14px}
+  border-radius:980px;padding:4px;margin-bottom:14px}
 .modes button{flex:1;border:none;background:none;color:var(--muted);font-family:var(--sans);
-  font-size:13px;font-weight:500;padding:9px;border-radius:999px;cursor:pointer}
-.modes button.sel{background:var(--gold);color:var(--on-gold);font-weight:600}
+  font-size:13px;font-weight:500;padding:9px;border-radius:980px;cursor:pointer}
+.modes button.sel{background:var(--accent);color:var(--on-accent);font-weight:600}
 
 .tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
   background:var(--raise);border:1px solid var(--line);border-radius:22px;
   padding:18px;color:var(--text);font-family:var(--sans);cursor:pointer}
-.tile:hover{border-color:var(--tint-2)}
-.tile .ico{font-size:22px;width:44px;height:44px;flex:none;border-radius:12px;
+.tile:hover{border-color:var(--accent)}
+.tile .ico{font-size:22px;width:44px;height:44px;flex:none;border-radius:14px;
   background:var(--tint);display:grid;place-items:center}
 .tile h3{font-size:15px;font-weight:600;margin-bottom:3px}
 .tile p{font-size:12px;color:var(--muted)}
 .tile .arrow{margin-left:auto;color:var(--muted);font-size:18px}
 
-.eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
-  margin:28px 0 12px}
 .steps{list-style:none;display:flex;flex-direction:column;gap:14px}
 .steps li{display:flex;gap:14px;font-size:13px;line-height:1.5;color:var(--muted)}
-.steps .n{font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:.06em;
-  color:var(--gold);flex:none;width:22px;padding-top:2px}
+.steps .n{font-weight:600;font-size:12px;letter-spacing:.06em;color:var(--accent);
+  flex:none;width:22px;padding-top:2px}
 .steps b{color:var(--text);font-weight:600}
 
 .back{background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;
   padding:0 0 14px;font-family:var(--sans)}
 
 input[type=text]{width:100%;background:var(--raise);border:1px solid var(--line);
-  border-radius:12px;color:var(--text);font-family:var(--sans);font-size:16px;padding:14px;outline:none}
-input[type=text]:focus{border-color:var(--gold)}
+  border-radius:14px;color:var(--text);font-family:var(--sans);font-size:16px;padding:14px;outline:none}
+input[type=text]:focus{border-color:var(--accent)}
 input::placeholder{color:var(--place)}
 
 .list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:2px}
-.list li{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;cursor:pointer}
+.list li{display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px;cursor:pointer}
 .list li:hover{background:var(--raise)}
 .list img{width:42px;height:42px;border-radius:50%;object-fit:cover;flex:none;background:var(--raise)}
 .list .nm{font-size:14px;font-weight:500}
 .list .sub{font-size:11px;color:var(--muted);margin-top:2px}
 
-/* game */
-.art{position:relative;width:min(100%,200px);aspect-ratio:1;margin:0 auto 16px;border-radius:16px;
-  overflow:hidden;background:var(--raise);display:grid;place-items:center}
+/* partida */
+.bhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.bhead .rnd{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--place)}
+.bhead .pts{font-size:34px;font-weight:600;letter-spacing:-.03em}
+
+.art{position:relative;width:min(100%,190px);aspect-ratio:1;margin:0 auto 16px;
+  border-radius:22px;overflow:hidden;background:var(--raise);display:grid;place-items:center}
 .art img{width:100%;height:100%;object-fit:cover;filter:blur(26px) saturate(1.3);
   transform:scale(1.15);transition:filter .5s,transform .5s}
 .art.reveal img{filter:none;transform:none}
-.art .vinyl{position:absolute;width:64px;height:64px;border-radius:50%;
-  border:2px solid color-mix(in srgb, var(--text) 35%, transparent);
-  background:radial-gradient(circle,color-mix(in srgb, var(--bg) 92%, transparent) 0 22%,transparent 22%)}
+.art .vinyl{position:absolute;width:60px;height:60px;border-radius:50%;
+  border:2px solid color-mix(in srgb,var(--text) 35%,transparent);
+  background:radial-gradient(circle,color-mix(in srgb,var(--bg) 92%,transparent) 0 22%,transparent 22%)}
 .art.spin .vinyl{animation:spin 2.6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .art.reveal .vinyl{display:none}
 
-.bar{height:6px;border-radius:999px;background:var(--raise);overflow:hidden;position:relative}
-.bar .seg{position:absolute;top:0;bottom:0;left:0;background:var(--gold);width:0;transition:width .3s}
-.bar .now{position:absolute;top:0;bottom:0;width:2px;background:var(--text);left:0;opacity:0}
-.spin .bar .now{opacity:1}
-.times{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
-
-.play{width:100%;margin-top:16px;padding:16px;border:none;border-radius:980px;
-  background:var(--gold);color:var(--on-gold);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer}
-.play:active{opacity:.85}
-
-.guesswrap{position:relative;margin-top:14px}
-.sugg{list-style:none;position:absolute;left:0;right:0;bottom:100%;margin-bottom:6px;z-index:9;
-  background:var(--sugg);border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:200px}
-.sugg li{padding:12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--line)}
-.sugg li:last-child{border:none}
-.sugg li:hover{background:var(--raise)}
-.actions{display:flex;gap:8px;margin-top:10px}
-.actions button{flex:1;padding:13px;border-radius:980px;border:1px solid var(--line);
-  background:none;color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer}
-.actions .skip{color:var(--muted)}
-
-.rows{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:6px}
-.rows li{font-size:12px;padding:11px 12px;border-radius:10px;background:var(--raise);
-  color:var(--muted);display:flex;gap:8px;align-items:center}
-.rows li .mk{color:var(--red)}
-.rows li.skipped .mk{color:var(--muted)}
-
-.verdict{font-family:var(--sans);font-weight:600;font-size:23px;
-  letter-spacing:-.025em;margin-bottom:4px}
-.verdict.win{color:var(--green)}
-.verdict.lose{color:var(--red)}
-.answer{font-size:15px;font-weight:600}
-.answer span{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:3px}
-.shake{animation:sh .3s}
-@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-
-.err{background:color-mix(in srgb, var(--red) 14%, transparent);border:1px solid color-mix(in srgb, var(--red) 55%, transparent);
-  border-radius:12px;padding:12px;font-size:12px;line-height:1.5;margin-top:10px}
-.load{font-size:12px;color:var(--muted);padding:14px;text-align:center}
-.foot{margin-top:18px;text-align:center;font-size:12px;color:var(--muted)}
-.foot button{background:none;border:none;color:var(--muted);font-family:var(--sans);
-  font-size:12px;text-decoration:underline;cursor:pointer}
-
-/* sheets */
-.sheet{position:fixed;inset:0;background:color-mix(in srgb, var(--bg) 80%, #000);display:none;
-  align-items:flex-end;justify-content:center;z-index:40;padding:16px}
-.sheet.on{display:flex}
-.sheet .inner{width:100%;max-width:440px;background:var(--sheet);border:1px solid var(--line);
-  border-radius:20px;padding:18px;animation:up .3s ease}
-@keyframes up{from{transform:translateY(24px);opacity:0}}
-.sheet h3{font-size:15px;font-weight:600;margin-bottom:10px}
-.sheet img.card{width:100%;border-radius:12px;display:block;margin-bottom:12px}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-
-/* --- blitz --- */
-.bhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
-.bhead .rnd{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--place)}
-.bhead .pts{font-size:34px;font-weight:600;letter-spacing:-.025em}
-.clock{height:6px;border-radius:980px;background:var(--raise);overflow:hidden;margin-bottom:6px}
-.clock i{display:block;height:100%;width:100%;background:var(--gold);
-  transition:background .2s}
+.clock{height:6px;border-radius:980px;background:var(--raise);overflow:hidden}
+.clock i{display:block;height:100%;width:100%;background:var(--accent)}
 .clock.warn i{background:var(--red)}
-.live{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:16px}
+.live{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);
+  margin:7px 0 16px;font-variant-numeric:tabular-nums}
+
 .opts{display:flex;flex-direction:column;gap:8px}
-.opts button{width:100%;text-align:left;padding:16px;border-radius:16px;
+.opts button{width:100%;text-align:left;padding:15px;border-radius:16px;
   background:var(--raise);border:1px solid var(--line);color:var(--text);
   font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;
   display:flex;align-items:center;gap:12px}
-.opts button:hover:not(:disabled){border-color:var(--gold)}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
 .opts button .k{width:26px;height:26px;flex:none;border-radius:50%;background:var(--sugg);
   color:var(--muted);font-size:12px;font-weight:600;display:grid;place-items:center}
 .opts button.right{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--raise))}
-.opts button.right .k{background:var(--green);color:var(--on-gold)}
+.opts button.right .k{background:var(--green);color:var(--on-accent)}
 .opts button.wrong{border-color:var(--red);background:color-mix(in srgb,var(--red) 12%,var(--raise))}
 .opts button:disabled{cursor:default}
+
 .gain{text-align:center;font-size:15px;font-weight:600;margin-top:14px;min-height:22px}
 .gain.plus{color:var(--green)}
 .gain.zero{color:var(--red)}
-.final{text-align:center;padding:8px 0}
-.final .big{font-size:clamp(52px,16vw,84px);font-weight:600;letter-spacing:-.04em;line-height:1}
-.final .sub{color:var(--muted);font-size:14px;margin-top:8px}
 
-/* --- pistas --- */
-.hints{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.hints li{font-size:12px;padding:8px 11px;border-radius:999px;
-  background:color-mix(in srgb, var(--amber) 13%, transparent);
-  border:1px solid color-mix(in srgb, var(--amber) 30%, transparent);color:var(--text)}
-.hints li b{font-weight:600}
-.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.12em}
-.minor{display:flex;gap:8px;margin-top:8px}
-.minor button{flex:1;background:none;border:none;color:var(--muted);font-family:var(--sans);
-  font-size:12px;padding:10px;cursor:pointer;border-radius:10px}
-.minor button:hover{color:var(--text);background:var(--raise)}
-.minor button:disabled{opacity:.35;cursor:default}
-.minor .danger.armed{color:var(--red);font-weight:600}
-.tag{display:inline-block;font-size:11px;color:var(--muted);margin-left:8px;vertical-align:middle}
+.final{text-align:center;padding:14px 0}
+.final .big{font-size:clamp(56px,17vw,88px);font-weight:600;letter-spacing:-.045em;line-height:1}
+.final .sub{color:var(--muted);font-size:14px;margin-top:10px;line-height:1.5}
+.final .rec{color:var(--green);font-weight:600}
+.tape{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;margin-top:20px}
+.tape i{width:22px;height:22px;border-radius:7px;background:var(--sugg)}
+.tape i.hit{background:var(--green)}
+.tape i.miss{background:var(--red)}
 
+.actions{display:flex;gap:8px;margin-top:20px}
+.actions button{flex:1;padding:14px;border-radius:980px;border:1px solid var(--line);
+  background:none;color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer}
+.actions .primary{background:var(--accent);color:var(--on-accent);border-color:transparent;font-weight:600}
+.actions .ghost{color:var(--muted)}
 
-/* En pantallas grandes la columna de 440px queda flotando sola:
-   le damos un marco para que se lea como una app y no como una web estirada. */
+.err{background:color-mix(in srgb,var(--red) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--red) 55%,transparent);
+  border-radius:14px;padding:12px;font-size:12px;line-height:1.5;margin-top:10px}
+.load{font-size:12px;color:var(--muted);padding:14px;text-align:center}
+.foot{margin-top:18px;text-align:center;font-size:12px;color:var(--place)}
+
+.sheet{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,#000);
+  display:none;align-items:flex-end;justify-content:center;z-index:40;padding:16px}
+.sheet.on{display:flex}
+.sheet .inner{width:100%;max-width:440px;background:var(--sheet);border:1px solid var(--line);
+  border-radius:24px;padding:18px;animation:up .3s ease}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+.sheet h3{font-size:15px;font-weight:600;margin-bottom:10px}
+.sheet img.card{width:100%;border-radius:14px;display:block;margin-bottom:12px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* En pantallas grandes la columna queda flotando sola: le damos marco */
 @media(min-width:720px){
   body{padding:44px 20px 60px;
     background-image:radial-gradient(900px 500px at 50% -10%,var(--glow),transparent 70%)}
-  .app{background:linear-gradient(180deg,var(--raise) 0%,var(--bg) 46%);
-    border:1px solid var(--line);border-radius:26px;
+  .app{background:var(--raise);border:1px solid var(--line);border-radius:28px;
     padding:0 26px 30px;box-shadow:0 28px 70px rgba(0,0,0,.45)}
   header{padding-top:22px}
-  .art{width:min(100%,230px)}
+  .tile,.list li,.opts button,.clock,input[type=text]{background-color:var(--bg)}
+  .art{width:min(100%,210px)}
 }
 </style>
 </head>
@@ -290,38 +214,26 @@ input::placeholder{color:var(--place)}
 
 <header>
   <div class="brand">Spindle</div>
-  <button id="modeBtn" title="Light or dark">◐</button>
-  <button id="installBtn">⬇ Install app</button>
-  <div class="stats">
-    <div class="chip">Streak <b id="streak">0</b></div>
-    <div class="chip">Best <b id="best">0</b></div>
-  </div>
+  <button id="modeBtn" title="Appearance">◐</button>
+  <button id="installBtn">⬇ Install</button>
+  <div class="chip">Best <b id="best">0</b></div>
 </header>
 
 <!-- HOME -->
 <section class="screen on" id="s-home">
   <h1>Guess the song, <em>live</em></h1>
-  <p class="lede">Real 30-second previews, pulled fresh every round. Pick an artist — Spindle quizzes you on their actual catalog.</p>
+  <p class="lede">Real 30-second previews, pulled fresh every round. Pick an artist and Spindle quizzes you on their actual catalog.</p>
 
   <div class="modes">
-    <button class="sel" data-mode="classic">Classic</button>
-    <button data-mode="hardcore">Hardcore</button>
+    <button class="sel" data-diff="classic">Classic</button>
+    <button data-diff="hardcore">Hardcore</button>
   </div>
 
-  <button class="tile" id="toArtist">
-    <span class="ico">🎤</span>
-    <span>
-      <h3>Artist Mode</h3>
-      <p id="modeSub">Search any artist, guess their songs</p>
-    </span>
-    <span class="arrow">→</span>
-  </button>
-
-  <button class="tile" id="toBlitz" style="margin-top:8px">
+  <button class="tile" id="toPick">
     <span class="ico">⚡</span>
     <span>
-      <h3>Blitz Mode</h3>
-      <p>Four options, ten rounds — faster answers score more</p>
+      <h3>Blitz</h3>
+      <p id="diffSub">10 rounds · 12 seconds each</p>
     </span>
     <span class="arrow">→</span>
   </button>
@@ -329,8 +241,8 @@ input::placeholder{color:var(--place)}
   <div class="eyebrow">How it works</div>
   <ol class="steps">
     <li><span class="n">01</span><span>Pick an artist — Spindle fetches their <b>real catalog</b> live</span></li>
-    <li><span class="n">02</span><span>Tap play — you get <b>1 second</b> to start, growing each guess</span></li>
-    <li><span class="n">03</span><span>Guess right, <b>share your result</b> as a card</span></li>
+    <li><span class="n">02</span><span>A song plays and <b>four titles</b> appear. All of them are theirs.</span></li>
+    <li><span class="n">03</span><span>Points drain as the clock runs — <b>answer fast, score more</b></span></li>
   </ol>
 </section>
 
@@ -338,7 +250,7 @@ input::placeholder{color:var(--place)}
 <section class="screen" id="s-pick">
   <button class="back" data-go="s-home">←</button>
   <h1>Pick an artist</h1>
-  <p class="lede">Start typing an artist name — Drake, Adele, Tame Impala, anyone on Deezer.</p>
+  <p class="lede">Start typing — Drake, Adele, Tame Impala, anyone on Deezer.</p>
   <input type="text" id="q" placeholder="Search artists" autocomplete="off">
   <ul class="list" id="artists"></ul>
 </section>
@@ -347,70 +259,34 @@ input::placeholder{color:var(--place)}
 <section class="screen" id="s-game">
   <button class="back" data-go="s-pick">←</button>
 
-  <div class="art" id="art"><img id="cover" alt=""><div class="vinyl"></div></div>
-
-  <div class="bar"><div class="seg" id="seg"></div><div class="now" id="now"></div></div>
-  <div class="times"><span id="tLeft">0:00</span><span id="tRight">1s unlocked</span></div>
-
-  <button class="play" id="play">▶ Play 1s</button>
-
-  <div id="live">
-    <div class="guesswrap">
-      <ul class="sugg" id="sugg" hidden></ul>
-      <input type="text" id="guess" placeholder="Guess the song" autocomplete="off">
-      <div class="actions">
-        <button id="submit">Guess</button>
-        <button class="skip" id="skip">Skip →</button>
-      </div>
-      <div class="minor">
-        <button id="hint">💡 Hint</button>
-        <button class="danger" id="giveup">Give up</button>
-      </div>
+  <div id="playing">
+    <div class="bhead">
+      <span class="rnd" id="round">Round 1 of 10</span>
+      <span class="pts" id="score">0</span>
     </div>
-    <ul class="hints" id="hints"></ul>
-    <ul class="rows" id="rows"></ul>
+    <div class="art" id="art"><img id="cover" alt=""><div class="vinyl"></div></div>
+    <div class="clock" id="clock"><i id="bar"></i></div>
+    <div class="live"><span id="worth">1000 pts</span><span id="left">12.0s</span></div>
+    <div class="opts" id="opts"></div>
+    <div class="gain" id="gain"></div>
   </div>
 
-  <div id="done" hidden>
-    <div class="verdict" id="verdict"></div>
-    <div class="answer" id="answer"></div>
-    <div class="actions" style="margin-top:16px">
-      <button id="next">Next song →</button>
-      <button class="skip" id="shareBtn">Share session</button>
+  <div id="final" hidden>
+    <div class="final">
+      <div class="big" id="total">0</div>
+      <div class="sub" id="recap"></div>
+      <div class="tape" id="tape"></div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="again">Play again</button>
+      <button id="share">Share</button>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button class="ghost" id="change">Change artist</button>
     </div>
   </div>
 
   <p class="foot" id="foot"></p>
-</section>
-
-<!-- BLITZ -->
-<section class="screen" id="s-blitz">
-  <button class="back" data-go="s-pick">←</button>
-
-  <div id="b-play">
-    <div class="bhead">
-      <span class="rnd" id="b-round">Round 1 of 10</span>
-      <span class="pts" id="b-score">0</span>
-    </div>
-    <div class="art" id="b-art"><img id="b-cover" alt=""><div class="vinyl"></div></div>
-    <div class="clock" id="b-clock"><i id="b-bar"></i></div>
-    <div class="live"><span id="b-worth">1000 pts</span><span id="b-left">12.0s</span></div>
-    <div class="opts" id="b-opts"></div>
-    <div class="gain" id="b-gain"></div>
-  </div>
-
-  <div id="b-final" hidden>
-    <div class="final">
-      <div class="big" id="b-total">0</div>
-      <div class="sub" id="b-recap"></div>
-    </div>
-    <div class="actions" style="margin-top:20px">
-      <button id="b-again">Play again</button>
-      <button class="skip" id="b-change">Change artist</button>
-    </div>
-  </div>
-
-  <p class="foot" id="b-foot"></p>
 </section>
 
 <!-- share sheet -->
@@ -418,10 +294,10 @@ input::placeholder{color:var(--place)}
   <div class="inner">
     <h3>Result card</h3>
     <img class="card" id="cardImg" alt="Result card">
-    <div class="actions">
+    <div class="actions" style="margin-top:0">
       <button id="saveImg">Save image</button>
       <button id="sysShare">Share</button>
-      <button class="skip" id="closeShare">Close</button>
+      <button class="ghost" id="closeShare">Close</button>
     </div>
   </div>
 </div>
@@ -431,7 +307,7 @@ input::placeholder{color:var(--place)}
   <div class="inner">
     <h3>Add Spindle to your Home Screen</h3>
     <p class="lede" id="installTip"></p>
-    <div class="actions"><button id="gotIt">Got it</button></div>
+    <div class="actions" style="margin-top:0"><button id="gotIt">Got it</button></div>
   </div>
 </div>
 
@@ -439,7 +315,10 @@ input::placeholder{color:var(--place)}
 </div>
 
 <script>
-/* ---------- Deezer via JSONP (no CORS headers, no proxy needed) ---------- */
+/* ---------- Deezer vía JSONP ----------
+   La API no manda cabeceras CORS, así que fetch() falla desde el
+   navegador. Pidiendo output=jsonp devuelve una etiqueta de script
+   que llama a nuestra función: mismo dato, sin proxy ni servidor. */
 function deezer(path, params={}){
   return new Promise((res,rej)=>{
     const cb='dz'+Math.random().toString(36).slice(2);
@@ -453,7 +332,9 @@ function deezer(path, params={}){
   });
 }
 
-/* ---------- storage (window.storage here; swap for localStorage when you host it) ---------- */
+/* ---------- guardado ----------
+   Dentro de Claude usa window.storage; si lo alojas tú, descomenta
+   las líneas de localStorage. */
 const mem={};
 const store={
   async get(k){try{if(window.storage){const r=await window.storage.get(k);return r?r.value:null}}catch(e){}
@@ -462,176 +343,47 @@ const store={
     /* localStorage.setItem(k,String(v)); */}
 };
 
-/* ---------- state ---------- */
-const REWARD=15;    // duración del premio
-const PREVIEW=30;   // los previews de Deezer duran 30s
-const MODES={
-  classic:{stages:[1,2,4,7,11,16],hints:true},
-  hardcore:{stages:[1,2,3],hints:false}
+/* ---------- estado ---------- */
+const DIFF={
+  classic:{limit:12, rounds:10, label:'10 rounds · 12 seconds each'},
+  hardcore:{limit:6, rounds:10, label:'10 rounds · 6 seconds each'}
 };
-const S={mode:'classic',artist:null,pool:[],titles:[],used:new Set(),
-  track:null,stage:0,streak:0,best:0,session:[],hints:0,gaveUp:false,over:false,
-  game:'artist',bRound:0,bScore:0,bHits:0};
+const TOP=1000, FLOOR=100;   // puntos al empezar y al agotarse el reloj
+
+const S={diff:'classic',artist:null,pool:[],used:new Set(),
+  track:null,round:0,score:0,hits:0,log:[],best:0};
 
 const $=id=>document.getElementById(id);
 const audio=$('audio');
-let stopT=null,raf=null;
-const cfg=()=>MODES[S.mode];
-const total=()=>cfg().stages[cfg().stages.length-1];
-const window_=()=>S.over?PREVIEW:total();   // la barra pasa a mostrar el preview entero
-/* El premio no rebobina: arranca donde el jugador dejó de oír y sigue
-   hacia adelante. Los previews de Deezer están recortados del centro
-   del tema, así que avanzar suele llevar al estribillo. */
-const rewardStart=()=>Math.min(cfg().stages[S.stage], PREVIEW-REWARD);
+let raf=null,tStart=0,locked=false,nextT=null;
+const cfg=()=>DIFF[S.diff];
 
 const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/\(.*?\)|\[.*?\]/g,'').replace(/ - .*$/,'').replace(/feat\.?.*$/,'')
   .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
 
-function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.id===id));
-  if(id!=='s-game')stop();
-  if(id!=='s-blitz'&&typeof bStop==='function')bStop();}
+function go(id){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.id===id));
+  if(id!=='s-game') halt();
+}
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 
-/* ---------- mode ---------- */
+/* ---------- dificultad ---------- */
 document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.modes button').forEach(x=>x.classList.remove('sel'));
-  b.classList.add('sel'); S.mode=b.dataset.mode;
-  $('modeSub').textContent = S.mode==='hardcore'
-    ? '3 guesses, 3 seconds, no suggestions'
-    : 'Search any artist, guess their songs';
+  b.classList.add('sel'); S.diff=b.dataset.diff;
+  $('diffSub').textContent=cfg().label;
 });
-$('toArtist').onclick=()=>{S.game='artist';go('s-pick');$('q').focus()};
+$('toPick').onclick=()=>{go('s-pick');$('q').focus()};
 
-/* ---------- Blitz ----------
-   Diez rondas de opción múltiple. La canción suena mientras decides
-   y los puntos caen con el reloj: responder rápido vale diez veces
-   más que responder al final. */
-const B={rounds:10,limit:12,top:1000,floor:100};
-let bT=null,bRaf=null,bStart=0,bLocked=false;
-
-$('toBlitz').onclick=()=>{S.game='blitz';go('s-pick');$('q').focus()};
-
-function worth(elapsed){
-  const k=Math.min(elapsed/B.limit,1);
-  return Math.max(B.floor,Math.round(B.top-(B.top-B.floor)*k));
-}
-
-function startBlitz(){
-  S.bRound=0;S.bScore=0;S.bHits=0;S.used=new Set();
-  $('b-final').hidden=true;$('b-play').hidden=false;
-  blitzRound();
-}
-
-function blitzRound(){
-  bStop();
-  bLocked=false;
-  S.bRound++;
-  if(S.used.size>=S.pool.length)S.used=new Set();
-  let t;do{t=S.pool[Math.floor(Math.random()*S.pool.length)]}while(S.used.has(t.id));
-  S.used.add(t.id);S.track=t;
-
-  // tres señuelos distintos del mismo catálogo
-  const pool=S.pool.filter(o=>o.id!==t.id);
-  const decoys=[];
-  while(decoys.length<3 && pool.length){
-    const i=Math.floor(Math.random()*pool.length);
-    decoys.push(pool.splice(i,1)[0]);
-  }
-  const opts=[t,...decoys].sort(()=>Math.random()-0.5);
-
-  $('b-round').textContent=`Round ${S.bRound} of ${B.rounds}`;
-  $('b-score').textContent=S.bScore;
-  $('b-cover').src=t.album?t.album.cover_big:'';
-  $('b-art').classList.remove('reveal');
-  $('b-gain').textContent='';$('b-gain').className='gain';
-  $('b-clock').classList.remove('warn');
-  $('b-foot').textContent=`${S.artist.name} · ${S.pool.length} songs in rotation`;
-
-  $('b-opts').innerHTML='';
-  opts.forEach((o,i)=>{
-    const b=document.createElement('button');
-    b.innerHTML='<span class="k"></span><span class="t"></span>';
-    b.querySelector('.k').textContent='ABCD'[i];
-    b.querySelector('.t').textContent=o.title;
-    b.onclick=()=>answer(b,o.id===t.id);
-    $('b-opts').appendChild(b);
-  });
-
-  audio.src=t.preview;audio.load();
-  audio.currentTime=0;
-  audio.play().then(()=>{
-    $('b-art').classList.add('spin');
-    bStart=performance.now();
-    (function tick(){
-      const el=(performance.now()-bStart)/1000;
-      const left=Math.max(0,B.limit-el);
-      $('b-bar').style.width=(left/B.limit*100)+'%';
-      $('b-left').textContent=left.toFixed(1)+'s';
-      $('b-worth').textContent=worth(el)+' pts';
-      $('b-clock').classList.toggle('warn',left<3.5);
-      if(left<=0){answer(null,false);return}
-      bRaf=requestAnimationFrame(tick);
-    })();
-  }).catch(()=>{
-    $('b-foot').innerHTML='<span class="err">Tap anywhere to enable audio, then Play again.</span>';
-  });
-}
-
-function answer(btn,ok){
-  if(bLocked)return;
-  bLocked=true;
-  const el=(performance.now()-bStart)/1000;
-  bStop();
-  $('b-art').classList.add('reveal');
-
-  [...$('b-opts').children].forEach(b=>{
-    b.disabled=true;
-    if(b.querySelector('.t').textContent===S.track.title) b.classList.add('right');
-  });
-  if(btn && !ok) btn.classList.add('wrong');
-
-  if(ok){
-    const pts=worth(el);
-    S.bScore+=pts;S.bHits++;
-    $('b-score').textContent=S.bScore;
-    $('b-gain').textContent=`+${pts}`;
-    $('b-gain').className='gain plus';
-  }else{
-    $('b-gain').textContent=btn?'Nope':"Time's up";
-    $('b-gain').className='gain zero';
-  }
-
-  setTimeout(()=>{
-    if(S.bRound>=B.rounds) endBlitz(); else blitzRound();
-  },1500);
-}
-
-function bStop(){
-  clearTimeout(bT);cancelAnimationFrame(bRaf);
-  audio.pause();
-  $('b-art').classList.remove('spin');
-}
-
-async function endBlitz(){
-  bStop();
-  $('b-play').hidden=true;$('b-final').hidden=false;
-  const prev=+(await store.get('blitzBest')||0);
-  const record=S.bScore>prev;
-  if(record) await store.set('blitzBest',S.bScore);
-  $('b-total').textContent=S.bScore;
-  $('b-recap').innerHTML=`${S.bHits} of ${B.rounds} right · ${S.artist.name}`
-    + (record?'<br><b>New personal best</b>':` · best ${Math.max(prev,S.bScore)}`);
-}
-
-$('b-again').onclick=startBlitz;
-$('b-change').onclick=()=>{bStop();S.game='blitz';go('s-pick')};
-
-/* ---------- artist search ---------- */
+/* ---------- búsqueda de artista ---------- */
 let sT;
-$('q').oninput=e=>{clearTimeout(sT);const q=e.target.value.trim();
+$('q').oninput=e=>{
+  clearTimeout(sT);
+  const q=e.target.value.trim();
   if(q.length<2){$('artists').innerHTML='';return}
-  sT=setTimeout(()=>findArtists(q),320)};
+  sT=setTimeout(()=>findArtists(q),320);
+};
 
 async function findArtists(q){
   $('artists').innerHTML='<div class="load">searching…</div>';
@@ -657,195 +409,163 @@ async function loadArtist(a){
   $('artists').innerHTML='<div class="load">loading catalog…</div>';
   try{
     const d=await deezer(`/artist/${a.id}/top`,{limit:50});
-    const seen=new Set(),pool=[];
+    const seen=new Set(), pool=[];
     (d.data||[]).forEach(t=>{
-      if(!t.preview)return;
+      if(!t.preview)return;                  // sin fragmento no sirve
       const k=norm(t.title);
-      if(!k||seen.has(k))return;
+      if(!k||seen.has(k))return;             // fuera remixes y duplicados
       seen.add(k);pool.push(t);
     });
-    if(pool.length<4){$('artists').innerHTML='<div class="err">Too few previews for that artist. Try another one.</div>';return}
-    S.artist=a;S.pool=pool;S.titles=pool.map(t=>t.title);S.used=new Set();S.session=[];
-    $('foot').innerHTML=`${a.name} · ${pool.length} songs in rotation`;
-    go('s-game');newRound();
+    // hacen falta cuatro títulos distintos para poder ofrecer opciones
+    if(pool.length<6){
+      $('artists').innerHTML='<div class="err">Too few previews for that artist. Try another one.</div>';
+      return;
+    }
+    S.artist=a;S.pool=pool;
+    go('s-game');start();
   }catch(e){
     $('artists').innerHTML='<div class="err">Couldn\'t load that catalog. Try again.</div>';
   }
 }
 
-/* ---------- rounds ---------- */
-function newRound(){
+/* ---------- partida ---------- */
+function worth(elapsed){
+  const k=Math.min(elapsed/cfg().limit,1);
+  return Math.max(FLOOR,Math.round(TOP-(TOP-FLOOR)*k));
+}
+
+function start(){
+  S.round=0;S.score=0;S.hits=0;S.log=[];S.used=new Set();
+  $('final').hidden=true;$('playing').hidden=false;
+  round();
+}
+
+function round(){
+  halt();
+  locked=false;
+  S.round++;
+
   if(S.used.size>=S.pool.length)S.used=new Set();
   let t;do{t=S.pool[Math.floor(Math.random()*S.pool.length)]}while(S.used.has(t.id));
-  stop();
-  S.used.add(t.id);S.track=t;S.stage=0;S.hints=0;S.gaveUp=false;S.over=false;
-  audio.src=t.preview;audio.load();
+  S.used.add(t.id);S.track=t;
+
+  // tres señuelos del mismo catálogo: así el juego mide si conoces el
+  // disco y no sólo si reconoces un estilo
+  const rest=S.pool.filter(o=>o.id!==t.id);
+  const decoys=[];
+  while(decoys.length<3 && rest.length){
+    decoys.push(rest.splice(Math.floor(Math.random()*rest.length),1)[0]);
+  }
+  const opts=[t,...decoys].sort(()=>Math.random()-0.5);
+
+  $('round').textContent=`Round ${S.round} of ${cfg().rounds}`;
+  $('score').textContent=S.score;
   $('cover').src=t.album?t.album.cover_big:'';
   $('art').classList.remove('reveal');
-  $('done').hidden=true;$('live').hidden=false;
-  $('rows').innerHTML='';$('hints').innerHTML='';$('guess').value='';$('sugg').hidden=true;
-  $('hint').disabled=false;$('hint').textContent='💡 Hint';
-  $('hint').style.display=cfg().hints?'':'none';
-  disarm();
-  $('seg').style.width='0';
-  $('tLeft').textContent='0:00';
-  paint();
-}
-function paint(){
-  const s=cfg().stages[S.stage];
-  $('seg').style.width=(s/total()*100)+'%';
-  $('tRight').textContent=s+'s unlocked';
-  $('play').textContent=`▶ Play ${s}s`;
-  const last=S.stage>=cfg().stages.length-1;
-  $('skip').textContent=last?'Give up':`Skip +${cfg().stages[S.stage+1]-s}s`;
-}
+  $('gain').textContent='';$('gain').className='gain';
+  $('clock').classList.remove('warn');
+  $('bar').style.width='100%';
+  $('foot').textContent=`${S.artist.name} · ${S.pool.length} songs in rotation`;
 
-/* ---------- playback ---------- */
-$('play').onclick=play;
-function play(){
-  stop();
-  const from=S.over?rewardStart():0;
-  const ms=(S.over?Math.min(REWARD,PREVIEW-from):cfg().stages[S.stage])*1000;
-  if(from>0 && audio.readyState<1){
-    audio.addEventListener('loadedmetadata',play,{once:true});
-    return;
-  }
-  try{audio.currentTime=from}catch(e){}
+  $('opts').innerHTML='';
+  opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.innerHTML='<span class="k"></span><span class="t"></span>';
+    b.querySelector('.k').textContent='ABCD'[i];
+    b.querySelector('.t').textContent=o.title;
+    b.onclick=()=>answer(b,o.id===t.id);
+    $('opts').appendChild(b);
+  });
+
+  audio.src=t.preview;audio.load();
   audio.play().then(()=>{
     $('art').classList.add('spin');
-    stopT=setTimeout(stop,ms);
+    tStart=performance.now();
     (function tick(){
-      $('now').style.left=(audio.currentTime/window_()*100)+'%';
-      $('tLeft').textContent='0:'+Math.floor(audio.currentTime).toString().padStart(2,'0');
+      const el=(performance.now()-tStart)/1000;
+      const left=Math.max(0,cfg().limit-el);
+      $('bar').style.width=(left/cfg().limit*100)+'%';
+      $('left').textContent=left.toFixed(1)+'s';
+      $('worth').textContent=worth(el)+' pts';
+      $('clock').classList.toggle('warn',left<cfg().limit/3.5);
+      if(left<=0){answer(null,false);return}
       raf=requestAnimationFrame(tick);
     })();
-  }).catch(()=>{$('foot').innerHTML='<span class="err">Your browser blocked playback. Tap play again.</span>'});
-}
-function stop(){clearTimeout(stopT);cancelAnimationFrame(raf);audio.pause();$('art').classList.remove('spin')}
-
-/* ---------- guessing ---------- */
-$('guess').oninput=()=>{
-  if(!cfg().hints){$('sugg').hidden=true;return}
-  const v=norm($('guess').value);
-  if(!v){$('sugg').hidden=true;return}
-  const hits=S.titles.filter(t=>norm(t).includes(v)).slice(0,6);
-  if(!hits.length){$('sugg').hidden=true;return}
-  $('sugg').innerHTML='';
-  hits.forEach(t=>{const li=document.createElement('li');li.textContent=t;
-    li.onclick=()=>{$('guess').value=t;$('sugg').hidden=true;submit()};$('sugg').appendChild(li)});
-  $('sugg').hidden=false;
-};
-$('guess').onkeydown=e=>{if(e.key==='Enter')submit()};
-$('submit').onclick=submit;
-$('skip').onclick=()=>step(null);
-
-function submit(){
-  const v=$('guess').value.trim();
-  if(!v)return;
-  $('sugg').hidden=true;
-  if(norm(v)===norm(S.track.title))return end(true);
-  step(v);
-}
-function step(txt){
-  const li=document.createElement('li');
-  li.innerHTML=`<span class="mk">${txt?'✕':'→'}</span><span></span>`;
-  li.lastChild.textContent=txt||'Skipped';
-  if(!txt)li.className='skipped';
-  $('rows').appendChild(li);
-  $('guess').value='';
-  const box=$('guess');box.classList.add('shake');setTimeout(()=>box.classList.remove('shake'),320);
-  if(S.stage>=cfg().stages.length-1)return end(false);
-  S.stage++;paint();play();
+  }).catch(()=>{
+    $('foot').innerHTML='<span class="err">Your browser blocked audio. Tap an answer to continue.</span>';
+    tStart=performance.now();
+  });
 }
 
-/* --- Pistas ---------------------------------------------------
-   Tres niveles, de menos a más revelador. No gastan intentos:
-   quedan anotados en el resultado y en la tarjeta para compartir. */
-function hintText(n){
-  const t = S.track;
-  if(n===1) return `Album <b>${escapeHtml(t.album ? t.album.title : '—')}</b>`;
-  if(n===2){
-    const m = Math.floor(t.duration/60), s = String(t.duration%60).padStart(2,'0');
-    const words = t.title.trim().split(/\s+/).length;
-    return `Runs <b>${m}:${s}</b> · <b>${words}</b> word${words>1?'s':''}`;
-  }
-  const mask = t.title.split(' ').map(w =>
-    w.length<=1 ? w : w[0] + '·'.repeat(Math.min(w.length-1,9))).join('   ');
-  return `<span class="mono">${escapeHtml(mask)}</span>`;
-}
-
-$('hint').onclick=()=>{
-  if(S.hints>=3) return;
-  S.hints++;
-  const li=document.createElement('li');
-  li.innerHTML=hintText(S.hints);
-  $('hints').appendChild(li);
-  if(S.hints>=3){$('hint').disabled=true;$('hint').textContent='No hints left'}
-  else $('hint').textContent=`💡 Hint (${3-S.hints} left)`;
-};
-
-/* --- Rendirse -------------------------------------------------
-   Pide confirmación con un segundo toque: revelar la canción
-   rompe la racha y no tiene vuelta atrás. */
-let armT=null;
-function disarm(){
-  clearTimeout(armT);
-  $('giveup').classList.remove('armed');
-  $('giveup').textContent='Give up';
-}
-$('giveup').onclick=()=>{
-  if(!$('giveup').classList.contains('armed')){
-    $('giveup').classList.add('armed');
-    $('giveup').textContent='Reveal the answer?';
-    armT=setTimeout(disarm,4000);
-    return;
-  }
-  disarm();
-  S.gaveUp=true;
-  end(false);
-};
-
-async function end(won){
-  stop();
-  S.streak=won?S.streak+1:0;
-  if(S.streak>S.best){S.best=S.streak;await store.set('best',S.best)}
-  $('streak').textContent=S.streak;$('best').textContent=S.best;
-  S.session.push({won,tries:S.stage+1,title:S.track.title,hints:S.hints,gaveUp:S.gaveUp});
-  S.over=true;
+function answer(btn,ok){
+  if(locked)return;
+  locked=true;
+  const el=(performance.now()-tStart)/1000;
+  halt();
   $('art').classList.add('reveal');
-  $('seg').style.width='100%';
-  $('play').textContent=`▶ Play ${REWARD}s more`;
-  // el premio por acertar es oír de verdad la canción, no solo el fragmento
-  if(won) setTimeout(play,260);
-  $('live').hidden=true;$('done').hidden=false;
-  $('verdict').textContent=won?`Got it in ${S.stage+1}`:(S.gaveUp?'Gave up':'Missed');
-  $('verdict').className='verdict '+(won?'win':'lose');
-  if(S.hints){
-    const tag=document.createElement('span');
-    tag.className='tag';
-    tag.textContent=`with ${S.hints} hint${S.hints>1?'s':''}`;
-    $('verdict').appendChild(tag);
+
+  [...$('opts').children].forEach(b=>{
+    b.disabled=true;
+    if(b.querySelector('.t').textContent===S.track.title) b.classList.add('right');
+  });
+  if(btn && !ok) btn.classList.add('wrong');
+
+  if(ok){
+    const pts=worth(el);
+    S.score+=pts;S.hits++;
+    $('score').textContent=S.score;
+    $('gain').textContent=`+${pts}`;
+    $('gain').className='gain plus';
+  }else{
+    $('gain').textContent=btn?'Nope':"Time's up";
+    $('gain').className='gain zero';
   }
-  disarm();
-  $('answer').innerHTML='<span></span>';
-  $('answer').firstChild.textContent='';
-  $('answer').childNodes[0].nodeValue='';
-  $('answer').innerHTML=`${escapeHtml(S.track.title)}<span>${escapeHtml(S.artist.name)} · ${escapeHtml(S.track.album?S.track.album.title:'')}</span>`;
+  S.log.push(ok);
+
+  nextT=setTimeout(()=>{
+    if(S.round>=cfg().rounds) finish(); else round();
+  },1600);
+}
+
+function halt(){
+  clearTimeout(nextT);cancelAnimationFrame(raf);
+  audio.pause();
+  $('art').classList.remove('spin');
+}
+
+async function finish(){
+  halt();
+  $('playing').hidden=true;$('final').hidden=false;
+  const prev=+(await store.get('best')||0);
+  const record=S.score>prev;
+  if(record){S.best=S.score;await store.set('best',S.score)}
+  else S.best=prev;
+  $('best').textContent=S.best;
+
+  $('total').textContent=S.score;
+  $('recap').innerHTML=`${S.hits} of ${cfg().rounds} right · ${escapeHtml(S.artist.name)}`
+    + (record?'<div class="rec">New personal best</div>':`<br>Best ${S.best}`);
+  $('tape').innerHTML='';
+  S.log.forEach(hit=>{
+    const i=document.createElement('i');
+    i.className=hit?'hit':'miss';
+    $('tape').appendChild(i);
+  });
 }
 const escapeHtml=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-$('next').onclick=newRound;
 
-/* ---------- share card ---------- */
-$('shareBtn').onclick=async()=>{$('shareSheet').classList.add('on');await drawCard()};
-$('closeShare').onclick=()=>$('shareSheet').classList.remove('on');
+$('again').onclick=start;
+$('change').onclick=()=>{halt();go('s-pick')};
+
+/* ---------- tarjeta para compartir ---------- */
 let blobRef=null;
 
-/* Carga la portada con permiso de origen cruzado. Sin ese permiso el
-   lienzo queda "contaminado" y no se puede exportar la imagen, así que
-   si falla seguimos sin portada en vez de romper la tarjeta. */
+/* La portada se pide con permiso de origen cruzado: sin él el lienzo
+   queda contaminado y no se puede exportar. Si falla, seguimos sin
+   portada en vez de romper la tarjeta. */
 function loadCover(url){
   return new Promise(res=>{
-    if(!url) return res(null);
+    if(!url)return res(null);
     const img=new Image();
     img.crossOrigin='anonymous';
     img.onload=()=>res(img);
@@ -853,183 +573,127 @@ function loadCover(url){
     img.src=url;
   });
 }
-
-function roundRect(x,r,a,b,w,hgt){
+function rr(x,r,a,b,w,h){
   x.beginPath();
   x.moveTo(a+r,b);
-  x.arcTo(a+w,b,a+w,b+hgt,r);
-  x.arcTo(a+w,b+hgt,a,b+hgt,r);
-  x.arcTo(a,b+hgt,a,b,r);
-  x.arcTo(a,b,a+w,b,r);
+  x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);
+  x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);
   x.closePath();
 }
 
-/* Parte el título en líneas que quepan en el ancho dado. */
-function wrap(x,text,max,limit){
-  const words=text.split(' '), lines=[];
-  let line='';
-  for(const w of words){
-    const test=line?line+' '+w:w;
-    if(x.measureText(test).width>max && line){lines.push(line);line=w}
-    else line=test;
-  }
-  if(line) lines.push(line);
-  if(lines.length>limit){
-    lines.length=limit;
-    lines[limit-1]=lines[limit-1].replace(/.{2}$/,'…');
-  }
-  return lines;
-}
-
 async function drawCard(){
-  // los colores salen del modo activo, no van fijos en el código
   const css=getComputedStyle(document.body);
   const V=n=>css.getPropertyValue(n).trim();
   const c=document.createElement('canvas');c.width=1080;c.height=1350;
   const x=c.getContext('2d');
-  const t=S.track, last=S.session[S.session.length-1];
 
   x.fillStyle=V('--bg');x.fillRect(0,0,1080,1350);
-
-  // cabecera
-  x.fillStyle=V('--gold');x.font='600 42px Inter, sans-serif';
+  x.fillStyle=V('--accent');x.font='600 42px Inter, sans-serif';
   x.fillText('Spindle',80,120);
   x.fillStyle=V('--place');x.font='600 26px Inter, sans-serif';
-  x.fillText((S.mode==='hardcore'?'HARDCORE':'CLASSIC')+' · ARTIST MODE',80,172);
+  x.fillText((S.diff==='hardcore'?'HARDCORE':'CLASSIC')+' BLITZ',80,172);
 
-  // portada
-  const cover=await loadCover(t && t.album ? (t.album.cover_xl||t.album.cover_big) : null);
-  const CX=80, CY=232, CS=440;
-  x.save();
-  roundRect(x,32,CX,CY,CS,CS);
-  x.clip();
-  if(cover){
-    x.drawImage(cover,CX,CY,CS,CS);
-  }else{
+  // portada del último tema, como imagen de la sesión
+  const t=S.track;
+  const cover=await loadCover(t&&t.album?(t.album.cover_xl||t.album.cover_big):null);
+  const CX=80,CY=236,CS=380;
+  x.save();rr(x,30,CX,CY,CS,CS);x.clip();
+  if(cover) x.drawImage(cover,CX,CY,CS,CS);
+  else{
     x.fillStyle=V('--raise');x.fillRect(CX,CY,CS,CS);
     x.fillStyle=V('--spent');
-    x.beginPath();x.arc(CX+CS/2,CY+CS/2,120,0,Math.PI*2);x.fill();
-    x.fillStyle=V('--bg');
-    x.beginPath();x.arc(CX+CS/2,CY+CS/2,26,0,Math.PI*2);x.fill();
+    x.beginPath();x.arc(CX+CS/2,CY+CS/2,110,0,Math.PI*2);x.fill();
   }
   x.restore();
 
-  // canción y artista, a la derecha de la portada
-  const TX=CX+CS+44, TW=1080-TX-80;
-  x.fillStyle=V('--text');x.font='600 52px Inter, sans-serif';
-  const lines=wrap(x,t?t.title:'',TW,4);
-  let ty=CY+72;
-  lines.forEach(l=>{x.fillText(l,TX,ty);ty+=62});
+  const TX=CX+CS+48;
+  x.fillStyle=V('--text');x.font='600 118px Inter, sans-serif';
+  x.fillText(String(S.score),TX,CY+130);
   x.fillStyle=V('--muted');x.font='400 34px Inter, sans-serif';
-  x.fillText(S.artist.name.length>22?S.artist.name.slice(0,21)+'…':S.artist.name,TX,ty+16);
+  x.fillText('points',TX,CY+184);
+  x.font='600 40px Inter, sans-serif';x.fillStyle=V('--text');
+  const name=S.artist.name.length>16?S.artist.name.slice(0,15)+'…':S.artist.name;
+  x.fillText(name,TX,CY+284);
+  x.fillStyle=V('--muted');x.font='400 32px Inter, sans-serif';
+  x.fillText(`${S.hits} of ${cfg().rounds} right`,TX,CY+336);
 
-  // veredicto de la ronda
-  if(last){
-    const won=last.won;
-    const label=won?`Got it in ${last.tries}`:(last.gaveUp?'Gave up':'Missed');
-    x.font='600 36px Inter, sans-serif';
-    const w=x.measureText(label).width+56;
-    x.fillStyle=won?V('--green'):V('--red');
-    x.globalAlpha=.16;roundRect(x,40,TX,ty+52,w,72);x.fill();x.globalAlpha=1;
-    x.fillStyle=won?V('--green'):V('--red');
-    x.fillText(label,TX+28,ty+100);
-  }
-
-  // historial de la sesión, centrado en el espacio libre para que
-  // una sola ronda no deje la mitad de la tarjeta vacía
-  const rows=S.session.slice(-5);
-  const blockH=rows.length*74+56;
-  let y=760+Math.max(0,(420-blockH)/2)+56;
+  // una casilla por ronda
   x.fillStyle=V('--place');x.font='600 24px Inter, sans-serif';
-  x.fillText('THIS SESSION',80,y-56);
-  y+=24;
-  const max=cfg().stages.length;
-  rows.forEach(r=>{
-    for(let i=0;i<max;i++){
-      x.fillStyle = r.won ? (i<r.tries-1?V('--spent'):(i===r.tries-1?V('--green'):V('--sugg')))
-                          : (i<r.tries?V('--red'):V('--sugg'));
-      roundRect(x,10,80+i*66,y-38,50,50);x.fill();
-    }
-    x.fillStyle=V('--muted');x.font='400 28px Inter, sans-serif';
-    let lb = r.won ? `${r.tries}/${max}` : (r.gaveUp ? 'gave up' : 'missed');
-    if(r.hints) lb += ' · '+r.hints+' hint'+(r.hints>1?'s':'');
-    x.fillText(lb,80+max*66+22,y);
-    y+=74;
+  x.fillText('THE RUN',80,760);
+  S.log.forEach((hit,i)=>{
+    x.fillStyle=hit?V('--green'):V('--red');
+    rr(x,14,80+i*96,800,76,76);x.fill();
   });
 
-  // pie
   x.fillStyle=V('--line');x.fillRect(80,1218,920,2);
   x.fillStyle=V('--text');x.font='600 40px Inter, sans-serif';
-  x.fillText(`Streak ${S.streak}`,80,1290);
-  x.fillText(`Best ${S.best}`,340,1290);
+  x.fillText(`Best ${S.best}`,80,1290);
   x.fillStyle=V('--place');x.font='400 28px Inter, sans-serif';
-  x.textAlign='right';
-  x.fillText('real 30s previews',1000,1290);
-  x.textAlign='left';
+  x.textAlign='right';x.fillText('real 30s previews',1000,1290);x.textAlign='left';
 
   c.toBlob(b=>{blobRef=b;$('cardImg').src=URL.createObjectURL(b)},'image/png');
 }
+
+$('share').onclick=async()=>{$('shareSheet').classList.add('on');await drawCard()};
+$('closeShare').onclick=()=>$('shareSheet').classList.remove('on');
 $('saveImg').onclick=()=>{
   if(!blobRef)return;
-  const a=document.createElement('a');a.href=URL.createObjectURL(blobRef);a.download='spindle.png';a.click();
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blobRef);a.download='spindle.png';a.click();
 };
 $('sysShare').onclick=async()=>{
   if(!blobRef)return;
   const file=new File([blobRef],'spindle.png',{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[file]})){
-    try{await navigator.share({files:[file],text:`Spindle · ${S.artist.name}`})}catch(e){}
-  }else{$('saveImg').click()}
+    try{await navigator.share({files:[file],text:`Spindle · ${S.artist.name} · ${S.score} pts`})}catch(e){}
+  }else $('saveImg').click();
 };
 
 /* ---------- claro / oscuro ----------
-   Tres estados: auto sigue al sistema, y los otros dos lo fuerzan. */
-const MODE_ICON={auto:'◐',light:'☀',dark:'☾'};
+   Tres estados: auto sigue al sistema, los otros dos lo fuerzan. */
+const ICON={auto:'◐',light:'☀',dark:'☾'};
 let mode='auto';
-
 function applyMode(m){
   mode=m;
   if(m==='auto') delete document.documentElement.dataset.mode;
   else document.documentElement.dataset.mode=m;
-  $('modeBtn').textContent=MODE_ICON[m];
+  $('modeBtn').textContent=ICON[m];
   $('modeBtn').title=`Appearance: ${m}`;
-  // la barra del navegador sigue al fondo real, sea cual sea el origen
   const bg=getComputedStyle(document.body).getPropertyValue('--bg').trim();
   document.querySelector('meta[name=theme-color]').setAttribute('content',bg);
   store.set('mode',m);
 }
-$('modeBtn').onclick=()=>{
-  applyMode(mode==='auto'?'light':mode==='light'?'dark':'auto');
-};
+$('modeBtn').onclick=()=>applyMode(mode==='auto'?'light':mode==='light'?'dark':'auto');
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{
   if(mode==='auto') applyMode('auto');
 });
 
-/* ---------- install prompt ---------- */
+/* ---------- instalación ---------- */
 let deferred=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('installBtn').classList.add('on')});
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferred=e;$('installBtn').classList.add('on');
+});
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
 if(isIOS&&!standalone)$('installBtn').classList.add('on');
-$('installBtn').onclick=async()=>{
+$('installBtn').onclick=()=>{
   if(deferred){deferred.prompt();deferred=null;$('installBtn').classList.remove('on');return}
   $('installTip').textContent='Tap the Share button in Safari, then choose "Add to Home Screen".';
   $('installSheet').classList.add('on');
 };
 $('gotIt').onclick=()=>$('installSheet').classList.remove('on');
 
-/* ---------- boot ---------- */
+/* ---------- arranque ---------- */
 (async()=>{
   const b=await store.get('best');
   if(b){S.best=+b;$('best').textContent=b}
-  applyMode(await store.get('mode') || 'auto');
+  applyMode(await store.get('mode')||'auto');
 })();
 
 /* El service worker sólo arranca sobre https (o localhost).
    Dentro de este chat no se registra; en GitHub Pages sí. */
 if('serviceWorker' in navigator && location.protocol==='https:'){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  });
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
 </script>
 </body>

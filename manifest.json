@@ -1,13 +1,13 @@
 {
   "name": "Spindle — Guess the Song",
   "short_name": "Spindle",
-  "description": "Guess songs from real 30-second previews. Pick any artist and Spindle quizzes you on their catalog.",
+  "description": "Guess songs from real 30-second previews. Four options, ten rounds, faster answers score more.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0C1B3A",
-  "theme_color": "#0C1B3A",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "categories": [
     "games",
     "music",
