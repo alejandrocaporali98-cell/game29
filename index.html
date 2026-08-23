@@ -228,6 +228,34 @@ input::placeholder{color:var(--place)}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
+/* --- blitz --- */
+.bhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.bhead .rnd{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--place)}
+.bhead .pts{font-size:34px;font-weight:600;letter-spacing:-.025em}
+.clock{height:6px;border-radius:980px;background:var(--raise);overflow:hidden;margin-bottom:6px}
+.clock i{display:block;height:100%;width:100%;background:var(--gold);
+  transition:background .2s}
+.clock.warn i{background:var(--red)}
+.live{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:16px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{width:100%;text-align:left;padding:16px;border-radius:16px;
+  background:var(--raise);border:1px solid var(--line);color:var(--text);
+  font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;gap:12px}
+.opts button:hover:not(:disabled){border-color:var(--gold)}
+.opts button .k{width:26px;height:26px;flex:none;border-radius:50%;background:var(--sugg);
+  color:var(--muted);font-size:12px;font-weight:600;display:grid;place-items:center}
+.opts button.right{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--raise))}
+.opts button.right .k{background:var(--green);color:var(--on-gold)}
+.opts button.wrong{border-color:var(--red);background:color-mix(in srgb,var(--red) 12%,var(--raise))}
+.opts button:disabled{cursor:default}
+.gain{text-align:center;font-size:15px;font-weight:600;margin-top:14px;min-height:22px}
+.gain.plus{color:var(--green)}
+.gain.zero{color:var(--red)}
+.final{text-align:center;padding:8px 0}
+.final .big{font-size:clamp(52px,16vw,84px);font-weight:600;letter-spacing:-.04em;line-height:1}
+.final .sub{color:var(--muted);font-size:14px;margin-top:8px}
+
 /* --- pistas --- */
 .hints{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .hints li{font-size:12px;padding:8px 11px;border-radius:999px;
@@ -289,6 +317,15 @@ input::placeholder{color:var(--place)}
     <span class="arrow">→</span>
   </button>
 
+  <button class="tile" id="toBlitz" style="margin-top:8px">
+    <span class="ico">⚡</span>
+    <span>
+      <h3>Blitz Mode</h3>
+      <p>Four options, ten rounds — faster answers score more</p>
+    </span>
+    <span class="arrow">→</span>
+  </button>
+
   <div class="eyebrow">How it works</div>
   <ol class="steps">
     <li><span class="n">01</span><span>Pick an artist — Spindle fetches their <b>real catalog</b> live</span></li>
@@ -344,6 +381,36 @@ input::placeholder{color:var(--place)}
   </div>
 
   <p class="foot" id="foot"></p>
+</section>
+
+<!-- BLITZ -->
+<section class="screen" id="s-blitz">
+  <button class="back" data-go="s-pick">←</button>
+
+  <div id="b-play">
+    <div class="bhead">
+      <span class="rnd" id="b-round">Round 1 of 10</span>
+      <span class="pts" id="b-score">0</span>
+    </div>
+    <div class="art" id="b-art"><img id="b-cover" alt=""><div class="vinyl"></div></div>
+    <div class="clock" id="b-clock"><i id="b-bar"></i></div>
+    <div class="live"><span id="b-worth">1000 pts</span><span id="b-left">12.0s</span></div>
+    <div class="opts" id="b-opts"></div>
+    <div class="gain" id="b-gain"></div>
+  </div>
+
+  <div id="b-final" hidden>
+    <div class="final">
+      <div class="big" id="b-total">0</div>
+      <div class="sub" id="b-recap"></div>
+    </div>
+    <div class="actions" style="margin-top:20px">
+      <button id="b-again">Play again</button>
+      <button class="skip" id="b-change">Change artist</button>
+    </div>
+  </div>
+
+  <p class="foot" id="b-foot"></p>
 </section>
 
 <!-- share sheet -->
@@ -403,7 +470,8 @@ const MODES={
   hardcore:{stages:[1,2,3],hints:false}
 };
 const S={mode:'classic',artist:null,pool:[],titles:[],used:new Set(),
-  track:null,stage:0,streak:0,best:0,session:[],hints:0,gaveUp:false,over:false};
+  track:null,stage:0,streak:0,best:0,session:[],hints:0,gaveUp:false,over:false,
+  game:'artist',bRound:0,bScore:0,bHits:0};
 
 const $=id=>document.getElementById(id);
 const audio=$('audio');
@@ -421,7 +489,8 @@ const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
 
 function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.id===id));
-  if(id!=='s-game')stop();}
+  if(id!=='s-game')stop();
+  if(id!=='s-blitz'&&typeof bStop==='function')bStop();}
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 
 /* ---------- mode ---------- */
@@ -432,7 +501,131 @@ document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{
     ? '3 guesses, 3 seconds, no suggestions'
     : 'Search any artist, guess their songs';
 });
-$('toArtist').onclick=()=>{go('s-pick');$('q').focus()};
+$('toArtist').onclick=()=>{S.game='artist';go('s-pick');$('q').focus()};
+
+/* ---------- Blitz ----------
+   Diez rondas de opción múltiple. La canción suena mientras decides
+   y los puntos caen con el reloj: responder rápido vale diez veces
+   más que responder al final. */
+const B={rounds:10,limit:12,top:1000,floor:100};
+let bT=null,bRaf=null,bStart=0,bLocked=false;
+
+$('toBlitz').onclick=()=>{S.game='blitz';go('s-pick');$('q').focus()};
+
+function worth(elapsed){
+  const k=Math.min(elapsed/B.limit,1);
+  return Math.max(B.floor,Math.round(B.top-(B.top-B.floor)*k));
+}
+
+function startBlitz(){
+  S.bRound=0;S.bScore=0;S.bHits=0;S.used=new Set();
+  $('b-final').hidden=true;$('b-play').hidden=false;
+  blitzRound();
+}
+
+function blitzRound(){
+  bStop();
+  bLocked=false;
+  S.bRound++;
+  if(S.used.size>=S.pool.length)S.used=new Set();
+  let t;do{t=S.pool[Math.floor(Math.random()*S.pool.length)]}while(S.used.has(t.id));
+  S.used.add(t.id);S.track=t;
+
+  // tres señuelos distintos del mismo catálogo
+  const pool=S.pool.filter(o=>o.id!==t.id);
+  const decoys=[];
+  while(decoys.length<3 && pool.length){
+    const i=Math.floor(Math.random()*pool.length);
+    decoys.push(pool.splice(i,1)[0]);
+  }
+  const opts=[t,...decoys].sort(()=>Math.random()-0.5);
+
+  $('b-round').textContent=`Round ${S.bRound} of ${B.rounds}`;
+  $('b-score').textContent=S.bScore;
+  $('b-cover').src=t.album?t.album.cover_big:'';
+  $('b-art').classList.remove('reveal');
+  $('b-gain').textContent='';$('b-gain').className='gain';
+  $('b-clock').classList.remove('warn');
+  $('b-foot').textContent=`${S.artist.name} · ${S.pool.length} songs in rotation`;
+
+  $('b-opts').innerHTML='';
+  opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.innerHTML='<span class="k"></span><span class="t"></span>';
+    b.querySelector('.k').textContent='ABCD'[i];
+    b.querySelector('.t').textContent=o.title;
+    b.onclick=()=>answer(b,o.id===t.id);
+    $('b-opts').appendChild(b);
+  });
+
+  audio.src=t.preview;audio.load();
+  audio.currentTime=0;
+  audio.play().then(()=>{
+    $('b-art').classList.add('spin');
+    bStart=performance.now();
+    (function tick(){
+      const el=(performance.now()-bStart)/1000;
+      const left=Math.max(0,B.limit-el);
+      $('b-bar').style.width=(left/B.limit*100)+'%';
+      $('b-left').textContent=left.toFixed(1)+'s';
+      $('b-worth').textContent=worth(el)+' pts';
+      $('b-clock').classList.toggle('warn',left<3.5);
+      if(left<=0){answer(null,false);return}
+      bRaf=requestAnimationFrame(tick);
+    })();
+  }).catch(()=>{
+    $('b-foot').innerHTML='<span class="err">Tap anywhere to enable audio, then Play again.</span>';
+  });
+}
+
+function answer(btn,ok){
+  if(bLocked)return;
+  bLocked=true;
+  const el=(performance.now()-bStart)/1000;
+  bStop();
+  $('b-art').classList.add('reveal');
+
+  [...$('b-opts').children].forEach(b=>{
+    b.disabled=true;
+    if(b.querySelector('.t').textContent===S.track.title) b.classList.add('right');
+  });
+  if(btn && !ok) btn.classList.add('wrong');
+
+  if(ok){
+    const pts=worth(el);
+    S.bScore+=pts;S.bHits++;
+    $('b-score').textContent=S.bScore;
+    $('b-gain').textContent=`+${pts}`;
+    $('b-gain').className='gain plus';
+  }else{
+    $('b-gain').textContent=btn?'Nope':"Time's up";
+    $('b-gain').className='gain zero';
+  }
+
+  setTimeout(()=>{
+    if(S.bRound>=B.rounds) endBlitz(); else blitzRound();
+  },1500);
+}
+
+function bStop(){
+  clearTimeout(bT);cancelAnimationFrame(bRaf);
+  audio.pause();
+  $('b-art').classList.remove('spin');
+}
+
+async function endBlitz(){
+  bStop();
+  $('b-play').hidden=true;$('b-final').hidden=false;
+  const prev=+(await store.get('blitzBest')||0);
+  const record=S.bScore>prev;
+  if(record) await store.set('blitzBest',S.bScore);
+  $('b-total').textContent=S.bScore;
+  $('b-recap').innerHTML=`${S.bHits} of ${B.rounds} right · ${S.artist.name}`
+    + (record?'<br><b>New personal best</b>':` · best ${Math.max(prev,S.bScore)}`);
+}
+
+$('b-again').onclick=startBlitz;
+$('b-change').onclick=()=>{bStop();S.game='blitz';go('s-pick')};
 
 /* ---------- artist search ---------- */
 let sT;
@@ -643,42 +836,136 @@ const escapeHtml=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':
 $('next').onclick=newRound;
 
 /* ---------- share card ---------- */
-$('shareBtn').onclick=()=>{drawCard();$('shareSheet').classList.add('on')};
+$('shareBtn').onclick=async()=>{$('shareSheet').classList.add('on');await drawCard()};
 $('closeShare').onclick=()=>$('shareSheet').classList.remove('on');
 let blobRef=null;
 
-function drawCard(){
-  // los colores salen del tema activo, no van fijos en el código
+/* Carga la portada con permiso de origen cruzado. Sin ese permiso el
+   lienzo queda "contaminado" y no se puede exportar la imagen, así que
+   si falla seguimos sin portada en vez de romper la tarjeta. */
+function loadCover(url){
+  return new Promise(res=>{
+    if(!url) return res(null);
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>res(img);
+    img.onerror=()=>res(null);
+    img.src=url;
+  });
+}
+
+function roundRect(x,r,a,b,w,hgt){
+  x.beginPath();
+  x.moveTo(a+r,b);
+  x.arcTo(a+w,b,a+w,b+hgt,r);
+  x.arcTo(a+w,b+hgt,a,b+hgt,r);
+  x.arcTo(a,b+hgt,a,b,r);
+  x.arcTo(a,b,a+w,b,r);
+  x.closePath();
+}
+
+/* Parte el título en líneas que quepan en el ancho dado. */
+function wrap(x,text,max,limit){
+  const words=text.split(' '), lines=[];
+  let line='';
+  for(const w of words){
+    const test=line?line+' '+w:w;
+    if(x.measureText(test).width>max && line){lines.push(line);line=w}
+    else line=test;
+  }
+  if(line) lines.push(line);
+  if(lines.length>limit){
+    lines.length=limit;
+    lines[limit-1]=lines[limit-1].replace(/.{2}$/,'…');
+  }
+  return lines;
+}
+
+async function drawCard(){
+  // los colores salen del modo activo, no van fijos en el código
   const css=getComputedStyle(document.body);
   const V=n=>css.getPropertyValue(n).trim();
   const c=document.createElement('canvas');c.width=1080;c.height=1350;
   const x=c.getContext('2d');
-  x.fillStyle=V('--bg');x.fillRect(0,0,1080,1350);
-  x.fillStyle=V('--gold');x.font='600 46px Inter, sans-serif';x.fillText('Spindle',80,140);
-  x.fillStyle=V('--muted');x.font='400 34px Inter, sans-serif';
-  x.fillText(S.mode==='hardcore'?'Hardcore · Artist Mode':'Classic · Artist Mode',80,196);
-  x.fillStyle=V('--text');x.font='600 84px Inter, sans-serif';
-  x.fillText(S.artist.name.slice(0,18),80,320);
+  const t=S.track, last=S.session[S.session.length-1];
 
-  let y=460;
-  S.session.slice(-8).forEach(r=>{
-    const max=cfg().stages.length;
+  x.fillStyle=V('--bg');x.fillRect(0,0,1080,1350);
+
+  // cabecera
+  x.fillStyle=V('--gold');x.font='600 42px Inter, sans-serif';
+  x.fillText('Spindle',80,120);
+  x.fillStyle=V('--place');x.font='600 26px Inter, sans-serif';
+  x.fillText((S.mode==='hardcore'?'HARDCORE':'CLASSIC')+' · ARTIST MODE',80,172);
+
+  // portada
+  const cover=await loadCover(t && t.album ? (t.album.cover_xl||t.album.cover_big) : null);
+  const CX=80, CY=232, CS=440;
+  x.save();
+  roundRect(x,32,CX,CY,CS,CS);
+  x.clip();
+  if(cover){
+    x.drawImage(cover,CX,CY,CS,CS);
+  }else{
+    x.fillStyle=V('--raise');x.fillRect(CX,CY,CS,CS);
+    x.fillStyle=V('--spent');
+    x.beginPath();x.arc(CX+CS/2,CY+CS/2,120,0,Math.PI*2);x.fill();
+    x.fillStyle=V('--bg');
+    x.beginPath();x.arc(CX+CS/2,CY+CS/2,26,0,Math.PI*2);x.fill();
+  }
+  x.restore();
+
+  // canción y artista, a la derecha de la portada
+  const TX=CX+CS+44, TW=1080-TX-80;
+  x.fillStyle=V('--text');x.font='600 52px Inter, sans-serif';
+  const lines=wrap(x,t?t.title:'',TW,4);
+  let ty=CY+72;
+  lines.forEach(l=>{x.fillText(l,TX,ty);ty+=62});
+  x.fillStyle=V('--muted');x.font='400 34px Inter, sans-serif';
+  x.fillText(S.artist.name.length>22?S.artist.name.slice(0,21)+'…':S.artist.name,TX,ty+16);
+
+  // veredicto de la ronda
+  if(last){
+    const won=last.won;
+    const label=won?`Got it in ${last.tries}`:(last.gaveUp?'Gave up':'Missed');
+    x.font='600 36px Inter, sans-serif';
+    const w=x.measureText(label).width+56;
+    x.fillStyle=won?V('--green'):V('--red');
+    x.globalAlpha=.16;roundRect(x,40,TX,ty+52,w,72);x.fill();x.globalAlpha=1;
+    x.fillStyle=won?V('--green'):V('--red');
+    x.fillText(label,TX+28,ty+100);
+  }
+
+  // historial de la sesión, centrado en el espacio libre para que
+  // una sola ronda no deje la mitad de la tarjeta vacía
+  const rows=S.session.slice(-5);
+  const blockH=rows.length*74+56;
+  let y=760+Math.max(0,(420-blockH)/2)+56;
+  x.fillStyle=V('--place');x.font='600 24px Inter, sans-serif';
+  x.fillText('THIS SESSION',80,y-56);
+  y+=24;
+  const max=cfg().stages.length;
+  rows.forEach(r=>{
     for(let i=0;i<max;i++){
       x.fillStyle = r.won ? (i<r.tries-1?V('--spent'):(i===r.tries-1?V('--green'):V('--sugg')))
                           : (i<r.tries?V('--red'):V('--sugg'));
-      x.fillRect(80+i*70,y-40,54,54);
+      roundRect(x,10,80+i*66,y-38,50,50);x.fill();
     }
-    x.fillStyle=V('--muted');x.font='400 30px Inter, sans-serif';
-    let label = r.won ? `${r.tries}/${cfg().stages.length}` : (r.gaveUp ? '—' : 'X');
-    if(r.hints) label += ' 💡'.repeat(Math.min(r.hints,3));
-    x.fillText(label,80+max*70+24,y);
-    y+=90;
+    x.fillStyle=V('--muted');x.font='400 28px Inter, sans-serif';
+    let lb = r.won ? `${r.tries}/${max}` : (r.gaveUp ? 'gave up' : 'missed');
+    if(r.hints) lb += ' · '+r.hints+' hint'+(r.hints>1?'s':'');
+    x.fillText(lb,80+max*66+22,y);
+    y+=74;
   });
 
-  x.fillStyle=V('--text');x.font='600 44px Inter, sans-serif';
-  x.fillText(`Streak ${S.streak}   ·   Best ${S.best}`,80,1200);
-  x.fillStyle=V('--muted');x.font='400 30px Inter, sans-serif';
-  x.fillText('Guess the song from real 30s previews',80,1256);
+  // pie
+  x.fillStyle=V('--line');x.fillRect(80,1218,920,2);
+  x.fillStyle=V('--text');x.font='600 40px Inter, sans-serif';
+  x.fillText(`Streak ${S.streak}`,80,1290);
+  x.fillText(`Best ${S.best}`,340,1290);
+  x.fillStyle=V('--place');x.font='400 28px Inter, sans-serif';
+  x.textAlign='right';
+  x.fillText('real 30s previews',1000,1290);
+  x.textAlign='left';
 
   c.toBlob(b=>{blobRef=b;$('cardImg').src=URL.createObjectURL(b)},'image/png');
 }
