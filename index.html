@@ -247,20 +247,25 @@ input::placeholder{color:var(--place)}
 
 /* La línea se lee de izquierda a derecha: tarjetas colocadas y, entre
    ellas, los huecos donde puedes meter la canción que suena. */
-.line{display:flex;align-items:flex-start;gap:6px;overflow-x:auto;padding:4px 2px 12px;
+.line{display:flex;align-items:stretch;gap:6px;overflow-x:auto;padding:4px 2px 12px;
   scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
 .line::-webkit-scrollbar{height:0}
-.card{flex:none;width:104px;min-height:168px;border-radius:16px;overflow:hidden;
+.card{flex:none;width:88px;border-radius:14px;overflow:hidden;
   background:var(--raise);border:1px solid var(--line);scroll-snap-align:center}
 .card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.card .yr{font-size:17px;font-weight:600;letter-spacing:-.02em;padding:8px 8px 2px}
-.card .ti{font-size:10.5px;color:var(--muted);padding:0 8px 9px;line-height:1.3;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .yr{font-size:19px;font-weight:600;letter-spacing:-.03em;padding:8px 8px 1px;
+  font-variant-numeric:tabular-nums}
+.card .ti{font-size:10px;color:var(--muted);padding:0 8px 9px;line-height:1.25;
+  height:25px;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .card.fresh{border-color:var(--green);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 35%,transparent)}
-.slot{flex:none;width:54px;height:168px;border-radius:16px;
-  border:1px dashed color-mix(in srgb,var(--accent) 45%,transparent);
-  background:var(--tint);color:var(--accent);font-family:var(--sans);font-size:22px;font-weight:600;
-  cursor:pointer;display:grid;place-items:center}
+.slot{flex:none;width:46px;align-self:stretch;min-height:150px;border-radius:14px;
+  border:1px dashed color-mix(in srgb,var(--accent) 50%,transparent);
+  background:var(--tint);color:var(--accent);font-family:var(--sans);
+  font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:8px 4px;text-align:center;line-height:1.2}
+.slot .plus{font-size:20px;letter-spacing:0}
 .slot:hover{background:color-mix(in srgb,var(--accent) 26%,transparent)}
 .slot:disabled{opacity:.3;cursor:default}
 .hint-line{font-size:11.5px;color:var(--place);text-align:center;margin:16px 0 10px}
@@ -525,7 +530,7 @@ input::placeholder{color:var(--place)}
   <button class="play" id="l-play">▶ Play</button>
 
   <div id="l-choose">
-    <p class="hint-line" id="l-tip">Tap the gap where this song belongs</p>
+    <p class="hint-line" id="l-tip">Older ← → Newer · tap where this song belongs</p>
     <div class="line" id="l-line"></div>
   </div>
 
@@ -1149,11 +1154,21 @@ async function loadDated(a){
   let list=(alb.data||[]).filter(x=>x.release_date && !REISSUE.test(x.title));
   list.sort((x,y)=>x.release_date<y.release_date?-1:1);
 
-  const seen=new Set(), picks=[];
-  list.forEach(al=>{const k=norm(al.title);if(!seen.has(k)){seen.add(k);picks.push(al)}});
-  if(!picks.length) throw new Error('no dates');
+  const seen=new Set(), byYear=new Map();
+  list.forEach(al=>{
+    const k=norm(al.title);
+    if(seen.has(k))return;
+    seen.add(k);
+    const y=+String(al.release_date).slice(0,4);
+    if(!y||y<1900)return;
+    // el listado viene de más viejo a más nuevo: nos quedamos con el
+    // primer álbum de cada año, que es el original y no la reedición
+    if(!byYear.has(y)) byYear.set(y,al);
+  });
+  const picks=[...byYear.values()];
+  if(picks.length<3) throw new Error('no dates');
 
-  const N=Math.min(14,picks.length), step=picks.length/N, chosen=[];
+  const N=Math.min(16,picks.length), step=picks.length/N, chosen=[];
   for(let i=0;i<N;i++) chosen.push(picks[Math.floor(i*step)]);
 
   $('artists').innerHTML='<div class="load">dating the songs…</div>';
@@ -1186,9 +1201,22 @@ async function loadDated(a){
   });
 
   // sin año no hay juego posible: fuera del mazo
-  const pool=[...byTitle.values()].filter(t=>t.year&&t.title);
-  const years=new Set(pool.map(t=>t.year));
-  if(pool.length<12||years.size<3) throw new Error('thin');
+  let pool=[...byTitle.values()].filter(t=>t.year&&t.title);
+
+  /* Un disco de 31 cortes aportaría 31 cartas y uno de 10 sólo diez,
+     así que todo caería en el mismo año. Cinco por año como máximo. */
+  const perYear=new Map();
+  pool.forEach(t=>{
+    const arr=perYear.get(t.year)||[];
+    arr.push(t);perYear.set(t.year,arr);
+  });
+  pool=[];
+  perYear.forEach(arr=>{
+    arr.sort(()=>Math.random()-0.5);
+    pool.push(...arr.slice(0,5));
+  });
+
+  if(pool.length<12||perYear.size<4) throw new Error('thin');
   return pool;
 }
 
@@ -1230,10 +1258,17 @@ function startLine(pool){
 
 /* Ojo con el nombre: drawCard() ya existe para la tarjeta que se
    comparte. Dos funciones con el mismo nombre y la segunda gana. */
+/* Se sortea primero el año y luego la canción dentro de ese año. Si
+   sorteáramos canciones sueltas, los años con más cortes saldrían
+   una y otra vez y la línea no avanzaría. */
 function dealCard(){
   if(!H.pool.length)return null;
-  const i=Math.floor(Math.random()*H.pool.length);
-  return H.pool.splice(i,1)[0];
+  const years=[...new Set(H.pool.map(t=>t.year))];
+  const y=years[Math.floor(Math.random()*years.length)];
+  const same=H.pool.filter(t=>t.year===y);
+  const card=same[Math.floor(Math.random()*same.length)];
+  H.pool.splice(H.pool.indexOf(card),1);
+  return card;
 }
 
 function board(el){
@@ -1293,14 +1328,17 @@ function linePlay(){
 function drawLine(p){
   const cards=p.cards.slice().sort((a,b)=>a.year-b.year);
   $('l-line').innerHTML='';
-  const slot=i=>{
+  // cada hueco dice qué significa: antes, en medio o después
+  const slot=(i,n)=>{
     const b=document.createElement('button');
-    b.className='slot';b.textContent='+';
-    b.title=i===0?'Before':'Between';
+    b.className='slot';
+    const label=n===0?'anywhere':i===0?'older':i===n?'newer':'between';
+    b.innerHTML='<span class="plus">+</span><span></span>';
+    b.lastChild.textContent=label;
     b.onclick=()=>place(i,cards);
     return b;
   };
-  $('l-line').appendChild(slot(0));
+  $('l-line').appendChild(slot(0,cards.length));
   cards.forEach((c,i)=>{
     const d=document.createElement('div');
     d.className='card';
@@ -1312,8 +1350,10 @@ function drawLine(p){
     d.querySelector('.yr').textContent=c.year||'—';
     d.querySelector('.ti').textContent=c.title||'';
     $('l-line').appendChild(d);
-    $('l-line').appendChild(slot(i+1));
+    $('l-line').appendChild(slot(i+1,cards.length));
   });
+  // que se vea desde el año más antiguo
+  $('l-line').scrollLeft=0;
 }
 
 function place(i,cards){
