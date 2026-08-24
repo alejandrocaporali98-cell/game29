@@ -1442,23 +1442,10 @@ function endLine(){
   board($('w-board'));
   go('s-win');
 }
-/* Abandonar pide un segundo toque: se pierde la partida de todos. */
-let quitArmed=null,quitT=null;
+/* Un solo toque: pedir confirmación aquí sólo hacía parecer que el
+   botón estaba roto. La partida se puede volver a empezar. */
 function quitBtn(id){
-  $(id).onclick=()=>{
-    if(quitArmed===id){
-      clearTimeout(quitT);quitArmed=null;
-      $(id).textContent='← Quit game';
-      stopAudio();go('s-home');
-      return;
-    }
-    quitArmed=id;
-    $(id).textContent='← Quit? Tap again';
-    clearTimeout(quitT);
-    quitT=setTimeout(()=>{
-      quitArmed=null;$(id).textContent='← Quit game';
-    },3500);
-  };
+  $(id).onclick=()=>{stopAudio();go('s-home')};
 }
 quitBtn('l-quit');quitBtn('p-quit');
 
