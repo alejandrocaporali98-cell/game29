@@ -56,6 +56,25 @@
   --glow:rgba(0,113,227,.08);--tint:rgba(0,113,227,.10);
 }
 
+/* Luz ambiente: la carátula que suena se proyecta desenfocada sobre
+   los márgenes, como el resplandor de una pantalla en una pared. Sin
+   ella el escritorio son dos franjas negras muertas. */
+#ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#ambient img{position:absolute;inset:-20%;width:140%;height:140%;
+  object-fit:cover;filter:blur(90px) saturate(1.7);
+  opacity:0;transition:opacity 1.1s ease;transform:scale(1.1)}
+#ambient img.on{opacity:.34}
+/* viñeta: oscurece los bordes para que la columna central mande */
+#ambient::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 42%,transparent 30%,var(--bg) 82%)}
+/* grano finísimo: quita el aspecto de degradado plano */
+#ambient::after{content:"";position:absolute;inset:0;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+@media(max-width:719px){
+  /* en el móvil la columna ocupa todo: el desenfoque grande sólo costaría batería */
+  #ambient img{display:none}
+}
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);
@@ -63,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);
   background-repeat:no-repeat;background-attachment:fixed;
   -webkit-font-smoothing:antialiased;display:flex;justify-content:center;
   padding:0 16px calc(24px + env(safe-area-inset-bottom))}
-.app{width:100%;max-width:440px}
+.app{width:100%;max-width:440px;position:relative;z-index:1}
 
 /* cabecera */
 header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area-inset-top)) 0 16px}
@@ -273,8 +292,11 @@ input::placeholder{color:var(--place)}
 @media(min-width:720px){
   body{padding:44px 20px 60px;
     background-image:radial-gradient(900px 500px at 50% -10%,var(--glow),transparent 70%)}
-  .app{background:var(--raise);border:1px solid var(--line);border-radius:28px;
-    padding:0 26px 30px;box-shadow:0 28px 70px rgba(0,0,0,.45)}
+  .app{background:color-mix(in srgb,var(--raise) 82%,transparent);
+    -webkit-backdrop-filter:blur(30px) saturate(160%);
+    backdrop-filter:blur(30px) saturate(160%);
+    border:1px solid var(--line);border-radius:28px;
+    padding:0 26px 30px;box-shadow:0 28px 90px rgba(0,0,0,.55)}
   header{padding-top:22px}
   .tile,.list li,.opts button,.clock,.bar,input[type=text],.rows li{background-color:var(--bg)}
   .art{width:min(100%,210px)}
@@ -282,6 +304,7 @@ input::placeholder{color:var(--place)}
 </style>
 </head>
 <body>
+<div id="ambient" aria-hidden="true"><img id="ambientArt" alt=""></div>
 <div class="app">
 
 <header>
@@ -562,9 +585,18 @@ async function accentFrom(url){
     r.style.setProperty('--tint',`rgba(${c.map(Math.round).join(',')},.16)`);
   }catch(e){}
 }
+/* la luz sigue a la carátula de la ronda */
+function ambient(url){
+  const el=$('ambientArt');
+  if(!url){el.classList.remove('on');return}
+  el.src=url;
+  el.classList.add('on');
+}
+
 function resetAccent(){
   const r=document.documentElement;
   ['--accent','--on-accent','--tint'].forEach(k=>r.style.removeProperty(k));
+  ambient(null);
 }
 
 /* ---------- muro de carátulas ---------- */
@@ -669,6 +701,7 @@ function aRound(){
   $('a-cover').src=S.track.album?S.track.album.cover_big:'';
   $('a-art').classList.remove('reveal');
   accentFrom(S.track.album?S.track.album.cover_medium:null);
+  ambient(S.track.album?S.track.album.cover_big:null);
   $('a-done').hidden=true;$('a-live').hidden=false;
   $('a-rows').innerHTML='';$('a-hints').innerHTML='';
   $('a-guess').value='';$('a-sugg').hidden=true;
@@ -870,6 +903,7 @@ function bRound(){
   $('b-art').classList.remove('reveal');
   $('b-art').style.setProperty('--blur','30px');
   accentFrom(t.album?t.album.cover_medium:null);
+  ambient(t.album?t.album.cover_big:null);
   $('b-gain').textContent='';$('b-gain').className='gain';
   $('b-clock').classList.remove('warn');
   $('b-bar').style.width='100%';
