@@ -1458,7 +1458,19 @@ async function showGenres(){
   try{
     const d=await deezer('/genre');
     ($('g-msg').innerHTML='');
-    (d.data||[]).filter(x=>x.id!==0).forEach(gen=>{
+    /* La lista cruda trae cajones que no son géneros musicales y que
+       arruinan el juego: bandas sonoras, infantil, podcasts. */
+    const NOT_MUSIC=/films?|games|podcast|kids|children|comedy|audiobook|spoken|religion|spiritual|sound ?track|^tv|sport|brass|military/i;
+    const order=['pop','rock','rap','hip hop','dance','r&b','alternative','electro',
+                 'latin','reggae','metal','soul','funk','jazz','folk','country','blues','classical'];
+    const rank=n=>{
+      const i=order.findIndex(k=>n.toLowerCase().includes(k));
+      return i<0?99:i;
+    };
+    (d.data||[])
+      .filter(x=>x.id!==0 && x.name && !NOT_MUSIC.test(x.name))
+      .sort((a,b)=>rank(a.name)-rank(b.name))
+      .forEach(gen=>{
       const b=document.createElement('button');
       b.innerHTML='<img alt=""><span></span>';
       const im=b.querySelector('img');
@@ -1474,29 +1486,47 @@ async function showGenres(){
 }
 
 async function loadGenre(gen){
-  $('g-msg').innerHTML='<div class="load">gathering artists…</div>';
+  $('g-msg').innerHTML='<div class="load">reading the charts…</div>';
   try{
-    const d=await deezer(`/genre/${gen.id}/artists`);
-    let artists=(d.data||[]).filter(a=>a.name);
-    if(artists.length<6) throw new Error('thin');
-    // doce artistas al azar: suficientes señuelos sin castigar la espera
-    artists.sort(()=>Math.random()-0.5);
-    artists=artists.slice(0,12);
-
-    $('g-msg').innerHTML='<div class="load">picking songs…</div>';
-    const tops=await Promise.all(artists.map(a=>
-      deezer(`/artist/${a.id}/top`,{limit:5}).then(r=>({a,r})).catch(()=>null)));
-
-    const pool=[];
-    tops.forEach(x=>{
-      if(!x||!x.r||!x.r.data)return;
-      x.r.data.forEach(t=>{
-        if(!t.preview)return;
-        pool.push({title:t.title,preview:t.preview,
+    /* /genre/{id}/artists devuelve artistas asociados al género de
+       forma muy laxa y se cuela de todo. La lista de éxitos del
+       género sí trae canciones que de verdad son de ahí, y además
+       en una sola llamada en vez de trece. */
+    let pool=[];
+    try{
+      const ch=await deezer(`/chart/${gen.id}/tracks`,{limit:100});
+      const perArtist=new Map();
+      (ch.data||[]).forEach(t=>{
+        if(!t.preview||!t.artist)return;
+        const arr=perArtist.get(t.artist.name)||[];
+        if(arr.length>=3)return;        // nadie domina la partida
+        arr.push({title:t.title,preview:t.preview,
           cover:t.album?(t.album.cover_big||t.album.cover_medium):null,
-          artist:x.a.name,artistId:x.a.id,face:x.a.picture_medium});
+          artist:t.artist.name,artistId:t.artist.id,face:t.artist.picture_medium});
+        perArtist.set(t.artist.name,arr);
       });
-    });
+      perArtist.forEach(arr=>pool.push(...arr));
+    }catch(e){}
+
+    // respaldo por si el género no tiene lista propia de éxitos
+    if(pool.length<12){
+      const d=await deezer(`/genre/${gen.id}/artists`);
+      let artists=(d.data||[]).filter(a=>a.name);
+      artists.sort(()=>Math.random()-0.5);
+      artists=artists.slice(0,12);
+      const tops=await Promise.all(artists.map(a=>
+        deezer(`/artist/${a.id}/top`,{limit:3}).then(r=>({a,r})).catch(()=>null)));
+      tops.forEach(x=>{
+        if(!x||!x.r||!x.r.data)return;
+        x.r.data.forEach(t=>{
+          if(!t.preview)return;
+          pool.push({title:t.title,preview:t.preview,
+            cover:t.album?(t.album.cover_big||t.album.cover_medium):null,
+            artist:x.a.name,artistId:x.a.id,face:x.a.picture_medium});
+        });
+      });
+    }
+
     const names=new Set(pool.map(t=>t.artist));
     if(pool.length<12||names.size<4) throw new Error('thin');
 
