@@ -247,22 +247,23 @@ input::placeholder{color:var(--place)}
 
 /* La línea se lee de izquierda a derecha: tarjetas colocadas y, entre
    ellas, los huecos donde puedes meter la canción que suena. */
-.line{display:flex;align-items:stretch;gap:6px;overflow-x:auto;padding:4px 2px 12px;
+.line{display:flex;align-items:flex-start;gap:6px;overflow-x:auto;padding:4px 2px 12px;
   scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
 .line::-webkit-scrollbar{height:0}
-.card{flex:none;width:96px;border-radius:16px;overflow:hidden;background:var(--raise);
-  border:1px solid var(--line);scroll-snap-align:center}
+.card{flex:none;width:104px;min-height:168px;border-radius:16px;overflow:hidden;
+  background:var(--raise);border:1px solid var(--line);scroll-snap-align:center}
 .card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 .card .yr{font-size:17px;font-weight:600;letter-spacing:-.02em;padding:8px 8px 2px}
 .card .ti{font-size:10.5px;color:var(--muted);padding:0 8px 9px;line-height:1.3;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card.fresh{border-color:var(--green);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 35%,transparent)}
-.slot{flex:none;width:52px;border-radius:16px;border:1px dashed color-mix(in srgb,var(--accent) 45%,transparent);
-  background:var(--tint);color:var(--accent);font-family:var(--sans);font-size:20px;font-weight:600;
-  cursor:pointer;display:grid;place-items:center;min-height:150px}
+.slot{flex:none;width:54px;height:168px;border-radius:16px;
+  border:1px dashed color-mix(in srgb,var(--accent) 45%,transparent);
+  background:var(--tint);color:var(--accent);font-family:var(--sans);font-size:22px;font-weight:600;
+  cursor:pointer;display:grid;place-items:center}
 .slot:hover{background:color-mix(in srgb,var(--accent) 26%,transparent)}
 .slot:disabled{opacity:.3;cursor:default}
-.hint-line{font-size:11.5px;color:var(--place);text-align:center;margin:-4px 0 14px}
+.hint-line{font-size:11.5px;color:var(--place);text-align:center;margin:16px 0 10px}
 .reveal-row{display:flex;align-items:center;gap:14px;background:var(--raise);
   border:1px solid var(--line);border-radius:20px;padding:14px;margin-top:14px}
 .reveal-row img{width:64px;height:64px;border-radius:12px;flex:none;object-fit:cover}
@@ -1154,25 +1155,36 @@ async function loadDated(a){
   for(let i=0;i<N;i++) chosen.push(picks[Math.floor(i*step)]);
 
   $('artists').innerHTML='<div class="load">dating the songs…</div>';
-  const albums=await Promise.all(chosen.map(al=>deezer(`/album/${al.id}`).catch(()=>null)));
+  /* La ficha del listado ya trae fecha y portada. La segunda llamada
+     sólo aporta el tracklist, y a veces vuelve incompleta, así que
+     nunca dependemos de ella para los datos que importan. */
+  const albums=await Promise.all(chosen.map(async al=>{
+    const full=await deezer(`/album/${al.id}`).catch(()=>null);
+    return {al,full};
+  }));
 
   const byTitle=new Map();
-  albums.forEach(full=>{
-    if(!full||!full.tracks)return;
-    const yr=+String(full.release_date||'').slice(0,4);
+  albums.forEach(({al,full})=>{
+    const tracks=(full&&full.tracks&&full.tracks.data)||[];
+    if(!tracks.length)return;
+    const yr=+String((full&&full.release_date)||al.release_date||'').slice(0,4);
     if(!yr||yr<1900)return;
-    (full.tracks.data||[]).forEach(t=>{
-      if(!t.preview)return;
+    const cover = (full&&(full.cover_big||full.cover_medium))
+               || al.cover_big || al.cover_medium
+               || `https://api.deezer.com/album/${al.id}/image?size=big`;
+    tracks.forEach(t=>{
+      if(!t.preview||!t.title)return;
       const k=norm(t.title);
       if(!k||REISSUE.test(t.title))return;
       const prev=byTitle.get(k);
       if(prev && prev.year<=yr)return;      // nos quedamos con la más antigua
       byTitle.set(k,{id:t.id,title:t.title,preview:t.preview,year:yr,
-                     cover:full.cover_big||full.cover_medium,album:full.title});
+                     cover,album:(full&&full.title)||al.title});
     });
   });
 
-  const pool=[...byTitle.values()];
+  // sin año no hay juego posible: fuera del mazo
+  const pool=[...byTitle.values()].filter(t=>t.year&&t.title);
   const years=new Set(pool.map(t=>t.year));
   if(pool.length<12||years.size<3) throw new Error('thin');
   return pool;
@@ -1253,7 +1265,9 @@ function turnUI(){
   $('l-choose').hidden=false;$('l-result').hidden=true;
   $('l-art').classList.remove('reveal');
   $('l-art').style.setProperty('--blur','30px');
-  $('l-cover').src=H.card.cover||'';
+  // src vacío hace que el navegador recargue la página como imagen
+  if(H.card.cover) $('l-cover').src=H.card.cover;
+  else $('l-cover').removeAttribute('src');
   $('l-foot').textContent=`${S.artist.name} · ${H.pool.length} songs left`;
   accentFrom(H.card.cover);ambient(H.card.cover);
 
@@ -1286,9 +1300,13 @@ function drawLine(p){
   cards.forEach((c,i)=>{
     const d=document.createElement('div');
     d.className='card';
-    d.innerHTML=`<img src="${c.cover}" alt=""><div class="yr"></div><div class="ti"></div>`;
-    d.querySelector('.yr').textContent=c.year;
-    d.querySelector('.ti').textContent=c.title;
+    d.innerHTML='<img alt=""><div class="yr"></div><div class="ti"></div>';
+    const im=d.querySelector('img');
+    // si la portada no carga, la escondemos: mejor sin imagen que rota
+    im.onerror=()=>{im.style.display='none'};
+    if(c.cover) im.src=c.cover; else im.style.display='none';
+    d.querySelector('.yr').textContent=c.year||'—';
+    d.querySelector('.ti').textContent=c.title||'';
     $('l-line').appendChild(d);
     $('l-line').appendChild(slot(i+1));
   });
@@ -1305,7 +1323,8 @@ function place(i,cards){
 
   $('l-art').classList.add('reveal');
   $('l-choose').hidden=true;$('l-result').hidden=false;
-  $('l-rcover').src=H.card.cover||'';
+  if(H.card.cover) $('l-rcover').src=H.card.cover;
+  else $('l-rcover').removeAttribute('src');
   $('l-verdict').textContent=ok?'Correct':'Not quite';
   $('l-verdict').className='v '+(ok?'ok':'no');
   $('l-detail').innerHTML=`<b>${escapeHtml(H.card.title)}</b> · ${H.card.year}`
