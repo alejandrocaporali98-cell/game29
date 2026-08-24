@@ -1451,92 +1451,78 @@ $('w-home').onclick=()=>go('s-home');
 const G={genre:null,pool:[],artists:[],round:0,score:0,hits:0,log:[],best:0};
 let gRaf=null,gT=null,gStart=0,gLocked=false;
 
+const NOT_MUSIC=/films?|games|podcast|kids|children|comedy|audiobook|spoken|religion|spiritual|sound ?track|^tv|sport|brass|military/i;
+
 async function showGenres(){
   go('s-genres');
   if($('genres').children.length)return;          // ya cargados
   $('g-msg').innerHTML='<div class="load">loading genres…</div>';
   try{
-    const d=await deezer('/genre');
-    ($('g-msg').innerHTML='');
-    /* La lista cruda trae cajones que no son géneros musicales y que
-       arruinan el juego: bandas sonoras, infantil, podcasts. */
-    const NOT_MUSIC=/films?|games|podcast|kids|children|comedy|audiobook|spoken|religion|spiritual|sound ?track|^tv|sport|brass|military/i;
+    /* Las radios de Deezer están curadas por estilo de verdad. El
+       listado /genre y las listas de éxitos por género no filtran:
+       piden rock y devuelven el top del país donde estás. */
+    const d=await deezer('/radio/genres');
+    $('g-msg').innerHTML='';
+    const groups=(d.data||[])
+      .filter(g=>g.title && !NOT_MUSIC.test(g.title) && (g.radios||[]).length);
+
     const order=['pop','rock','rap','hip hop','dance','r&b','alternative','electro',
                  'latin','reggae','metal','soul','funk','jazz','folk','country','blues','classical'];
-    const rank=n=>{
-      const i=order.findIndex(k=>n.toLowerCase().includes(k));
-      return i<0?99:i;
-    };
-    (d.data||[])
-      .filter(x=>x.id!==0 && x.name && !NOT_MUSIC.test(x.name))
-      .sort((a,b)=>rank(a.name)-rank(b.name))
-      .forEach(gen=>{
+    const rank=n=>{const i=order.findIndex(k=>n.toLowerCase().includes(k));return i<0?99:i};
+    groups.sort((a,b)=>rank(a.title)-rank(b.title));
+
+    groups.forEach(gen=>{
       const b=document.createElement('button');
       b.innerHTML='<img alt=""><span></span>';
       const im=b.querySelector('img');
       im.onerror=()=>{im.style.display='none'};
-      im.src=gen.picture_medium||gen.picture;
-      b.querySelector('span').textContent=gen.name;
+      const art=(gen.radios[0]||{});
+      im.src=art.picture_medium||art.picture||'';
+      b.querySelector('span').textContent=gen.title;
       b.onclick=()=>loadGenre(gen);
       $('genres').appendChild(b);
     });
+    if(!groups.length) throw new Error('empty');
   }catch(e){
-    $('g-msg').innerHTML='<div class="err">Couldn\'t load genres. Check your connection.</div>';
+    $('g-msg').innerHTML='<div class="err">Couldn\'t load genres. Check your connection and try again.</div>';
   }
 }
 
 async function loadGenre(gen){
-  $('g-msg').innerHTML='<div class="load">reading the charts…</div>';
+  $('g-msg').innerHTML='<div class="load">tuning in…</div>';
   try{
-    /* /genre/{id}/artists devuelve artistas asociados al género de
-       forma muy laxa y se cuela de todo. La lista de éxitos del
-       género sí trae canciones que de verdad son de ahí, y además
-       en una sola llamada en vez de trece. */
-    let pool=[];
-    try{
-      const ch=await deezer(`/chart/${gen.id}/tracks`,{limit:100});
-      const perArtist=new Map();
-      (ch.data||[]).forEach(t=>{
-        if(!t.preview||!t.artist)return;
+    // hasta tres emisoras del estilo: más variedad sin más espera
+    const radios=(gen.radios||[]).slice().sort(()=>Math.random()-0.5).slice(0,3);
+    const lists=await Promise.all(radios.map(r=>
+      deezer(`/radio/${r.id}/tracks`).catch(()=>null)));
+
+    const perArtist=new Map();
+    lists.forEach(l=>{
+      ((l&&l.data)||[]).forEach(t=>{
+        if(!t.preview||!t.artist||!t.title)return;
         const arr=perArtist.get(t.artist.name)||[];
-        if(arr.length>=3)return;        // nadie domina la partida
+        if(arr.length>=3)return;          // que nadie domine la partida
         arr.push({title:t.title,preview:t.preview,
           cover:t.album?(t.album.cover_big||t.album.cover_medium):null,
           artist:t.artist.name,artistId:t.artist.id,face:t.artist.picture_medium});
         perArtist.set(t.artist.name,arr);
       });
-      perArtist.forEach(arr=>pool.push(...arr));
-    }catch(e){}
+    });
 
-    // respaldo por si el género no tiene lista propia de éxitos
-    if(pool.length<12){
-      const d=await deezer(`/genre/${gen.id}/artists`);
-      let artists=(d.data||[]).filter(a=>a.name);
-      artists.sort(()=>Math.random()-0.5);
-      artists=artists.slice(0,12);
-      const tops=await Promise.all(artists.map(a=>
-        deezer(`/artist/${a.id}/top`,{limit:3}).then(r=>({a,r})).catch(()=>null)));
-      tops.forEach(x=>{
-        if(!x||!x.r||!x.r.data)return;
-        x.r.data.forEach(t=>{
-          if(!t.preview)return;
-          pool.push({title:t.title,preview:t.preview,
-            cover:t.album?(t.album.cover_big||t.album.cover_medium):null,
-            artist:x.a.name,artistId:x.a.id,face:x.a.picture_medium});
-        });
-      });
-    }
+    const pool=[];
+    perArtist.forEach(arr=>pool.push(...arr));
+    const names=[...perArtist.keys()];
+    if(pool.length<10||names.length<4) throw new Error('thin');
 
-    const names=new Set(pool.map(t=>t.artist));
-    if(pool.length<12||names.size<4) throw new Error('thin');
-
-    G.genre=gen;G.pool=pool;G.artists=[...names];
+    G.genre={id:gen.id,name:gen.title};
+    G.pool=pool;G.artists=names;
     $('g-msg').innerHTML='';
     go('s-guess');gStartGame();
   }catch(e){
-    $('g-msg').innerHTML='<div class="err">Not enough previews in that genre. Try another one.</div>';
+    $('g-msg').innerHTML='<div class="err">That station came back too thin. Try another genre.</div>';
   }
 }
+
 
 function gStartGame(){
   G.round=0;G.score=0;G.hits=0;G.log=[];G.used=new Set();
