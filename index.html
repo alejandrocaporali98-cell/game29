@@ -505,6 +505,7 @@ input::placeholder{color:var(--place)}
 
 <!-- TIMELINE: pasar el teléfono -->
 <section class="screen" id="s-pass">
+  <button class="back" id="p-quit">← Quit game</button>
   <div class="pass">
     <div class="big" id="p-name"></div>
     <div class="sub" id="p-sub"></div>
@@ -515,6 +516,7 @@ input::placeholder{color:var(--place)}
 
 <!-- TIMELINE: turno -->
 <section class="screen" id="s-line">
+  <button class="back" id="l-quit">← Quit game</button>
   <div class="who">
     <span class="nm" id="l-who"></span>
     <span class="cnt" id="l-cnt"></span>
@@ -1219,14 +1221,16 @@ function startLine(pool){
   }
   // cada jugador arranca con una carta servida: sin ancla no hay dónde colocar
   H.players.forEach(p=>{
-    const c=drawCard();
+    const c=dealCard();
     if(c) p.cards.push(c);
   });
   H.turn=-1;
   nextTurn();
 }
 
-function drawCard(){
+/* Ojo con el nombre: drawCard() ya existe para la tarjeta que se
+   comparte. Dos funciones con el mismo nombre y la segunda gana. */
+function dealCard(){
   if(!H.pool.length)return null;
   const i=Math.floor(Math.random()*H.pool.length);
   return H.pool.splice(i,1)[0];
@@ -1249,7 +1253,7 @@ function nextTurn(){
   stopAudio();
   H.turn=(H.turn+1)%H.players.length;
   const p=H.players[H.turn];
-  H.card=drawCard();
+  H.card=dealCard();
   if(!H.card) return endLine();
   $('p-name').textContent=p.name;
   $('p-sub').textContent='Pass the phone. Nobody else should look.';
@@ -1349,6 +1353,18 @@ function endLine(){
   board($('w-board'));
   go('s-win');
 }
+/* Abandonar pide confirmación: la partida entera se pierde. */
+let quitArmed=null;
+function quitBtn(id){
+  $(id).onclick=()=>{
+    if(quitArmed===id){clearTimeout(quitT);quitArmed=null;stopAudio();go('s-home');return}
+    quitArmed=id;$(id).textContent='← Quit? Tap again';
+    quitT=setTimeout(()=>{quitArmed=null;$(id).textContent='← Quit game'},3500);
+  };
+}
+let quitT=null;
+quitBtn('l-quit');quitBtn('p-quit');
+
 $('w-again').onclick=()=>{go('s-seats');seats()};
 $('w-home').onclick=()=>go('s-home');
 
