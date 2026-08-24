@@ -75,6 +75,20 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 #installBtn{display:none}
 #installBtn.on{display:block}
 
+/* Muro de carátulas reales del top de Deezer. Va detrás del titular,
+   muy atenuado y a la deriva: una app de música tiene que enseñar
+   música antes de que toques nada. */
+#wall{position:absolute;inset:-10% -20% auto -20%;height:420px;z-index:0;
+  display:grid;grid-template-columns:repeat(6,1fr);gap:8px;
+  opacity:.16;pointer-events:none;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 78%);
+  mask-image:linear-gradient(180deg,#000 0%,transparent 78%);
+  animation:drift 90s linear infinite}
+#wall img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block}
+@keyframes drift{to{transform:translateY(-58px) rotate(-.6deg)}}
+#s-home{position:relative}
+#s-home>*:not(#wall){position:relative;z-index:1}
+
 /* pantallas */
 .screen{display:none}
 .screen.on{display:block;animation:fade .25s ease}
@@ -99,8 +113,10 @@ h1 em{font-style:normal;
   background:var(--raise);border:1px solid var(--line);border-radius:22px;
   padding:18px;color:var(--text);font-family:var(--sans);cursor:pointer;margin-bottom:8px}
 .tile:hover{border-color:var(--accent)}
-.tile .ico{font-size:22px;width:44px;height:44px;flex:none;border-radius:14px;
-  background:var(--tint);display:grid;place-items:center}
+.tile .ico{width:44px;height:44px;flex:none;border-radius:14px;
+  background:var(--tint);display:grid;place-items:center;color:var(--accent)}
+.tile .ico svg{width:21px;height:21px;stroke:currentColor;fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .tile h3{font-size:15px;font-weight:600;margin-bottom:3px}
 .tile p{font-size:12px;color:var(--muted)}
 .tile .arrow{margin-left:auto;color:var(--muted);font-size:18px}
@@ -129,8 +145,11 @@ input::placeholder{color:var(--place)}
 /* portada compartida por los dos juegos */
 .art{position:relative;width:min(100%,190px);aspect-ratio:1;margin:0 auto 16px;
   border-radius:22px;overflow:hidden;background:var(--raise);display:grid;place-items:center}
-.art img{width:100%;height:100%;object-fit:cover;filter:blur(26px) saturate(1.3);
-  transform:scale(1.15);transition:filter .5s,transform .5s}
+/* El desenfoque es el marcador: se va disipando conforme desbloqueas
+   segundos, así ves cuánto llevas sin mirar ningún número. */
+.art img{width:100%;height:100%;object-fit:cover;
+  filter:blur(var(--blur,26px)) saturate(1.25);
+  transform:scale(1.15);transition:filter .45s ease,transform .45s ease}
 .art.reveal img{filter:none;transform:none}
 .art .vinyl{position:absolute;width:60px;height:60px;border-radius:50%;
   border:2px solid color-mix(in srgb,var(--text) 35%,transparent);
@@ -184,7 +203,8 @@ input::placeholder{color:var(--place)}
 /* ---- juego de opciones ---- */
 .bhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
 .bhead .rnd{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--place)}
-.bhead .pts{font-size:34px;font-weight:600;letter-spacing:-.03em}
+.bhead .pts{font-size:clamp(38px,11vw,52px);font-weight:600;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;line-height:.9}
 .clock{height:6px;border-radius:980px;background:var(--raise);overflow:hidden}
 .clock i{display:block;height:100%;width:100%;background:var(--accent)}
 .clock.warn i{background:var(--red)}
@@ -264,6 +284,7 @@ input::placeholder{color:var(--place)}
 
 <!-- HOME -->
 <section class="screen on" id="s-home">
+  <div id="wall" aria-hidden="true"></div>
   <h1>Guess the song, <em>live</em></h1>
   <p class="lede">Real 30-second previews, pulled fresh every round. Pick an artist and Spindle quizzes you on their actual catalog.</p>
 
@@ -273,7 +294,8 @@ input::placeholder{color:var(--place)}
   </div>
 
   <button class="tile" data-game="type">
-    <span class="ico">🎤</span>
+    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 8v8M8 5v14M12 9v6M16 4v16M20 8v8"/></svg></span>
     <span>
       <h3>Name It</h3>
       <p id="subType">Type the title · 6 tries · hints</p>
@@ -282,7 +304,8 @@ input::placeholder{color:var(--place)}
   </button>
 
   <button class="tile" data-game="blitz">
-    <span class="ico">⚡</span>
+    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M13 2 4.5 13.5H11l-1 8.5 9-11.8h-6.6z"/></svg></span>
     <span>
       <h3>Blitz</h3>
       <p id="subBlitz">Four options · 10 rounds · 12s each</p>
@@ -459,6 +482,7 @@ const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
 
 function go(id){
   document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.id===id));
+  if(id==='s-home'||id==='s-pick') resetAccent();
   if(id!=='s-type') stopAudio();
   if(id!=='s-blitz') bHalt();
 }
@@ -475,6 +499,77 @@ function chips(){
     $('chipB').innerHTML='Best <b>'+S.bestStreak+'</b>';
   }
 }
+
+/* ---------- el color de cada ronda sale de su carátula ----------
+   Se muestrea el tono más vivo de la portada y se usa como acento de
+   esa ronda. El semáforo (verde, ámbar, rojo) no se toca nunca: sólo
+   cambia el color de interfaz. */
+const lum=([r,g,b])=>(.2126*r+.7152*g+.0722*b)/255;
+const hex=([r,g,b])=>'#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+
+function dominant(img){
+  const n=10, c=document.createElement('canvas');
+  c.width=c.height=n;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.drawImage(img,0,0,n,n);
+  let best=null,bestScore=-1;
+  const d=x.getImageData(0,0,n,n).data;
+  for(let i=0;i<d.length;i+=4){
+    const rgb=[d[i],d[i+1],d[i+2]];
+    const mx=Math.max(...rgb), mn=Math.min(...rgb);
+    const sat=mx===0?0:(mx-mn)/mx;
+    const l=lum(rgb);
+    // premiamos color vivo y de brillo medio: los extremos no sirven
+    const score=sat*1.6+(1-Math.abs(l-.55))*.8;
+    if(score>bestScore){bestScore=score;best=rgb}
+  }
+  return best;
+}
+
+function tune(rgb){
+  // el acento tiene que separarse del fondo, sea claro u oscuro
+  const bg=getComputedStyle(document.body).backgroundColor.match(/\d+/g).map(Number);
+  const dark=lum(bg)<.5;
+  let c=rgb;
+  if(dark){ let g=0; while(lum(c)<.58 && g++<12) c=mix(c,[255,255,255],.16); }
+  else    { let g=0; while(lum(c)>.42 && g++<12) c=mix(c,[0,0,0],.16); }
+  return c;
+}
+
+async function accentFrom(url){
+  resetAccent();
+  if(!url)return;
+  const img=await loadCover(url);
+  if(!img)return;                       // sin permiso de origen cruzado
+  try{
+    const c=tune(dominant(img));
+    const r=document.documentElement;
+    r.style.setProperty('--accent',hex(c));
+    r.style.setProperty('--on-accent',lum(c)>.6?'#000':'#fff');
+    r.style.setProperty('--tint',`rgba(${c.map(Math.round).join(',')},.16)`);
+  }catch(e){}
+}
+function resetAccent(){
+  const r=document.documentElement;
+  ['--accent','--on-accent','--tint'].forEach(k=>r.style.removeProperty(k));
+}
+
+/* ---------- muro de carátulas ---------- */
+(async()=>{
+  try{
+    const d=await deezer('/chart/0/tracks',{limit:24});
+    const seen=new Set();
+    (d.data||[]).forEach(t=>{
+      const u=t.album&&t.album.cover_medium;
+      if(!u||seen.has(u))return;
+      seen.add(u);
+      const img=new Image();
+      img.src=u;img.alt='';img.loading='lazy';
+      $('wall').appendChild(img);
+    });
+  }catch(e){}   // sin muro se ve igual de bien, no vale la pena avisar
+})();
 
 /* ---------- portada ---------- */
 document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{
@@ -561,6 +656,7 @@ function aRound(){
   audio.src=S.track.preview;audio.load();
   $('a-cover').src=S.track.album?S.track.album.cover_big:'';
   $('a-art').classList.remove('reveal');
+  accentFrom(S.track.album?S.track.album.cover_medium:null);
   $('a-done').hidden=true;$('a-live').hidden=false;
   $('a-rows').innerHTML='';$('a-hints').innerHTML='';
   $('a-guess').value='';$('a-sugg').hidden=true;
@@ -573,6 +669,8 @@ function aRound(){
 
 function aPaint(){
   const s=cfg().stages[S.stage];
+  // de 30px a 6px conforme se desbloquea el fragmento
+  $('a-art').style.setProperty('--blur',(30-24*(s/total())).toFixed(1)+'px');
   $('a-seg').style.width=(s/total()*100)+'%';
   $('a-right').textContent=s+'s unlocked';
   $('a-play').textContent=`▶ Play ${s}s`;
@@ -758,6 +856,8 @@ function bRound(){
   $('b-score').textContent=S.score;
   $('b-cover').src=t.album?t.album.cover_big:'';
   $('b-art').classList.remove('reveal');
+  $('b-art').style.setProperty('--blur','30px');
+  accentFrom(t.album?t.album.cover_medium:null);
   $('b-gain').textContent='';$('b-gain').className='gain';
   $('b-clock').classList.remove('warn');
   $('b-bar').style.width='100%';
@@ -783,6 +883,8 @@ function bRound(){
       $('b-bar').style.width=(left/cfg().limit*100)+'%';
       $('b-time').textContent=left.toFixed(1)+'s';
       $('b-worth').textContent=worth(el)+' pts';
+      // la imagen se va aclarando: cuanto más tardas, más pista tienes
+      $('b-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
       $('b-clock').classList.toggle('warn',left<cfg().limit/3.5);
       if(left<=0){bAnswer(null,false);return}
       bRaf=requestAnimationFrame(tick);
