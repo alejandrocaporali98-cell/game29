@@ -101,14 +101,22 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
    música antes de que toques nada. */
 /* El muro vive arriba del todo y se apaga antes de llegar al texto:
    si compite con el titular, deja de ser fondo y estorba. */
-#wallwrap{position:absolute;top:-14px;left:-16px;right:-16px;height:230px;
+#wallwrap{position:absolute;top:-14px;left:-16px;right:-16px;height:212px;
   z-index:0;overflow:hidden;pointer-events:none;
   -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 42%,transparent 88%);
   mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 42%,transparent 88%)}
-#wall{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;opacity:.42;
-  animation:drift 70s linear infinite}
-#wall img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
-@keyframes drift{to{transform:translateY(-46px)}}
+#wall{display:flex;flex-direction:column;gap:7px;opacity:.42}
+/* Dos cintas en sentidos opuestos. El truco del bucle sin costura:
+   el contenido va duplicado y la animación recorre justo la mitad,
+   así el salto cae en un fotograma idéntico al de partida. */
+.strip{display:flex;gap:7px;width:max-content;will-change:transform;
+  animation:slide 64s linear infinite}
+.strip.rev{animation-duration:86s;animation-direction:reverse}
+.strip img{width:96px;height:96px;object-fit:cover;border-radius:12px;display:block;flex:none}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(min-width:720px){
+  .strip img{width:104px;height:104px}
+}
 #s-home{position:relative;padding-top:96px}
 #s-home>*:not(#wallwrap){position:relative;z-index:1}
 @media(min-width:720px){
@@ -789,14 +797,27 @@ function resetAccent(){
 (async()=>{
   try{
     const d=await deezer('/chart/0/tracks',{limit:24});
-    const seen=new Set();
+    const seen=new Set(), urls=[];
     (d.data||[]).forEach(t=>{
       const u=t.album&&t.album.cover_medium;
       if(!u||seen.has(u))return;
-      seen.add(u);
-      const img=new Image();
-      img.src=u;img.alt='';img.loading='lazy';
-      $('wall').appendChild(img);
+      seen.add(u);urls.push(u);
+    });
+    if(urls.length<6)return;
+
+    // una cinta con las pares y otra con las impares, para que las dos
+    // filas no muestren las mismas carátulas al mismo tiempo
+    [0,1].forEach(row=>{
+      const strip=document.createElement('div');
+      strip.className='strip'+(row?' rev':'');
+      const mine=urls.filter((_,i)=>i%2===row);
+      // duplicado: la animación recorre la mitad y vuelve a empezar igual
+      [...mine,...mine].forEach(u=>{
+        const img=new Image();
+        img.src=u;img.alt='';img.loading='lazy';
+        strip.appendChild(img);
+      });
+      $('wall').appendChild(strip);
     });
   }catch(e){}   // sin muro se ve igual de bien, no vale la pena avisar
 })();
