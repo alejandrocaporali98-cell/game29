@@ -245,43 +245,51 @@ input::placeholder{color:var(--place)}
 .names{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
 .names input{font-size:15px;padding:12px 14px}
 
-/* La línea se lee de izquierda a derecha: tarjetas colocadas y, entre
-   ellas, los huecos donde puedes meter la canción que suena. */
-.line{display:flex;align-items:stretch;gap:6px;overflow-x:auto;padding:4px 2px 12px;
-  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
-.line::-webkit-scrollbar{height:0}
-.card{flex:none;width:88px;border-radius:14px;overflow:hidden;
-  background:var(--raise);border:1px solid var(--line);scroll-snap-align:center}
-.card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.card .yr{font-size:19px;font-weight:600;letter-spacing:-.03em;padding:8px 8px 1px;
+/* Décadas: una rejilla de botones grandes, pensada para el pulgar
+   de quien tiene el teléfono en la mano y los demás mirando. */
+.decades{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.decades button{padding:18px 6px;border-radius:18px;border:1px solid var(--line);
+  background:var(--raise);color:var(--text);font-family:var(--sans);
+  font-size:20px;font-weight:600;letter-spacing:-.02em;cursor:pointer;
   font-variant-numeric:tabular-nums}
-.card .ti{font-size:10px;color:var(--muted);padding:0 8px 9px;line-height:1.25;
-  height:25px;overflow:hidden;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.card.fresh{border-color:var(--green);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 35%,transparent)}
-.slot{flex:none;width:46px;align-self:stretch;min-height:150px;border-radius:14px;
-  border:1px dashed color-mix(in srgb,var(--accent) 50%,transparent);
-  background:var(--tint);color:var(--accent);font-family:var(--sans);
-  font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
-  cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  padding:8px 4px;text-align:center;line-height:1.2}
-.slot .plus{font-size:20px;letter-spacing:0}
-.slot:hover{background:color-mix(in srgb,var(--accent) 26%,transparent)}
-.slot:disabled{opacity:.3;cursor:default}
+.decades button:hover:not(:disabled){border-color:var(--accent)}
+.decades button.right{background:color-mix(in srgb,var(--green) 18%,var(--raise));
+  border-color:var(--green);color:var(--green)}
+.decades button.near{background:color-mix(in srgb,var(--amber) 16%,var(--raise));
+  border-color:var(--amber);color:var(--amber)}
+.decades button.wrong{background:color-mix(in srgb,var(--red) 14%,var(--raise));
+  border-color:var(--red);color:var(--red)}
+.decades button:disabled{cursor:default}
 .hint-line{font-size:11.5px;color:var(--place);text-align:center;margin:16px 0 10px}
 .reveal-row{display:flex;align-items:center;gap:14px;background:var(--raise);
   border:1px solid var(--line);border-radius:20px;padding:14px;margin-top:14px}
 .reveal-row img{width:64px;height:64px;border-radius:12px;flex:none;object-fit:cover}
-.reveal-row .v{font-size:15px;font-weight:600}
+.reveal-row .v{font-size:17px;font-weight:600;letter-spacing:-.02em}
 .reveal-row .v.ok{color:var(--green)}
+.reveal-row .v.near{color:var(--amber)}
 .reveal-row .v.no{color:var(--red)}
-.reveal-row .d{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.reveal-row .d{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
 .board{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:14px}
 .board li{display:flex;align-items:center;gap:10px;font-size:13px;padding:11px 13px;
   border-radius:14px;background:var(--raise);color:var(--muted)}
 .board li b{color:var(--text);font-weight:600}
 .board li.lead{border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
-.board li .n{margin-left:auto;color:var(--text);font-weight:600}
+.board li .n{margin-left:auto;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ---- géneros ---- */
+.genres{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.genres button{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;
+  border:1px solid var(--line);background:var(--raise);cursor:pointer;padding:0}
+.genres button img{width:100%;height:100%;object-fit:cover;opacity:.55;
+  transition:opacity .25s,transform .25s}
+.genres button:hover img{opacity:.8;transform:scale(1.04)}
+.genres button span{position:absolute;left:12px;right:12px;bottom:10px;text-align:left;
+  color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;letter-spacing:-.01em;
+  text-shadow:0 2px 12px rgba(0,0,0,.9)}
+.genres button::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.75))}
+.genres button span{z-index:1}
+.face{width:54px;height:54px;border-radius:50%;object-fit:cover;flex:none;background:var(--sugg)}
 
 /* ---- juego de opciones ---- */
 .bhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
@@ -404,8 +412,18 @@ input::placeholder{color:var(--place)}
     <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3 12h18M7 9v6M13 7v10M19 10v4"/></svg></span>
     <span>
-      <h3>Timeline</h3>
-      <p id="subLine">2–4 players · one phone · place the year</p>
+      <h3>Eras</h3>
+      <p id="subLine">2–4 players · one phone · name the decade</p>
+    </span>
+    <span class="arrow">→</span>
+  </button>
+
+  <button class="tile" data-game="genre">
+    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/></svg></span>
+    <span>
+      <h3>Who's This</h3>
+      <p>Pick a genre · name the artist</p>
     </span>
     <span class="arrow">→</span>
   </button>
@@ -502,7 +520,7 @@ input::placeholder{color:var(--place)}
 <section class="screen" id="s-seats">
   <button class="back" data-go="s-home">←</button>
   <h1>Who's playing?</h1>
-  <p class="lede">Everyone shares this phone. On your turn you hear a song and place it on your own timeline.</p>
+  <p class="lede">Everyone shares this phone. On your turn you hear a song and call the decade it came out.</p>
   <div class="seats" id="seats"></div>
   <div class="names" id="names"></div>
   <div class="actions"><button class="primary" id="l-go">Pick an artist →</button></div>
@@ -530,8 +548,8 @@ input::placeholder{color:var(--place)}
   <button class="play" id="l-play">▶ Play</button>
 
   <div id="l-choose">
-    <p class="hint-line" id="l-tip">Older ← → Newer · tap where this song belongs</p>
-    <div class="line" id="l-line"></div>
+    <p class="hint-line" id="l-tip">When did this come out?</p>
+    <div class="decades" id="l-decades"></div>
   </div>
 
   <div id="l-result" hidden>
@@ -559,6 +577,44 @@ input::placeholder{color:var(--place)}
     <button class="primary" id="w-again">Play again</button>
     <button class="ghost" id="w-home">Home</button>
   </div>
+</section>
+
+<!-- GÉNEROS: elegir -->
+<section class="screen" id="s-genres">
+  <button class="back" data-go="s-home">←</button>
+  <h1>Pick a genre</h1>
+  <p class="lede">Spindle pulls the artists that define it, then plays you one and hides the name.</p>
+  <div class="genres" id="genres"></div>
+  <div id="g-msg"></div>
+</section>
+
+<!-- GÉNEROS: jugar -->
+<section class="screen" id="s-guess">
+  <button class="back" data-go="s-genres">←</button>
+  <div id="g-live">
+    <div class="bhead">
+      <span class="rnd" id="g-round">Round 1 of 10</span>
+      <span class="pts" id="g-score">0</span>
+    </div>
+    <div class="art" id="g-art"><img id="g-cover" alt=""><div class="vinyl"></div></div>
+    <div class="clock" id="g-clock"><i id="g-bar"></i></div>
+    <div class="live"><span id="g-worth">1000 pts</span><span id="g-time">12.0s</span></div>
+    <div class="opts" id="g-opts"></div>
+    <div class="gain" id="g-gain"></div>
+  </div>
+
+  <div id="g-final" hidden>
+    <div class="final">
+      <div class="big" id="g-total">0</div>
+      <div class="sub" id="g-recap"></div>
+      <div class="tape" id="g-tape"></div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="g-again">Play again</button>
+      <button id="g-other">Change genre</button>
+    </div>
+  </div>
+  <p class="foot" id="g-foot"></p>
 </section>
 
 <!-- share sheet -->
@@ -645,13 +701,14 @@ function go(id){
   if(id==='s-home'||id==='s-pick') resetAccent();
   if(id!=='s-type') stopAudio();
   if(id!=='s-blitz') bHalt();
+  if(id!=='s-guess'&&typeof gHalt==='function') gHalt();
 }
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 
 /* la cabecera dice cosas distintas según el juego: la racha no
    significa lo mismo que los puntos */
 function chips(){
-  const hide=S.game==='line';
+  const hide=S.game==='line'||S.game==='genre';
   $('chipA').style.display=hide?'none':'';
   $('chipB').style.display=hide?'none':'';
   if(hide)return;
@@ -757,6 +814,8 @@ document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{
   S.game=b.dataset.game; chips();
   // Timeline necesita saber cuántos juegan antes de elegir artista
   if(S.game==='line'){go('s-seats');seats();return}
+  // este modo no arranca por artista, sino por género
+  if(S.game==='genre'){showGenres();return}
   go('s-pick'); $('q').focus();
 });
 
@@ -817,7 +876,7 @@ async function loadArtist(a){
     else{S.session=[];go('s-type');aRound()}
   }catch(e){
     $('artists').innerHTML = e.message==='thin'||e.message==='no dates'
-      ? '<div class="err">Not enough dated releases for that artist — Timeline needs a longer career. Try someone else.</div>'
+      ? '<div class="err">Not enough dated releases for that artist — Eras needs a longer career. Try someone else.</div>'
       : '<div class="err">Couldn\'t load that catalog. Try again.</div>';
   }
 }
@@ -1216,7 +1275,7 @@ async function loadDated(a){
     pool.push(...arr.slice(0,5));
   });
 
-  if(pool.length<12||perYear.size<4) throw new Error('thin');
+  if(pool.length<10||perYear.size<3) throw new Error('thin');
   return pool;
 }
 
@@ -1241,26 +1300,29 @@ function seats(){
 }
 $('l-go').onclick=()=>{S.game='line';go('s-pick');$('q').focus()};
 
+const TURNS=5;   // rondas por jugador
+
 function startLine(pool){
   H.pool=pool.slice();
   H.players=[];
   for(let i=0;i<H.n;i++){
-    H.players.push({name:(H.names[i]||'').trim()||`Player ${i+1}`,cards:[]});
+    H.players.push({name:(H.names[i]||'').trim()||`Player ${i+1}`,score:0,hits:0});
   }
-  // cada jugador arranca con una carta servida: sin ancla no hay dónde colocar
-  H.players.forEach(p=>{
-    const c=dealCard();
-    if(c) p.cards.push(c);
-  });
-  H.turn=-1;
+  /* Las décadas que se ofrecen salen de la carrera del artista, más
+     una a cada lado: si sólo mostráramos las suyas, con dos discos el
+     juego se acertaría por descarte. */
+  const ys=H.pool.map(t=>t.year);
+  const now=new Date().getFullYear();
+  let lo=Math.floor(Math.min(...ys)/10)*10-10;
+  let hi=Math.floor(Math.max(...ys)/10)*10+10;
+  lo=Math.max(1950,lo);hi=Math.min(Math.floor(now/10)*10,hi);
+  H.decades=[];
+  for(let d=lo;d<=hi;d+=10) H.decades.push(d);
+
+  H.turn=-1;H.round=0;
   nextTurn();
 }
 
-/* Ojo con el nombre: drawCard() ya existe para la tarjeta que se
-   comparte. Dos funciones con el mismo nombre y la segunda gana. */
-/* Se sortea primero el año y luego la canción dentro de ese año. Si
-   sorteáramos canciones sueltas, los años con más cortes saldrían
-   una y otra vez y la línea no avanzaría. */
 function dealCard(){
   if(!H.pool.length)return null;
   const years=[...new Set(H.pool.map(t=>t.year))];
@@ -1273,45 +1335,46 @@ function dealCard(){
 
 function board(el){
   el.innerHTML='';
-  const max=Math.max(...H.players.map(p=>p.cards.length));
+  const max=Math.max(...H.players.map(p=>p.score));
   H.players.forEach(p=>{
     const li=document.createElement('li');
-    if(p.cards.length===max) li.className='lead';
+    if(p.score===max&&max>0) li.className='lead';
     li.innerHTML='<span></span><span class="n"></span>';
     li.firstChild.textContent=p.name;
-    li.lastChild.textContent=`${p.cards.length} / ${H.target}`;
+    li.lastChild.textContent=p.score;
     el.appendChild(li);
   });
 }
 
 function nextTurn(){
   stopAudio();
-  H.turn=(H.turn+1)%H.players.length;
-  const p=H.players[H.turn];
+  H.turn++;
+  if(H.turn>=H.players.length*TURNS) return endLine();
+  const p=H.players[H.turn%H.players.length];
+  H.round=Math.floor(H.turn/H.players.length)+1;
   H.card=dealCard();
   if(!H.card) return endLine();
   $('p-name').textContent=p.name;
-  $('p-sub').textContent='Pass the phone. Nobody else should look.';
+  $('p-sub').textContent=`Round ${H.round} of ${TURNS} · pass the phone`;
   board($('p-board'));
   go('s-pass');
 }
 $('p-ready').onclick=()=>{go('s-line');turnUI()};
 
 function turnUI(){
-  const p=H.players[H.turn];
+  const p=H.players[H.turn%H.players.length];
   $('l-who').textContent=p.name;
-  $('l-cnt').textContent=`${p.cards.length} of ${H.target} placed`;
+  $('l-cnt').textContent=`${p.score} pts · round ${H.round} of ${TURNS}`;
   $('l-choose').hidden=false;$('l-result').hidden=true;
   $('l-art').classList.remove('reveal');
   $('l-art').style.setProperty('--blur','30px');
-  // src vacío hace que el navegador recargue la página como imagen
   if(H.card.cover) $('l-cover').src=H.card.cover;
   else $('l-cover').removeAttribute('src');
   $('l-foot').textContent=`${S.artist.name} · ${H.pool.length} songs left`;
   accentFrom(H.card.cover);ambient(H.card.cover);
 
   audio.src=H.card.preview;audio.load();
-  drawLine(p);
+  drawDecades();
   linePlay();
 }
 
@@ -1325,88 +1388,240 @@ function linePlay(){
   }).catch(()=>{});
 }
 
-function drawLine(p){
-  const cards=p.cards.slice().sort((a,b)=>a.year-b.year);
-  $('l-line').innerHTML='';
-  // cada hueco dice qué significa: antes, en medio o después
-  const slot=(i,n)=>{
+function drawDecades(){
+  $('l-decades').innerHTML='';
+  H.decades.forEach(d=>{
     const b=document.createElement('button');
-    b.className='slot';
-    const label=n===0?'anywhere':i===0?'older':i===n?'newer':'between';
-    b.innerHTML='<span class="plus">+</span><span></span>';
-    b.lastChild.textContent=label;
-    b.onclick=()=>place(i,cards);
-    return b;
-  };
-  $('l-line').appendChild(slot(0,cards.length));
-  cards.forEach((c,i)=>{
-    const d=document.createElement('div');
-    d.className='card';
-    d.innerHTML='<img alt=""><div class="yr"></div><div class="ti"></div>';
-    const im=d.querySelector('img');
-    // si la portada no carga, la escondemos: mejor sin imagen que rota
-    im.onerror=()=>{im.style.display='none'};
-    if(c.cover) im.src=c.cover; else im.style.display='none';
-    d.querySelector('.yr').textContent=c.year||'—';
-    d.querySelector('.ti').textContent=c.title||'';
-    $('l-line').appendChild(d);
-    $('l-line').appendChild(slot(i+1,cards.length));
+    b.textContent=(d%100).toString().padStart(2,'0')+'s';
+    b.dataset.d=d;
+    b.onclick=()=>guessDecade(d,b);
+    $('l-decades').appendChild(b);
   });
-  // que se vea desde el año más antiguo
-  $('l-line').scrollLeft=0;
 }
 
-function place(i,cards){
+/* Acertar la década vale 100. Fallar por una vale 40: reconocer que
+   una canción es "de por ahí" ya es saber algo. */
+function guessDecade(d,btn){
   stopAudio();
-  const y=H.card.year;
-  const lo=i===0?-Infinity:cards[i-1].year;
-  const hi=i>=cards.length?Infinity:cards[i].year;
-  const ok=y>=lo&&y<=hi;
-  const p=H.players[H.turn];
-  if(ok) p.cards.push(H.card);
+  const actual=Math.floor(H.card.year/10)*10;
+  const off=Math.abs(d-actual)/10;
+  const pts=off===0?100:off===1?40:0;
+  const p=H.players[H.turn%H.players.length];
+  p.score+=pts;
+  if(off===0)p.hits++;
+
+  [...$('l-decades').children].forEach(b=>{
+    b.disabled=true;
+    const bd=+b.dataset.d;
+    if(bd===actual) b.classList.add('right');
+    else if(b===btn) b.classList.add(off===1?'near':'wrong');
+  });
 
   $('l-art').classList.add('reveal');
-  $('l-choose').hidden=true;$('l-result').hidden=false;
+  $('l-result').hidden=false;
   if(H.card.cover) $('l-rcover').src=H.card.cover;
   else $('l-rcover').removeAttribute('src');
-  $('l-verdict').textContent=ok?'Correct':'Not quite';
-  $('l-verdict').className='v '+(ok?'ok':'no');
-  $('l-detail').innerHTML=`<b>${escapeHtml(H.card.title)}</b> · ${H.card.year}`
-    +(ok?' — card is yours':' — no card this turn');
-  $('l-cnt').textContent=`${p.cards.length} of ${H.target} placed`;
-  $('l-next').textContent = p.cards.length>=H.target ? 'See the result →' : 'Next player →';
+  $('l-verdict').textContent=off===0?`Spot on · +${pts}`:off===1?`Close · +${pts}`:'Way off';
+  $('l-verdict').className='v '+(off===0?'ok':off===1?'near':'no');
+  $('l-detail').innerHTML=`<b>${escapeHtml(H.card.title)}</b> · released ${H.card.year}`;
+  $('l-cnt').textContent=`${p.score} pts · round ${H.round} of ${TURNS}`;
+  const lastTurn=H.turn>=H.players.length*TURNS-1;
+  $('l-next').textContent=lastTurn?'See the result →':'Next player →';
 }
 
-$('l-next').onclick=()=>{
-  if(H.players[H.turn].cards.length>=H.target) endLine();
-  else nextTurn();
-};
+$('l-next').onclick=()=>nextTurn();
 
 function endLine(){
   stopAudio();
-  const best=Math.max(...H.players.map(p=>p.cards.length));
-  const winners=H.players.filter(p=>p.cards.length===best);
-  $('w-name').textContent = winners.length>1 ? 'Tie' : winners[0].name+' wins';
-  $('w-sub').textContent = winners.length>1
-    ? winners.map(w=>w.name).join(' and ')+` finished with ${best} cards`
-    : `${best} songs placed in the right decade order`;
+  const best=Math.max(...H.players.map(p=>p.score));
+  const winners=H.players.filter(p=>p.score===best);
+  $('w-name').textContent=winners.length>1?'Tie':winners[0].name+' wins';
+  $('w-sub').textContent=winners.length>1
+    ? winners.map(w=>w.name).join(' and ')+` finished on ${best} points`
+    : `${best} points · ${winners[0].hits} decades called exactly`;
   board($('w-board'));
   go('s-win');
 }
-/* Abandonar pide confirmación: la partida entera se pierde. */
-let quitArmed=null;
-function quitBtn(id){
-  $(id).onclick=()=>{
-    if(quitArmed===id){clearTimeout(quitT);quitArmed=null;stopAudio();go('s-home');return}
-    quitArmed=id;$(id).textContent='← Quit? Tap again';
-    quitT=setTimeout(()=>{quitArmed=null;$(id).textContent='← Quit game'},3500);
-  };
-}
-let quitT=null;
-quitBtn('l-quit');quitBtn('p-quit');
-
 $('w-again').onclick=()=>{go('s-seats');seats()};
 $('w-home').onclick=()=>go('s-home');
+
+/* =====================================================
+   WHO'S THIS — género primero, artista después
+   ===================================================== */
+const G={genre:null,pool:[],artists:[],round:0,score:0,hits:0,log:[],best:0};
+let gRaf=null,gT=null,gStart=0,gLocked=false;
+
+async function showGenres(){
+  go('s-genres');
+  if($('genres').children.length)return;          // ya cargados
+  $('g-msg').innerHTML='<div class="load">loading genres…</div>';
+  try{
+    const d=await deezer('/genre');
+    ($('g-msg').innerHTML='');
+    (d.data||[]).filter(x=>x.id!==0).forEach(gen=>{
+      const b=document.createElement('button');
+      b.innerHTML='<img alt=""><span></span>';
+      const im=b.querySelector('img');
+      im.onerror=()=>{im.style.display='none'};
+      im.src=gen.picture_medium||gen.picture;
+      b.querySelector('span').textContent=gen.name;
+      b.onclick=()=>loadGenre(gen);
+      $('genres').appendChild(b);
+    });
+  }catch(e){
+    $('g-msg').innerHTML='<div class="err">Couldn\'t load genres. Check your connection.</div>';
+  }
+}
+
+async function loadGenre(gen){
+  $('g-msg').innerHTML='<div class="load">gathering artists…</div>';
+  try{
+    const d=await deezer(`/genre/${gen.id}/artists`);
+    let artists=(d.data||[]).filter(a=>a.name);
+    if(artists.length<6) throw new Error('thin');
+    // doce artistas al azar: suficientes señuelos sin castigar la espera
+    artists.sort(()=>Math.random()-0.5);
+    artists=artists.slice(0,12);
+
+    $('g-msg').innerHTML='<div class="load">picking songs…</div>';
+    const tops=await Promise.all(artists.map(a=>
+      deezer(`/artist/${a.id}/top`,{limit:5}).then(r=>({a,r})).catch(()=>null)));
+
+    const pool=[];
+    tops.forEach(x=>{
+      if(!x||!x.r||!x.r.data)return;
+      x.r.data.forEach(t=>{
+        if(!t.preview)return;
+        pool.push({title:t.title,preview:t.preview,
+          cover:t.album?(t.album.cover_big||t.album.cover_medium):null,
+          artist:x.a.name,artistId:x.a.id,face:x.a.picture_medium});
+      });
+    });
+    const names=new Set(pool.map(t=>t.artist));
+    if(pool.length<12||names.size<4) throw new Error('thin');
+
+    G.genre=gen;G.pool=pool;G.artists=[...names];
+    $('g-msg').innerHTML='';
+    go('s-guess');gStartGame();
+  }catch(e){
+    $('g-msg').innerHTML='<div class="err">Not enough previews in that genre. Try another one.</div>';
+  }
+}
+
+function gStartGame(){
+  G.round=0;G.score=0;G.hits=0;G.log=[];G.used=new Set();
+  $('g-final').hidden=true;$('g-live').hidden=false;
+  gRound();
+}
+
+function gRound(){
+  gHalt();
+  gLocked=false;G.round++;
+  const fresh=G.pool.filter(t=>!G.used.has(t.preview));
+  const list=fresh.length?fresh:G.pool;
+  const t=list[Math.floor(Math.random()*list.length)];
+  G.used.add(t.preview);G.track=t;
+
+  // los señuelos son otros artistas del mismo género
+  const others=G.artists.filter(n=>n!==t.artist).sort(()=>Math.random()-0.5).slice(0,3);
+  const opts=[t.artist,...others].sort(()=>Math.random()-0.5);
+
+  $('g-round').textContent=`Round ${G.round} of ${cfg().rounds}`;
+  $('g-score').textContent=G.score;
+  if(t.cover) $('g-cover').src=t.cover; else $('g-cover').removeAttribute('src');
+  $('g-art').classList.remove('reveal');
+  $('g-art').style.setProperty('--blur','30px');
+  $('g-gain').textContent='';$('g-gain').className='gain';
+  $('g-clock').classList.remove('warn');
+  $('g-bar').style.width='100%';
+  $('g-foot').textContent=`${G.genre.name} · ${G.artists.length} artists in play`;
+  accentFrom(t.cover);ambient(t.cover);
+
+  $('g-opts').innerHTML='';
+  opts.forEach((name,i)=>{
+    const b=document.createElement('button');
+    b.innerHTML='<span class="k"></span><span class="t"></span>';
+    b.querySelector('.k').textContent='ABCD'[i];
+    b.querySelector('.t').textContent=name;
+    b.onclick=()=>gAnswer(b,name===t.artist);
+    $('g-opts').appendChild(b);
+  });
+
+  audio.src=t.preview;audio.load();
+  audio.play().then(()=>{
+    $('g-art').classList.add('spin');
+    gStart=performance.now();
+    (function tick(){
+      const el=(performance.now()-gStart)/1000;
+      const left=Math.max(0,cfg().limit-el);
+      $('g-bar').style.width=(left/cfg().limit*100)+'%';
+      $('g-time').textContent=left.toFixed(1)+'s';
+      $('g-worth').textContent=worth(el)+' pts';
+      $('g-clock').classList.toggle('warn',left<cfg().limit/3.5);
+      $('g-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
+      if(left<=0){gAnswer(null,false);return}
+      gRaf=requestAnimationFrame(tick);
+    })();
+  }).catch(()=>{
+    $('g-foot').innerHTML='<span class="err">Your browser blocked audio. Pick an answer to continue.</span>';
+    gStart=performance.now();
+  });
+}
+
+function gAnswer(btn,ok){
+  if(gLocked)return;
+  gLocked=true;
+  const el=(performance.now()-gStart)/1000;
+  gHalt();
+  $('g-art').classList.add('reveal');
+
+  [...$('g-opts').children].forEach(b=>{
+    b.disabled=true;
+    if(b.querySelector('.t').textContent===G.track.artist) b.classList.add('right');
+  });
+  if(btn&&!ok) btn.classList.add('wrong');
+
+  if(ok){
+    const pts=worth(el);
+    G.score+=pts;G.hits++;
+    $('g-score').textContent=G.score;
+    $('g-gain').textContent=`+${pts}`;$('g-gain').className='gain plus';
+  }else{
+    $('g-gain').textContent=btn?G.track.artist:"Time's up · "+G.track.artist;
+    $('g-gain').className='gain zero';
+  }
+  G.log.push(ok);
+
+  gT=setTimeout(()=>{
+    if(G.round>=cfg().rounds) gFinish(); else gRound();
+  },1700);
+}
+
+function gHalt(){
+  clearTimeout(gT);cancelAnimationFrame(gRaf);
+  audio.pause();
+  const a=$('g-art'); if(a) a.classList.remove('spin');
+}
+
+async function gFinish(){
+  gHalt();
+  $('g-live').hidden=true;$('g-final').hidden=false;
+  const prev=+(await store.get('bestGenre')||0);
+  const record=G.score>prev;
+  if(record) await store.set('bestGenre',G.score);
+  G.best=Math.max(prev,G.score);
+  $('g-total').textContent=G.score;
+  $('g-recap').innerHTML=`${G.hits} of ${cfg().rounds} right · ${escapeHtml(G.genre.name)}`
+    +(record?'<div class="rec">New personal best</div>':`<br>Best ${G.best}`);
+  $('g-tape').innerHTML='';
+  G.log.forEach(hit=>{
+    const i=document.createElement('i');
+    i.className=hit?'hit':'miss';
+    $('g-tape').appendChild(i);
+  });
+}
+$('g-again').onclick=gStartGame;
+$('g-other').onclick=()=>{gHalt();go('s-genres')};
 
 /* =====================================================
    Tarjeta para compartir
