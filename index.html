@@ -1442,6 +1442,26 @@ function endLine(){
   board($('w-board'));
   go('s-win');
 }
+/* Abandonar pide un segundo toque: se pierde la partida de todos. */
+let quitArmed=null,quitT=null;
+function quitBtn(id){
+  $(id).onclick=()=>{
+    if(quitArmed===id){
+      clearTimeout(quitT);quitArmed=null;
+      $(id).textContent='← Quit game';
+      stopAudio();go('s-home');
+      return;
+    }
+    quitArmed=id;
+    $(id).textContent='← Quit? Tap again';
+    clearTimeout(quitT);
+    quitT=setTimeout(()=>{
+      quitArmed=null;$(id).textContent='← Quit game';
+    },3500);
+  };
+}
+quitBtn('l-quit');quitBtn('p-quit');
+
 $('w-again').onclick=()=>{go('s-seats');seats()};
 $('w-home').onclick=()=>go('s-home');
 
