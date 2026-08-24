@@ -1,7 +1,7 @@
 /* Spindle service worker
    Sube la versión cada vez que cambies index.html; así el navegador
    descarta la caché vieja en lugar de servir la versión anterior. */
-const VERSION = 'spindle-v16';
+const VERSION = 'spindle-v17';
 
 const SHELL = [
   './',
