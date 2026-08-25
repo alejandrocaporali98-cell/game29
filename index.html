@@ -104,10 +104,12 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
    música antes de que toques nada. */
 /* El muro vive arriba del todo y se apaga antes de llegar al texto:
    si compite con el titular, deja de ser fondo y estorba. */
-#wallwrap{position:absolute;top:-14px;left:-16px;right:-16px;height:212px;
+/* Dos filas completas de carátulas: la segunda antes quedaba mordida
+   por el titular, y abajo sobraba negro. */
+#wallwrap{position:absolute;top:-14px;left:-16px;right:-16px;height:272px;
   z-index:0;overflow:hidden;pointer-events:none;
-  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 42%,transparent 88%);
-  mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 42%,transparent 88%)}
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.72) 52%,transparent 94%);
+  mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.72) 52%,transparent 94%)}
 #wall{display:flex;flex-direction:column;gap:7px;opacity:.42}
 /* Dos cintas en sentidos opuestos. El truco del bucle sin costura:
    el contenido va duplicado y la animación recorre justo la mitad,
@@ -120,12 +122,12 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 @media(min-width:720px){
   .strip img{width:104px;height:104px}
 }
-#s-home{position:relative;padding-top:96px}
+#s-home{position:relative;padding-top:152px}
 #s-home>*:not(#wallwrap){position:relative;z-index:1}
 @media(min-width:720px){
   #wall{grid-template-columns:repeat(6,1fr)}
-  #wallwrap{height:200px}
-  #s-home{padding-top:74px}
+  #wallwrap{height:236px}
+  #s-home{padding-top:112px}
 }
 
 /* pantallas */
