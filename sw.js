@@ -1,7 +1,7 @@
-/* Spindle service worker
+/* M29 service worker
    Sube la versión cada vez que cambies index.html; así el navegador
    descarta la caché vieja en lugar de servir la versión anterior. */
-const VERSION = 'spindle-v28';
+const VERSION = 'm29-v2';
 
 const SHELL = [
   './',

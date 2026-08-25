@@ -7,8 +7,8 @@
 <meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Spindle">
-<title>Spindle — Guess the Song</title>
+<meta name="apple-mobile-web-app-title" content="M29">
+<title>M29 — Guess the Song</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -91,8 +91,11 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 .chip{background:var(--raise);border:1px solid var(--line);border-radius:980px;
   padding:6px 11px;font-size:11px;color:var(--muted);white-space:nowrap}
 .chip b{color:var(--text);font-size:12px;margin-left:5px}
-#modeBtn,#installBtn{background:none;border:1px solid var(--line);color:var(--muted);
+#modeBtn,#installBtn,#infoBtn{background:none;border:1px solid var(--line);color:var(--muted);
   border-radius:980px;padding:6px 10px;font-size:12px;line-height:1;cursor:pointer}
+/* la i necesita ser cuadrada para no verse como una píldora torcida */
+#infoBtn{width:26px;height:26px;padding:0;font-style:italic;font-weight:600;font-family:Georgia,serif}
+#infoBtn:hover,#modeBtn:hover{color:var(--text);border-color:var(--text)}
 #installBtn{display:none}
 #installBtn.on{display:block}
 
@@ -349,7 +352,8 @@ input::placeholder{color:var(--place)}
   display:none;align-items:flex-end;justify-content:center;z-index:40;padding:16px}
 .sheet.on{display:flex}
 .sheet .inner{width:100%;max-width:440px;background:var(--sheet);border:1px solid var(--line);
-  border-radius:24px;padding:18px;animation:up .3s ease}
+  border-radius:24px;padding:18px;animation:up .3s ease;
+  max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 @keyframes up{from{transform:translateY(24px);opacity:0}}
 .sheet h3{font-size:15px;font-weight:600;margin-bottom:10px}
 .sheet img.card{width:100%;border-radius:14px;display:block;margin-bottom:12px}
@@ -376,7 +380,8 @@ input::placeholder{color:var(--place)}
 <div class="app">
 
 <header>
-  <div class="brand">Spindle</div>
+  <div class="brand">M29</div>
+  <button id="infoBtn" title="How it works">i</button>
   <button id="modeBtn" title="Appearance">◐</button>
   <button id="installBtn">⬇ Install</button>
   <div class="stats">
@@ -389,7 +394,7 @@ input::placeholder{color:var(--place)}
 <section class="screen on" id="s-home">
   <div id="wallwrap" aria-hidden="true"><div id="wall"></div></div>
   <h1>Guess the song, <em>live</em></h1>
-  <p class="lede">Real 30-second previews, pulled fresh every round. Pick an artist and Spindle quizzes you on their actual catalog.</p>
+  <p class="lede">Real 30-second previews, pulled fresh every round. Pick an artist and M29 quizzes you on their actual catalog.</p>
 
   <div class="modes">
     <button class="sel" data-diff="classic">Classic</button>
@@ -436,12 +441,6 @@ input::placeholder{color:var(--place)}
     <span class="arrow">→</span>
   </button>
 
-  <div class="eyebrow">How it works</div>
-  <ol class="steps">
-    <li><span class="n">01</span><span>Pick an artist — Spindle fetches their <b>real catalog</b> live</span></li>
-    <li><span class="n">02</span><span><b>Name It</b> starts you with one second and grows it each guess</span></li>
-    <li><span class="n">03</span><span><b>Blitz</b> gives four titles and drains points as the clock runs</span></li>
-  </ol>
 </section>
 
 <!-- ARTIST PICKER -->
@@ -591,7 +590,7 @@ input::placeholder{color:var(--place)}
 <section class="screen" id="s-genres">
   <button class="back" data-go="s-home">←</button>
   <h1>Pick a genre</h1>
-  <p class="lede">Spindle pulls the artists that define it, then plays you one and hides the name.</p>
+  <p class="lede">M29 pulls the artists that define it, then plays you one and hides the name.</p>
   <div class="genres" id="genres"></div>
   <div id="g-msg"></div>
 </section>
@@ -638,10 +637,27 @@ input::placeholder{color:var(--place)}
   </div>
 </div>
 
+<!-- cómo funciona -->
+<div class="sheet" id="infoSheet">
+  <div class="inner">
+    <h3>How it works</h3>
+    <ol class="steps" style="margin-bottom:18px">
+      <li><span class="n">01</span><span>Everything is pulled <b>live</b> — real catalogs, real 30-second previews. Nothing is stored.</span></li>
+      <li><span class="n">02</span><span><b>Name It</b> — type the title. One second to start, growing with each guess. Hints cost nothing but get noted.</span></li>
+      <li><span class="n">03</span><span><b>Blitz</b> — four titles, ten rounds. Points fall from 1000 to 100 as the clock runs.</span></li>
+      <li><span class="n">04</span><span><b>Eras</b> — 2–4 players share one phone. Call the decade: exact is 100, one off is 40.</span></li>
+      <li><span class="n">05</span><span><b>Who's This</b> — pick a genre and name the artist. All four options come from that genre.</span></li>
+    </ol>
+    <p class="foot" style="margin:0 0 14px">Music data and previews from
+      <a href="https://www.deezer.com" target="_blank" rel="noopener" style="color:var(--accent)">Deezer</a></p>
+    <div class="actions" style="margin-top:0"><button id="infoClose">Got it</button></div>
+  </div>
+</div>
+
 <!-- install sheet -->
 <div class="sheet" id="installSheet">
   <div class="inner">
-    <h3>Add Spindle to your Home Screen</h3>
+    <h3>Add M29 to your Home Screen</h3>
     <p class="lede" id="installTip"></p>
     <div class="actions" style="margin-top:0"><button id="gotIt">Got it</button></div>
   </div>
@@ -1712,7 +1728,7 @@ async function drawCard(){
 
   x.fillStyle=V('--bg');x.fillRect(0,0,1080,1350);
   x.fillStyle=V('--accent');x.font='600 42px Inter, sans-serif';
-  x.fillText('Spindle',80,120);
+  x.fillText('M29',80,120);
   x.fillStyle=V('--place');x.font='600 26px Inter, sans-serif';
   x.fillText((S.diff==='hardcore'?'HARDCORE':'CLASSIC')+' · '+(S.game==='blitz'?'BLITZ':'NAME IT'),80,172);
 
@@ -1798,12 +1814,12 @@ $('closeShare').onclick=()=>$('shareSheet').classList.remove('on');
 $('saveImg').onclick=()=>{
   if(!blobRef)return;
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blobRef);a.download='spindle.png';a.click();
+  a.href=URL.createObjectURL(blobRef);a.download='m29.png';a.click();
 };
 $('sysShare').onclick=async()=>{
   if(!blobRef)return;
-  const file=new File([blobRef],'spindle.png',{type:'image/png'});
-  const txt=S.game==='blitz'?`Spindle · ${S.artist.name} · ${S.score} pts`:`Spindle · ${S.artist.name}`;
+  const file=new File([blobRef],'m29.png',{type:'image/png'});
+  const txt=S.game==='blitz'?`M29 · ${S.artist.name} · ${S.score} pts`:`M29 · ${S.artist.name}`;
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{await navigator.share({files:[file],text:txt})}catch(e){}
   }else $('saveImg').click();
@@ -1842,6 +1858,13 @@ $('installBtn').onclick=()=>{
   $('installSheet').classList.add('on');
 };
 $('gotIt').onclick=()=>$('installSheet').classList.remove('on');
+
+$('infoBtn').onclick=()=>$('infoSheet').classList.add('on');
+$('infoClose').onclick=()=>$('infoSheet').classList.remove('on');
+// tocar fuera cierra cualquier hoja: en móvil es el gesto que se espera
+document.querySelectorAll('.sheet').forEach(s=>{
+  s.onclick=e=>{if(e.target===s) s.classList.remove('on')};
+});
 
 /* ---------- arranque ---------- */
 (async()=>{
