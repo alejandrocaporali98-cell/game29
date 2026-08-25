@@ -360,6 +360,50 @@ input::placeholder{color:var(--place)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
+/* Proyección: en una pantalla grande hay que leerlo desde el fondo
+   del aula, así que todo sube de tamaño en vez de quedarse en una
+   columna de móvil centrada. */
+@media(min-width:1000px){
+  .app{max-width:780px}
+  h1{font-size:64px}
+  .lede{font-size:18px;max-width:46ch}
+  .tile{padding:26px 24px}
+  .tile h3{font-size:21px}
+  .tile p{font-size:14px}
+  .tile .ico{width:58px;height:58px;border-radius:19px}
+  .tile .ico svg{width:27px;height:27px}
+  .modes button{font-size:16px;padding:13px}
+  .art{width:min(100%,300px)}
+  .opts button{font-size:21px;padding:22px;border-radius:20px}
+  .opts button .k{width:34px;height:34px;font-size:15px}
+  .bhead .pts{font-size:64px}
+  .bhead .rnd{font-size:13px}
+  .live{font-size:15px}
+  .clock,.bar{height:9px}
+  .play{font-size:19px;padding:21px}
+  .decades button{font-size:30px;padding:28px 6px}
+  .who .nm{font-size:26px}
+  .who .cnt{font-size:14px}
+  .pass .big{font-size:60px}
+  .pass .sub{font-size:17px}
+  .final .big{font-size:120px}
+  .final .sub{font-size:17px}
+  .actions button{font-size:15px;padding:17px}
+  .board li{font-size:16px;padding:15px 17px}
+  .reveal-row .v{font-size:21px}
+  .reveal-row .d{font-size:14px}
+  .reveal-row img{width:84px;height:84px}
+  .gain{font-size:19px}
+  .tape i{width:28px;height:28px}
+  input[type=text]{font-size:18px;padding:17px}
+  .foot{font-size:14px}
+  /* las teclas se anuncian sólo donde hay teclado */
+  .kbd{display:inline-block}
+}
+.kbd{display:none;font-size:11px;color:var(--place);margin-left:8px;
+  border:1px solid var(--line);border-radius:6px;padding:1px 6px;
+  font-variant-numeric:tabular-nums}
+
 /* En pantallas grandes la columna queda flotando sola: le damos marco */
 @media(min-width:720px){
   body{padding:44px 20px 60px;
@@ -1864,6 +1908,47 @@ $('infoClose').onclick=()=>$('infoSheet').classList.remove('on');
 // tocar fuera cierra cualquier hoja: en móvil es el gesto que se espera
 document.querySelectorAll('.sheet').forEach(s=>{
   s.onclick=e=>{if(e.target===s) s.classList.remove('on')};
+});
+
+/* ---------- teclado ----------
+   Para proyectar en clase: quien maneja el portátil no debería tener
+   que buscar el ratón entre ronda y ronda. */
+document.addEventListener('keydown',e=>{
+  // si se está escribiendo una respuesta, el teclado es suyo
+  const typing=document.activeElement && document.activeElement.tagName==='INPUT';
+
+  if(e.key==='Escape'){
+    document.querySelectorAll('.sheet.on').forEach(s=>s.classList.remove('on'));
+    return;
+  }
+  if(typing)return;
+
+  const on=id=>$(id).closest('.screen').classList.contains('on');
+  const click=(sel,i)=>{
+    const el=document.querySelectorAll(sel)[i];
+    if(el && !el.disabled) el.click();
+  };
+
+  // A B C D o 1 2 3 4 en los modos de opción múltiple
+  const idx='abcd'.indexOf(e.key.toLowerCase());
+  const num=parseInt(e.key,10)-1;
+  const pick=idx>=0?idx:(num>=0&&num<9?num:-1);
+
+  if(on('b-opts') && pick>=0 && pick<4) return click('#b-opts button',pick);
+  if(on('g-opts') && pick>=0 && pick<4) return click('#g-opts button',pick);
+  if(on('l-decades') && pick>=0)        return click('#l-decades button',pick);
+
+  if(e.key===' '||e.key==='Enter'){
+    e.preventDefault();
+    /* Sólo el primero que esté visible. Si se dispararan todos, en la
+       pantalla de resultado sonaría la canción y además pasaría de
+       ronda con la misma tecla. */
+    const order=['p-ready','a-next','l-next','b-again','g-again','a-play','l-play'];
+    for(const id of order){
+      const el=$(id);
+      if(el && el.offsetParent!==null){ el.click(); break; }
+    }
+  }
 });
 
 /* ---------- arranque ---------- */
