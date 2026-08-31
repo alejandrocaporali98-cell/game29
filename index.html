@@ -358,20 +358,28 @@ input::placeholder{color:var(--place)}
   transform:translate(-50%,-50%);border-radius:50%;background:var(--bg);z-index:2}
 .art .vinyl{display:none}
 
-/* el brazo entra desde la derecha al reproducir */
-.arm{position:absolute;right:-2%;top:2%;width:46%;height:56%;pointer-events:none;
-  transform-origin:88% 12%;transform:rotate(-26deg);transition:transform .6s cubic-bezier(.3,.8,.3,1)}
-.deck.spin .arm{transform:rotate(0deg)}
-.arm .pivot{position:absolute;right:0;top:0;width:15px;height:15px;border-radius:50%;
-  background:linear-gradient(180deg,#5A5A62,#2E2E34);box-shadow:0 2px 6px rgba(0,0,0,.6)}
-.arm .rod{position:absolute;right:7px;top:7px;width:76%;height:4px;border-radius:3px;
-  background:linear-gradient(90deg,#8A8A92,#D6D6DC);transform-origin:100% 50%;
-  transform:rotate(34deg)}
-.arm .head{position:absolute;left:2%;bottom:8%;width:17px;height:13px;border-radius:3px;
-  background:#E4E4EA;box-shadow:0 2px 5px rgba(0,0,0,.6)}
+/* El brazo entra desde la derecha al reproducir. La cápsula cuelga
+   del extremo del propio brazo, no flota aparte. */
+.arm{position:absolute;right:-4%;top:0;width:42%;height:50%;pointer-events:none;
+  transform-origin:90% 10%;transform:rotate(-24deg);
+  transition:transform .65s cubic-bezier(.3,.85,.3,1)}
+.deck.spin .arm{transform:rotate(4deg)}
+.arm .pivot{position:absolute;right:4%;top:2%;width:16px;height:16px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#6E6E76,#26262B);
+  box-shadow:0 2px 7px rgba(0,0,0,.6)}
+.arm .rod{position:absolute;right:11%;top:9%;width:84%;height:4px;border-radius:3px;
+  background:linear-gradient(90deg,#7E7E88,#D8D8DE);
+  transform-origin:100% 50%;transform:rotate(40deg)}
+.arm .rod::after{content:"";position:absolute;left:-3px;top:-6px;
+  width:16px;height:14px;border-radius:3px;
+  background:linear-gradient(180deg,#F0F0F5,#BFBFC7);
+  box-shadow:0 2px 5px rgba(0,0,0,.55)}
+.arm .head{display:none}
 @media(max-width:400px){.arm{display:none}}
 
 /* ---- juego de escribir ---- */
+.times{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);
+  margin:-4px 0 4px;font-variant-numeric:tabular-nums}
 .spin .times{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);
   margin-top:7px;font-variant-numeric:tabular-nums}
 .play{width:100%;margin-top:16px;padding:16px;border:none;border-radius:980px;
@@ -1659,8 +1667,9 @@ async function aEnd(won){
   }
   $('a-answer').innerHTML=`${escapeHtml(S.track.title)}<span>${escapeHtml(S.artist.name)} · ${escapeHtml(S.track.album?S.track.album.title:'')}</span>`;
 
-  // el premio por acertar es oír de verdad la canción, no el fragmento
-  if(won) setTimeout(aPlay,260);
+  // el premio por acertar es oír de verdad la canción, y el disco
+  // se queda girando mientras suena
+  if(won) setTimeout(()=>{aPlay();$('a-art').classList.add('spin')},260);
 }
 $('a-next').onclick=aRound;
 $('a-change').onclick=()=>{stopAudio();go('s-pick')};
@@ -1749,6 +1758,7 @@ function bAnswer(btn,ok){
   const el=(performance.now()-bStartT)/1000;
   bHalt();
   $('b-art').classList.add('reveal');
+  if(ok) $('b-art').classList.add('spin');   // celebra girando
 
   [...$('b-opts').children].forEach(b=>{
     b.disabled=true;
@@ -2233,6 +2243,7 @@ function gAnswer(btn,ok){
   const el=(performance.now()-gStart)/1000;
   gHalt();
   $('g-art').classList.add('reveal');
+  if(ok) $('g-art').classList.add('spin');
 
   [...$('g-opts').children].forEach(b=>{
     b.disabled=true;
