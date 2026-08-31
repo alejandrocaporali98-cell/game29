@@ -1,7 +1,7 @@
 /* M29 service worker
    Sube la versión cada vez que cambies index.html; así el navegador
    descarta la caché vieja en lugar de servir la versión anterior. */
-const VERSION = 'm29-v10';
+const VERSION = 'm29-v11';
 
 const SHELL = [
   './',

@@ -151,31 +151,103 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 .slot2 .disc{transition:transform .18s}
 .slot2:hover .nm{color:var(--accent)}
 
-.cut{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
-  border:1px solid color-mix(in srgb,var(--amber) 45%,transparent);
-  background:color-mix(in srgb,var(--amber) 12%,transparent);
-  border-radius:18px;padding:15px;margin-bottom:16px;
-  color:var(--text);font-family:var(--sans);cursor:pointer}
-.cut .cutlab{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--amber);display:block;margin-bottom:4px}
-.cut .cutsub{font-size:13px;color:var(--muted);display:block}
-.cut .grow{flex:1;min-width:0}
-.cut .date{font-family:var(--mono);text-align:right;line-height:1;flex:none}
-.cut .date b{display:block;font-size:26px;font-weight:700;letter-spacing:-.03em}
-.cut .date span{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--place)}
-.cut.done{border-color:color-mix(in srgb,var(--green) 45%,transparent);
-  background:color-mix(in srgb,var(--green) 10%,transparent)}
-.cut.done .cutlab{color:var(--green)}
+/* ---- casetes ----
+   Arriba vinilos, abajo cintas: el mismo mundo en dos formatos. Todo
+   dibujado con degradados, sin una sola imagen de más. */
+.tape{position:relative;display:block;width:100%;border:none;padding:9px 9px 13px;
+  border-radius:12px;cursor:pointer;font-family:var(--sans);color:var(--text);
+  text-align:left;overflow:hidden;
+  background:linear-gradient(180deg,#2C2C31 0%,#1B1B1F 42%,#121214 100%);
+  box-shadow:0 6px 18px rgba(0,0,0,.5),
+             inset 0 1px 0 rgba(255,255,255,.16),
+             inset 0 0 0 1px rgba(255,255,255,.07)}
+/* brillo del plástico, en diagonal */
+.tape::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(118deg,rgba(255,255,255,.10) 0%,
+             rgba(255,255,255,.03) 34%,transparent 55%)}
+.tape.sel{box-shadow:0 6px 20px rgba(0,0,0,.55),
+          inset 0 1px 0 rgba(255,255,255,.2),
+          inset 0 0 0 2px var(--accent)}
 
-.bottom{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.speed{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.speed button{background:none;border:none;color:var(--muted);cursor:pointer;
-  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:9px 12px}
-.speed button.sel{background:var(--accent);color:var(--on-accent);font-weight:700}
-#surprise{background:none;border:1px solid var(--line);border-radius:9px;color:var(--muted);
-  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-  padding:9px 12px;cursor:pointer}
-#surprise:hover{color:var(--text);border-color:var(--text)}
+/* etiqueta: papel translúcido sobre la carátula del disco */
+.tape .card{position:relative;border-radius:5px;overflow:hidden;padding:9px 10px 8px;
+  background:linear-gradient(180deg,#EFE9DB,#DED6C4);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.22)}
+.tape .card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:.34;filter:saturate(1.3)}
+.tape .card>*{position:relative}
+.tape .card .t1{display:block;font-family:var(--mono);font-size:13px;font-weight:700;
+  letter-spacing:.02em;color:#1B1710}
+.tape .card .t2{display:block;font-family:var(--mono);font-size:9px;color:#6A6252;
+  margin-top:9px;padding-top:6px;border-top:1px solid rgba(110,102,86,.5)}
+.tape:not(.sel) .card{filter:saturate(.65) brightness(.86)}
+
+/* ventana: fondo hundido y dos bobinas con la cinta enrollada */
+.tape .win{position:relative;margin-top:9px;height:62px;border-radius:6px;
+  background:#0C0C0E;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.10);
+  display:flex;align-items:center;justify-content:space-around;padding:0 12%}
+.tape .win::after{content:"";position:absolute;left:26%;right:26%;top:50%;height:3px;
+  transform:translateY(-50%);background:#4A3722;border-radius:2px}
+.tape .reel{position:relative;width:46px;height:46px;border-radius:50%;
+  background:
+    repeating-radial-gradient(circle at 50% 50%,
+      rgba(150,110,70,.55) 0 1px, rgba(58,42,28,.9) 1px 3px),
+    #3A2A1C}
+.tape .reel.thin{width:34px;height:34px}
+/* el carrete: dientes hechos con un degradado cónico */
+.tape .reel::before{content:"";position:absolute;inset:31%;border-radius:50%;
+  background:conic-gradient(#C9C7C3 0 12deg,#6E6C68 12deg 30deg,
+             #C9C7C3 30deg 42deg,#6E6C68 42deg 60deg,
+             #C9C7C3 60deg 72deg,#6E6C68 72deg 90deg,
+             #C9C7C3 90deg 102deg,#6E6C68 102deg 120deg,
+             #C9C7C3 120deg 132deg,#6E6C68 132deg 150deg,
+             #C9C7C3 150deg 162deg,#6E6C68 162deg 180deg,
+             #C9C7C3 180deg 192deg,#6E6C68 192deg 210deg,
+             #C9C7C3 210deg 222deg,#6E6C68 222deg 240deg,
+             #C9C7C3 240deg 252deg,#6E6C68 252deg 270deg,
+             #C9C7C3 270deg 282deg,#6E6C68 282deg 300deg,
+             #C9C7C3 300deg 312deg,#6E6C68 312deg 330deg,
+             #C9C7C3 330deg 342deg,#6E6C68 342deg 360deg)}
+.tape .reel::after{content:"";position:absolute;inset:43%;border-radius:50%;background:#131315}
+.tape.sel .reel{animation:spin 4.2s linear infinite}
+
+/* ranuras y tornillos del borde inferior */
+.tape .screws{display:flex;justify-content:space-between;align-items:center;
+  padding:0 3px;margin-top:7px}
+.tape .screws i{width:4px;height:4px;border-radius:50%;
+  background:rgba(255,255,255,.22)}
+.tape .screws b{flex:1;height:3px;margin:0 5px;border-radius:2px;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.55) 0 14px,transparent 14px 24px)}
+
+/* el corte del día es una cinta grabada a mano */
+.cutwrap{margin-bottom:22px}
+.cuthead{display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.cutwrap.done .cuthead{color:var(--green)}
+.cutwrap.done .tape.sel{box-shadow:0 6px 20px rgba(0,0,0,.55),
+  inset 0 1px 0 rgba(255,255,255,.2),inset 0 0 0 2px var(--green)}
+
+.bottom .lab3{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--place);margin-bottom:8px;display:block}
+.bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:439px){
+  /* tres cintas seguidas no caben: la de Random pasa a ocupar la fila */
+  .bottom{grid-template-columns:1fr 1fr}
+  .bottom>*:nth-child(3){grid-column:span 2}
+  .tape .card .t1{font-size:12px}
+  .tape .win{height:56px}
+  .tape .reel{width:40px;height:40px}
+  .tape .reel.thin{width:30px;height:30px}
+}
+
+@media(min-width:1000px){
+  .tape .win{height:76px}
+  .tape .reel{width:56px;height:56px}
+  .tape .reel.thin{width:42px;height:42px}
+  .tape .card .t1{font-size:15px}
+}
 
 @media(min-width:1000px){
   .rack{gap:28px 26px}
@@ -609,20 +681,49 @@ input::placeholder{color:var(--place)}
     </button>
   </div>
 
-  <button class="cut" id="todayBtn">
-    <span class="grow">
-      <span class="cutlab">Today's cut</span>
-      <span class="cutsub" id="todaySub">One track, one shot. Same for everyone.</span>
-    </span>
-    <span class="date"><b id="todayNum">1</b><span id="todayMon">jan</span></span>
-  </button>
+  <div class="cutwrap" id="cutWrap">
+    <div class="cuthead"><span>Today's cut</span><span id="todaySub">one shot</span></div>
+    <button class="tape sel" id="todayBtn">
+      <span class="card">
+        <img id="todayArt" alt="">
+        <span class="t1"><span id="todayNum">1</span> <span id="todayMon">jan</span></span>
+        <span class="t2">one track · same for everyone</span>
+      </span>
+      <span class="win"><span class="reel"></span><span class="reel thin"></span></span>
+      <span class="screws"><i></i><b></b><i></i></span>
+    </button>
+  </div>
 
-  <div class="bottom">
-    <div class="speed modes">
-      <button class="sel" data-diff="classic">Classic</button>
-      <button data-diff="hardcore">Hardcore</button>
-    </div>
-    <button id="surprise">Random</button>
+  <div class="bottom modes">
+    <button class="tape sel" data-diff="classic">
+      <span class="card">
+        <img id="tapeArt1" alt="">
+        <span class="t1">CLASSIC</span>
+        <span class="t2" id="subType">6 tries · hints</span>
+      </span>
+      <span class="win"><span class="reel"></span><span class="reel thin"></span></span>
+      <span class="screws"><i></i><b></b><i></i></span>
+    </button>
+
+    <button class="tape" data-diff="hardcore">
+      <span class="card">
+        <img id="tapeArt2" alt="">
+        <span class="t1">HARDCORE</span>
+        <span class="t2">3 tries · 6s</span>
+      </span>
+      <span class="win"><span class="reel"></span><span class="reel thin"></span></span>
+      <span class="screws"><i></i><b></b><i></i></span>
+    </button>
+
+    <button class="tape" id="surprise">
+      <span class="card">
+        <img id="tapeArt3" alt="">
+        <span class="t1">RANDOM</span>
+        <span class="t2">surprise me</span>
+      </span>
+      <span class="win"><span class="reel"></span><span class="reel thin"></span></span>
+      <span class="screws"><i></i><b></b><i></i></span>
+    </button>
   </div>
 </section>
 
@@ -1187,14 +1288,19 @@ $('npBtn').onclick=()=>{ HOME.on ? homeStop() : homePlay(); };
       const u=homeArt(t);
       if(u) $('lab'+n).src=u;
     });
+    // las cintas también llevan carátula bajo el papel
+    ['todayArt','tapeArt1','tapeArt2','tapeArt3'].forEach((id,k)=>{
+      const u=homeArt(HOME.list[(k+5)%HOME.list.length]);
+      if(u) $(id).src=u;
+    });
   }catch(e){}
 })();
 
 /* ---------- portada ---------- */
-document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('.modes button').forEach(x=>x.classList.remove('sel'));
+document.querySelectorAll('.modes [data-diff]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.modes [data-diff]').forEach(x=>x.classList.remove('sel'));
   b.classList.add('sel'); S.diff=b.dataset.diff;
-  $('subType').textContent = S.diff==='hardcore' ? '3 tries' : '6 tries · hints';
+  $('subType').textContent = S.diff==='hardcore' ? '3 tries · 6s' : '6 tries · 12s';
   $('subBlitz').textContent = `${cfg().limit}s · 4 options`;
 });
 document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{
@@ -2656,11 +2762,10 @@ function paintToday(){
   $('todayNum').textContent=d.getDate();
   $('todayMon').textContent=d.toLocaleString('en',{month:'short'});
   const done=dailyState.done && dailyState.date===hoy();
-  $('todayBtn').classList.toggle('done',done);
+  $('cutWrap').classList.toggle('done',done);
   $('todaySub').textContent = done
-    ? (dailyState.won ? `Solved in ${dailyState.tries} · back tomorrow`
-                      : 'Missed today · back tomorrow')
-    : 'One track, one shot. Same for everyone.';
+    ? (dailyState.won ? `solved in ${dailyState.tries}` : 'missed today')
+    : 'one shot';
 }
 
 $('todayBtn').onclick=async()=>{
