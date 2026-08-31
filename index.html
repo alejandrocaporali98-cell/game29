@@ -114,7 +114,7 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
   background:color-mix(in srgb,var(--text) 10%,transparent);
   border:1px solid var(--line);border-radius:16px;padding:10px 12px;
   color:var(--text);font-family:var(--sans);cursor:pointer;margin-bottom:20px}
-.np .mini{width:36px;height:36px;flex:none;position:relative}
+.np .mini{display:block;width:36px;height:36px;flex:none;position:relative}
 .np .mini .disc{width:100%;height:100%}
 .np.spin .mini{animation:spin 2.6s linear infinite}
 .np .lab2{font-family:var(--mono);font-size:9px;letter-spacing:.16em;
@@ -126,14 +126,14 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 
 /* El disco se dibuja con CSS: surcos con un degradado radial repetido
    y la carátula recortada en círculo como etiqueta. */
-.disc{position:relative;width:100%;aspect-ratio:1;border-radius:50%;
+.disc{display:block;position:relative;width:100%;aspect-ratio:1;border-radius:50%;
   background:
     repeating-radial-gradient(circle at 50% 50%,
       rgba(255,255,255,.05) 0 1px, transparent 1px 4px),
     radial-gradient(circle at 32% 28%, rgba(255,255,255,.14), transparent 46%),
     #0F0F11;
   box-shadow:0 8px 26px rgba(0,0,0,.55)}
-.disc .lab{position:absolute;inset:29%;border-radius:50%;overflow:hidden;
+.disc .lab{display:block;position:absolute;inset:29%;border-radius:50%;overflow:hidden;
   background:var(--sugg);display:grid;place-items:center}
 .disc .lab img{width:100%;height:100%;object-fit:cover}
 .disc .lab .no{position:absolute;font-family:var(--mono);font-size:10px;font-weight:700;
