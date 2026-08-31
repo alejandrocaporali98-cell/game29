@@ -91,10 +91,12 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 .chip{background:var(--raise);border:1px solid var(--line);border-radius:980px;
   padding:6px 11px;font-size:11px;color:var(--muted);white-space:nowrap}
 .chip b{color:var(--text);font-size:12px;margin-left:5px}
-#modeBtn,#installBtn,#infoBtn{background:none;border:1px solid var(--line);color:var(--muted);
+#modeBtn,#installBtn,#infoBtn,#sfxBtn{background:none;border:1px solid var(--line);color:var(--muted);
   border-radius:980px;padding:6px 10px;font-size:12px;line-height:1;cursor:pointer}
 /* la i necesita ser cuadrada para no verse como una píldora torcida */
 #infoBtn{width:26px;height:26px;padding:0;font-style:italic;font-weight:600;font-family:Georgia,serif}
+#sfxBtn{width:26px;height:26px;padding:0;font-size:14px}
+#sfxBtn.off{opacity:.45;text-decoration:line-through}
 #infoBtn:hover,#modeBtn:hover{color:var(--text);border-color:var(--text)}
 #installBtn{display:none}
 #installBtn.on{display:block}
@@ -506,6 +508,7 @@ input::placeholder{color:var(--place)}
 
 <header>
   <div class="brand">M29</div>
+  <button id="sfxBtn" title="Sound" aria-label="Sound on or off">♪</button>
   <button id="infoBtn" title="How it works" aria-label="How it works">i</button>
   <button id="modeBtn" title="Appearance" aria-label="Light or dark mode">◐</button>
   <button id="installBtn">⬇ Install</button>
@@ -536,6 +539,10 @@ input::placeholder{color:var(--place)}
     </span>
     <span class="arrow" style="margin-left:auto;color:var(--accent)">→</span>
   </button>
+
+  <div class="actions" style="margin:0 0 14px">
+    <button class="primary" id="surprise">🎲 Surprise me</button>
+  </div>
 
   <div class="modes">
     <button class="sel" data-diff="classic">Classic</button>
@@ -754,6 +761,10 @@ input::placeholder{color:var(--place)}
   <div class="eyebrow">Look</div>
   <div class="tiles2" id="avaPick" style="grid-template-columns:repeat(3,1fr);gap:12px"></div>
   <input type="text" id="pfNameIn" placeholder="Your name" autocomplete="off" maxlength="14">
+
+  <div class="actions" style="margin-top:22px">
+    <button class="ghost" id="pfReset">Reset all progress</button>
+  </div>
 </section>
 
 <!-- GÉNEROS: elegir -->
@@ -1139,6 +1150,32 @@ function retryBtn(host, fn){
   host.appendChild(wrap);
 }
 
+/* Enseñar la app a alguien no debería costar tres decisiones antes de
+   oír una nota: un botón que elige modo y artista por ti. */
+$('surprise').onclick=async()=>{
+  const b=$('surprise');
+  const antes=b.textContent;
+  b.textContent='Finding something…'; b.disabled=true;
+  try{
+    const ch=await cached('chart:0',()=>deezer('/chart/0/tracks',{limit:100}));
+    const nombres=[...new Set((ch.data||[])
+      .filter(t=>t.artist&&t.artist.name)
+      .map(t=>JSON.stringify({id:t.artist.id,name:t.artist.name})))].map(JSON.parse);
+    if(!nombres.length) throw new Error('empty');
+    const elegido=nombres[Math.floor(Math.random()*nombres.length)];
+    // Blitz o Who's This: los dos entran sin teclado, que es lo que
+    // hace falta cuando le pasas el teléfono a alguien
+    S.game=Math.random()<0.5?'blitz':'type';
+    chips();
+    await loadArtist(elegido);
+  }catch(e){
+    b.textContent='Try again';
+  } finally {
+    b.disabled=false;
+    setTimeout(()=>{b.textContent=antes},1200);
+  }
+};
+
 /* ---------- búsqueda de artista ---------- */
 let sT;
 $('q').oninput=e=>{
@@ -1397,6 +1434,7 @@ async function aEnd(won){
   }
   $('a-verdict').textContent=won?`Got it in ${S.stage+1}`:(S.gaveUp?'Gave up':'Missed');
   $('a-verdict').className='verdict '+(won?'win':'lose');
+  if(won) sfx.right(); else sfx.wrong();
   if(S.hints){
     const tag=document.createElement('span');
     tag.className='tag';
@@ -1505,12 +1543,14 @@ function bAnswer(btn,ok){
   if(btn && !ok){btn.classList.add('wrong');btn.querySelector('.k').textContent='✕'}
 
   if(ok){
+    sfx.right();
     const pts=worth(el);
     S.score+=pts;S.hits++;
     S.bestHit=Math.max(S.bestHit||0,pts);
     $('b-score').textContent=S.score;
     $('b-gain').textContent=`+${pts}`;$('b-gain').className='gain plus rise';
   }else{
+    sfx.wrong();
     $('b-gain').textContent=btn?'Nope':"Time's up";
     $('b-gain').className='gain zero';
   }
@@ -1766,6 +1806,7 @@ function guessDecade(d,btn){
   const actual=Math.floor(H.card.year/10)*10;
   const off=Math.abs(d-actual)/10;
   const pts=off===0?100:off===1?40:0;
+  if(off===0) sfx.right(); else if(off>1) sfx.wrong();
   const p=H.players[H.turn%H.players.length];
   p.score+=pts;
   if(off===0)p.hits++;
@@ -1977,12 +2018,14 @@ function gAnswer(btn,ok){
   if(btn&&!ok){btn.classList.add('wrong');btn.querySelector('.k').textContent='✕'}
 
   if(ok){
+    sfx.right();
     const pts=worth(el);
     G.score+=pts;G.hits++;
     G.bestHit=Math.max(G.bestHit||0,pts);
     $('g-score').textContent=G.score;
     $('g-gain').textContent=`+${pts}`;$('g-gain').className='gain plus rise';
   }else{
+    sfx.wrong();
     $('g-gain').textContent=btn?G.track.artist:"Time's up · "+G.track.artist;
     $('g-gain').className='gain zero';
   }
@@ -2199,6 +2242,13 @@ $('installBtn').onclick=()=>{
 };
 $('gotIt').onclick=()=>$('installSheet').classList.remove('on');
 
+$('sfxBtn').onclick=()=>{
+  muted=!muted;
+  $('sfxBtn').classList.toggle('off',muted);
+  store.set('muted',muted?'1':'');
+  if(!muted) sfx.tick();
+};
+
 $('infoBtn').onclick=()=>$('infoSheet').classList.add('on');
 $('infoClose').onclick=()=>$('infoSheet').classList.remove('on');
 // tocar fuera cierra cualquier hoja: en móvil es el gesto que se espera
@@ -2350,8 +2400,8 @@ function award(xp, ev={}){
   saveProfile();
   paintXp();
 
-  if(up){ levelUp(up); confetti(); }
-  else if(nuevos.length){ badgeUp(nuevos[0]); confetti(); }
+  if(up){ levelUp(up); confetti(); sfx.level(); }
+  else if(nuevos.length){ badgeUp(nuevos[0]); confetti(); sfx.level(); }
 }
 
 function levelUp(n){
@@ -2443,10 +2493,67 @@ function paintProfile(){
     $('avaPick').appendChild(el);
   });
 }
+/* Si el guardado se corrompe no hay forma de arreglarlo desde dentro:
+   este botón es la salida de emergencia. Pide confirmación porque no
+   se puede deshacer. */
+let resetArmed=false;
+$('pfReset').onclick=async()=>{
+  if(!resetArmed){
+    resetArmed=true;
+    $('pfReset').textContent='Erase everything? Tap again';
+    setTimeout(()=>{resetArmed=false;$('pfReset').textContent='Reset all progress'},4000);
+    return;
+  }
+  await store.set('profile','');
+  await store.set('daily','');
+  await store.set('bestScore','0');
+  await store.set('bestGenre','0');
+  await store.set('bestStreak','0');
+  location.reload();
+};
+
 $('pfNameIn').oninput=e=>{
   P.name=e.target.value.trim()||'Player';
   $('pfName').textContent=P.name;
   saveProfile();
+};
+
+/* =====================================================
+   SONIDO — sintetizado, sin archivos
+   =====================================================
+   Tres avisos cortos generados con osciladores. No se descarga nada
+   y suenan igual en cualquier dispositivo. El navegador sólo permite
+   crear el contexto tras un gesto, así que se crea al primer toque. */
+let AC=null, muted=false;
+
+function audioCtx(){
+  if(!AC){
+    try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; }
+  }
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+}
+document.addEventListener('pointerdown',()=>audioCtx(),{once:true});
+
+function beep(freq, dur=0.12, type='sine', vol=0.16, delay=0){
+  const ctx=audioCtx();
+  if(!ctx||muted)return;
+  const t=ctx.currentTime+delay;
+  const osc=ctx.createOscillator(), g=ctx.createGain();
+  osc.type=type; osc.frequency.setValueAtTime(freq,t);
+  // una curva suave evita el chasquido al cortar la nota
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  osc.connect(g); g.connect(ctx.destination);
+  osc.start(t); osc.stop(t+dur+0.02);
+}
+
+const sfx={
+  right(){ beep(660,.12,'sine',.16); beep(990,.16,'sine',.13,.09); },
+  wrong(){ beep(180,.20,'sawtooth',.09); },
+  level(){ [523,659,784,1046].forEach((f,i)=>beep(f,.20,'triangle',.14,i*0.09)); },
+  tick(){  beep(1200,.04,'square',.05); }
 };
 
 /* =====================================================
@@ -2615,6 +2722,8 @@ document.addEventListener('keydown',e=>{
   applyMode(await store.get('mode')||'auto');
   await loadProfile();
   await loadDailyState();
+  muted=!!(await store.get('muted'));
+  $('sfxBtn').classList.toggle('off',muted);
 })();
 
 /* El service worker sólo arranca sobre https (o localhost).
