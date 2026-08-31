@@ -37,6 +37,7 @@
   --glow:rgba(48,209,88,.13);
   --tint:rgba(100,210,255,.13);
   --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,"Roboto Mono",monospace;
 }
 
 /* Mismo sistema en claro: los tonos del semáforo se oscurecen para
@@ -130,6 +131,65 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
   #wall{grid-template-columns:repeat(6,1fr)}
   #wallwrap{height:236px}
   #s-home{padding-top:112px}
+}
+
+/* ---- portada: contraportada de disco ----
+   Nada de filas con icono, título, subtítulo y flecha: ese patrón es
+   el que sale por defecto en cualquier plantilla. Aquí manda la
+   tipografía y los puntos guía, como en el reverso de un vinilo. */
+.sleeve{display:flex;align-items:center;gap:10px;margin-bottom:14px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--place)}
+.sleeve i{width:22px;height:2px;background:var(--accent);display:block}
+
+.cut{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  background:none;border:none;border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);padding:16px 2px;margin-bottom:26px;
+  color:var(--text);font-family:var(--sans);cursor:pointer}
+.cut .cutlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:5px}
+.cut .cutsub{font-size:14px;color:var(--muted);display:block}
+.cut .grow{flex:1;min-width:0}
+.cut .date{font-family:var(--mono);text-align:right;line-height:1;flex:none}
+.cut .date b{display:block;font-size:30px;font-weight:700;letter-spacing:-.03em}
+.cut .date span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--place)}
+.cut.done .cutlab{color:var(--green)}
+
+.listhead{display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--place);margin-bottom:6px}
+
+.tracks{list-style:none}
+.tracks button{display:flex;align-items:baseline;gap:12px;width:100%;
+  background:none;border:none;border-bottom:1px solid var(--line);
+  padding:17px 4px;color:var(--text);font-family:var(--sans);cursor:pointer;text-align:left}
+.tracks li:first-child button{border-top:1px solid var(--line)}
+.tracks .no{font-family:var(--mono);font-size:12px;color:var(--place);flex:none;width:22px}
+.tracks .nm{font-size:19px;font-weight:600;letter-spacing:-.025em;flex:none}
+.tracks .dots{flex:1;border-bottom:1px dotted var(--line);transform:translateY(-4px);min-width:14px}
+.tracks .meta{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none;
+  letter-spacing:.04em;white-space:nowrap}
+.tracks button:hover .nm,.tracks button:focus-visible .nm{color:var(--accent)}
+.tracks button:hover .no{color:var(--accent)}
+.tracks button:active{background:var(--raise)}
+
+.bottom{display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-top:22px}
+.speed{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.speed button{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:9px 12px}
+.speed button.sel{background:var(--accent);color:var(--on-accent);font-weight:700}
+#surprise{background:none;border:1px solid var(--line);border-radius:8px;
+  color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;padding:9px 12px;cursor:pointer;flex:none}
+#surprise:hover{color:var(--text);border-color:var(--text)}
+
+@media(min-width:1000px){
+  .tracks .nm{font-size:26px}
+  .tracks button{padding:22px 4px}
+  .tracks .meta,.tracks .no{font-size:13px}
+  .cut .date b{font-size:38px}
 }
 
 /* El progreso tiene que estar a la vista siempre: si sólo se ve
@@ -528,67 +588,46 @@ input::placeholder{color:var(--place)}
 <!-- HOME -->
 <section class="screen on" id="s-home">
   <div id="wallwrap" aria-hidden="true"><div id="wall"></div></div>
-  <h1>Guess the song, <em>live</em></h1>
-  <p class="lede">Real 30-second previews, pulled fresh every round. Pick an artist and M29 quizzes you on their actual catalog.</p>
 
-  <button class="today" id="todayBtn">
-    <span class="cal"><b id="todayNum">1</b><span id="todayMon">jan</span></span>
-    <span>
-      <h3>Today's song</h3>
-      <p id="todaySub">One track, one shot. Same for everyone.</p>
+  <p class="sleeve"><i></i> M29 · lado A</p>
+  <h1>Guess the song</h1>
+  <p class="lede">Real 30-second previews, pulled live. Nothing is stored, nothing is scripted.</p>
+
+  <button class="cut" id="todayBtn">
+    <span class="grow">
+      <span class="cutlab">Today's cut</span>
+      <span class="cutsub" id="todaySub">One track, one shot. Same for everyone.</span>
     </span>
-    <span class="arrow" style="margin-left:auto;color:var(--accent)">→</span>
+    <span class="date"><b id="todayNum">1</b><span id="todayMon">jan</span></span>
   </button>
 
-  <div class="actions" style="margin:0 0 14px">
-    <button class="primary" id="surprise">🎲 Surprise me</button>
+  <div class="listhead"><span>Tracklist</span><span>Four ways to play</span></div>
+  <ol class="tracks">
+    <li><button data-game="type">
+      <span class="no">01</span><span class="nm">Name It</span>
+      <span class="dots"></span><span class="meta" id="subType">6 tries</span>
+    </button></li>
+    <li><button data-game="blitz">
+      <span class="no">02</span><span class="nm">Blitz</span>
+      <span class="dots"></span><span class="meta" id="subBlitz">12s · 4 options</span>
+    </button></li>
+    <li><button data-game="line">
+      <span class="no">03</span><span class="nm">Eras</span>
+      <span class="dots"></span><span class="meta" id="subLine">2–4 players</span>
+    </button></li>
+    <li><button data-game="genre">
+      <span class="no">04</span><span class="nm">Who's This</span>
+      <span class="dots"></span><span class="meta">by genre</span>
+    </button></li>
+  </ol>
+
+  <div class="bottom">
+    <div class="speed modes">
+      <button class="sel" data-diff="classic">Classic</button>
+      <button data-diff="hardcore">Hardcore</button>
+    </div>
+    <button id="surprise">Random</button>
   </div>
-
-  <div class="modes">
-    <button class="sel" data-diff="classic">Classic</button>
-    <button data-diff="hardcore">Hardcore</button>
-  </div>
-
-  <button class="tile" data-game="type">
-    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 8v8M8 5v14M12 9v6M16 4v16M20 8v8"/></svg></span>
-    <span>
-      <h3>Name It</h3>
-      <p id="subType">Type the title · 6 tries · hints</p>
-    </span>
-    <span class="arrow">→</span>
-  </button>
-
-  <button class="tile" data-game="blitz">
-    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M13 2 4.5 13.5H11l-1 8.5 9-11.8h-6.6z"/></svg></span>
-    <span>
-      <h3>Blitz</h3>
-      <p id="subBlitz">Four options · 10 rounds · 12s each</p>
-    </span>
-    <span class="arrow">→</span>
-  </button>
-
-  <button class="tile" data-game="line">
-    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 12h18M7 9v6M13 7v10M19 10v4"/></svg></span>
-    <span>
-      <h3>Eras</h3>
-      <p id="subLine">2–4 players · one phone · name the decade</p>
-    </span>
-    <span class="arrow">→</span>
-  </button>
-
-  <button class="tile" data-game="genre">
-    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/></svg></span>
-    <span>
-      <h3>Who's This</h3>
-      <p>Pick a genre · name the artist</p>
-    </span>
-    <span class="arrow">→</span>
-  </button>
-
 </section>
 
 <!-- ARTIST PICKER -->
@@ -1124,10 +1163,8 @@ function resetAccent(){
 document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.modes button').forEach(x=>x.classList.remove('sel'));
   b.classList.add('sel'); S.diff=b.dataset.diff;
-  $('subType').textContent = S.diff==='hardcore'
-    ? 'Type the title · 3 tries · no help'
-    : 'Type the title · 6 tries · hints';
-  $('subBlitz').textContent = `Four options · ${cfg().rounds} rounds · ${cfg().limit}s each`;
+  $('subType').textContent = S.diff==='hardcore' ? '3 tries' : '6 tries · hints';
+  $('subBlitz').textContent = `${cfg().limit}s · 4 options`;
 });
 document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{
   S.game=b.dataset.game; chips();
@@ -1155,7 +1192,7 @@ function retryBtn(host, fn){
 $('surprise').onclick=async()=>{
   const b=$('surprise');
   const antes=b.textContent;
-  b.textContent='Finding something…'; b.disabled=true;
+  b.textContent='…'; b.disabled=true;
   try{
     const ch=await cached('chart:0',()=>deezer('/chart/0/tracks',{limit:100}));
     const nombres=[...new Set((ch.data||[])
