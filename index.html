@@ -538,10 +538,10 @@ input::placeholder{color:var(--place)}
 .final .big{font-size:clamp(56px,17vw,88px);font-weight:600;letter-spacing:-.045em;line-height:1}
 .final .sub{color:var(--muted);font-size:14px;margin-top:10px;line-height:1.5}
 .final .rec{color:var(--green);font-weight:600}
-.tape{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;margin-top:20px}
-.tape i{width:22px;height:22px;border-radius:7px;background:var(--sugg)}
-.tape i.hit{background:var(--green)}
-.tape i.miss{background:var(--red)}
+.run{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;margin-top:20px}
+.run i{width:22px;height:22px;border-radius:7px;background:var(--sugg)}
+.run i.hit{background:var(--green)}
+.run i.miss{background:var(--red)}
 
 .actions{display:flex;gap:8px;margin-top:12px}
 .actions button{flex:1;padding:14px;border-radius:980px;border:1px solid var(--line);
@@ -600,7 +600,7 @@ input::placeholder{color:var(--place)}
   .reveal-row .d{font-size:14px}
   .reveal-row img{width:84px;height:84px}
   .gain{font-size:19px}
-  .tape i{width:28px;height:28px}
+  .run i{width:28px;height:28px}
   input[type=text]{font-size:18px;padding:17px}
   .foot{font-size:14px}
   /* las teclas se anuncian sólo donde hay teclado */
@@ -801,7 +801,7 @@ input::placeholder{color:var(--place)}
     <div class="final">
       <div class="big" id="b-total">0</div>
       <div class="sub" id="b-recap"></div>
-      <div class="tape" id="b-tape"></div>
+      <div class="run" id="b-tape"></div>
     </div>
     <div class="actions">
       <button class="primary" id="b-again">Play again</button>
@@ -937,7 +937,7 @@ input::placeholder{color:var(--place)}
     <div class="final">
       <div class="big" id="g-total">0</div>
       <div class="sub" id="g-recap"></div>
-      <div class="tape" id="g-tape"></div>
+      <div class="run" id="g-tape"></div>
     </div>
     <div class="actions">
       <button class="primary" id="g-again">Play again</button>
@@ -1334,8 +1334,10 @@ function retryBtn(host, fn){
    oír una nota: un botón que elige modo y artista por ti. */
 $('surprise').onclick=async()=>{
   const b=$('surprise');
-  const antes=b.textContent;
-  b.textContent='…'; b.disabled=true;
+  // se cambia sólo la línea pequeña: tocar textContent borraría la cinta entera
+  const nota=b.querySelector('.t2');
+  const antes=nota.textContent;
+  nota.textContent='looking…'; b.disabled=true;
   try{
     const ch=await cached('chart:0',()=>deezer('/chart/0/tracks',{limit:100}));
     const nombres=[...new Set((ch.data||[])
@@ -1349,10 +1351,10 @@ $('surprise').onclick=async()=>{
     chips();
     await loadArtist(elegido);
   }catch(e){
-    b.textContent='Try again';
+    nota.textContent='try again';
   } finally {
     b.disabled=false;
-    setTimeout(()=>{b.textContent=antes},1200);
+    setTimeout(()=>{nota.textContent=antes},1400);
   }
 };
 
