@@ -152,108 +152,39 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 .slot2 .disc{transition:transform .18s}
 .slot2:hover .nm{color:var(--accent)}
 
-/* ---- casetes ----
-   Arriba vinilos, abajo cintas: el mismo mundo en dos formatos. Todo
-   dibujado con degradados, sin una sola imagen de más. */
-.tape{position:relative;display:flex;flex-direction:column;align-items:stretch;
-  width:100%;aspect-ratio:1.62/1;border:none;padding:8px 8px 10px;
-  border-radius:10px;cursor:pointer;font-family:var(--sans);color:var(--text);
-  text-align:left;overflow:hidden;
-  background:linear-gradient(180deg,#232327 0%,#191A1D 55%,#141416 100%);
-  box-shadow:0 4px 14px rgba(0,0,0,.45),
-             inset 0 0 0 1px rgba(255,255,255,.06)}
-.tape.sel{box-shadow:0 4px 14px rgba(0,0,0,.45),
-          inset 0 0 0 1.5px var(--tape-on)}
+/* ---- discos pequeños: mismos objetos, otro tamaño ----
+   Los ajustes son vinilos de 7 pulgadas junto a los álbumes de arriba.
+   Uno solo gira: el que está puesto. */
+.picks{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.pick{background:none;border:none;padding:0;cursor:pointer;text-align:center;
+  color:var(--text);font-family:var(--sans)}
+.pick .disc{width:100%;max-width:104px;margin:0 auto;transition:transform .18s}
+.pick:active .disc{transform:scale(.96)}
+.pick .nm2{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--place);margin-top:10px}
+.pick .meta2{display:block;font-family:var(--mono);font-size:9px;color:var(--place);
+  opacity:.7;margin-top:3px}
+.pick.sel .disc{box-shadow:0 0 0 2px var(--tape-on),0 10px 28px rgba(0,0,0,.6);
+  animation:spin 5.5s linear infinite}
+.pick.sel .nm2{color:var(--text);font-weight:700}
+.pick:not(.sel) .disc{filter:brightness(.72) saturate(.6)}
+.pick:hover .nm2{color:var(--text)}
 
-/* etiqueta: papel translúcido sobre la carátula del disco */
-.tape .card{display:block;position:relative;border-radius:5px;overflow:hidden;padding:9px 10px 8px;
-  flex:none;background:#D9D2C1;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
-.tape .card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  opacity:.20;filter:saturate(1.4) contrast(.9)}
-/* velo de papel sobre la carátula: el texto manda, la imagen sólo tiñe */
-.tape .card::after{content:"";position:absolute;inset:0;
-  background:rgba(217,210,193,.72)}
-.tape .card>*{position:relative}
-.tape .card .t1{display:block;font-family:var(--mono);font-size:13px;font-weight:700;
-  letter-spacing:.02em;color:#1B1710}
-.tape .card .t2{display:block;font-family:var(--mono);font-size:9px;color:#6A6252;
-  margin-top:9px;padding-top:6px;border-top:1px solid rgba(40,34,26,.28)}
-.tape:not(.sel) .card{filter:saturate(.5) brightness(.78)}
-
-/* ventana: fondo hundido y dos bobinas con la cinta enrollada */
-.tape .win{display:flex;flex:1;position:relative;margin-top:8px;border-radius:5px;
-  background:#0C0C0E;
-  box-shadow:inset 0 2px 6px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.10);
-  display:flex;align-items:center;justify-content:space-around;padding:0 12%}
-.tape .win::after{content:"";position:absolute;left:30%;right:30%;top:50%;height:3px;
-  transform:translateY(-50%);background:#4A3722;border-radius:2px}
-.tape .reel{position:relative;width:46px;height:46px;border-radius:50%;
-  background:
-    repeating-radial-gradient(circle at 50% 50%,
-      rgba(150,110,70,.55) 0 1px, rgba(58,42,28,.9) 1px 3px),
-    #3A2A1C}
-.tape .reel.thin{width:34px;height:34px}
-/* el carrete: dientes hechos con un degradado cónico */
-.tape .reel::before{content:"";position:absolute;inset:31%;border-radius:50%;
-  background:conic-gradient(#C9C7C3 0 12deg,#6E6C68 12deg 30deg,
-             #C9C7C3 30deg 42deg,#6E6C68 42deg 60deg,
-             #C9C7C3 60deg 72deg,#6E6C68 72deg 90deg,
-             #C9C7C3 90deg 102deg,#6E6C68 102deg 120deg,
-             #C9C7C3 120deg 132deg,#6E6C68 132deg 150deg,
-             #C9C7C3 150deg 162deg,#6E6C68 162deg 180deg,
-             #C9C7C3 180deg 192deg,#6E6C68 192deg 210deg,
-             #C9C7C3 210deg 222deg,#6E6C68 222deg 240deg,
-             #C9C7C3 240deg 252deg,#6E6C68 252deg 270deg,
-             #C9C7C3 270deg 282deg,#6E6C68 282deg 300deg,
-             #C9C7C3 300deg 312deg,#6E6C68 312deg 330deg,
-             #C9C7C3 330deg 342deg,#6E6C68 342deg 360deg)}
-.tape .reel::after{content:"";position:absolute;inset:43%;border-radius:50%;background:#131315}
-.tape.sel .reel{animation:spin 4.2s linear infinite}
-
-/* ranuras y tornillos del borde inferior */
-.tape .screws{display:flex;justify-content:space-between;align-items:center;
-  padding:0 3px;margin-top:7px}
-.tape .screws i{width:4px;height:4px;border-radius:50%;
-  background:rgba(255,255,255,.22)}
-.tape .screws b{flex:1;height:3px;margin:0 5px;border-radius:2px;
-  background:repeating-linear-gradient(90deg,rgba(0,0,0,.55) 0 14px,transparent 14px 24px)}
-
-/* el corte del día es una cinta grabada a mano */
-.cutwrap{margin-bottom:22px}
-.cutrow{display:flex;align-items:center;gap:16px}
-.cutrow .tape{width:190px;flex:none}
+/* el corte del día: un sencillo con la fecha en la etiqueta */
+.cutwrap{margin-bottom:26px}
+.cutrow{display:flex;align-items:center;gap:18px}
+.cutrow .disc{width:110px;flex:none;animation:spin 7s linear infinite}
+.cutrow .disc .lab{background:var(--amber);display:grid;place-items:center}
+.cutrow .disc .lab b{font-family:var(--mono);font-size:15px;font-weight:700;
+  color:#1B1400;line-height:1.05;text-align:center}
+.cutrow .disc .lab b span{display:block;font-size:8px;letter-spacing:.14em;margin-top:2px}
+.cutwrap.done .cutrow .disc .lab{background:var(--green)}
 .cutinfo{min-width:0}
 .cuthead{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
   text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+.cutwrap.done .cuthead{color:var(--green)}
 .cuttitle{display:block;font-size:17px;font-weight:600;letter-spacing:-.02em}
 .cutnote{display:block;font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.4}
-.cutwrap.done .cuthead{color:var(--green)}
-@media(max-width:439px){
-  /* en el móvil la cinta se pone arriba y el texto debajo */
-  .cutrow{flex-direction:column;align-items:flex-start;gap:12px}
-  .cutrow .tape{width:100%;max-width:230px}
-}
-.cutwrap.done .tape.sel{box-shadow:0 6px 20px rgba(0,0,0,.55),
-  inset 0 1px 0 rgba(255,255,255,.2),inset 0 0 0 2px var(--green)}
-
-.bottom .lab3{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--place);margin-bottom:8px;display:block}
-.bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-@media(max-width:439px){
-  /* tres cintas seguidas no caben: la de Random pasa a ocupar la fila */
-  .bottom{grid-template-columns:1fr 1fr}
-  .bottom>*:nth-child(3){grid-column:span 2}
-  .tape .card .t1{font-size:12px}
-  .tape .reel{width:40px;height:40px}
-  .tape .reel.thin{width:30px;height:30px}
-}
-
-@media(min-width:1000px){
-  .tape .reel{width:56px;height:56px}
-  .tape .reel.thin{width:42px;height:42px}
-  .tape .card .t1{font-size:15px}
-}
 
 @media(min-width:1000px){
   .rack{gap:28px 26px}
@@ -683,52 +614,29 @@ input::placeholder{color:var(--place)}
 
   <div class="cutwrap" id="cutWrap">
     <div class="cutrow">
-    <button class="tape sel" id="todayBtn">
-      <span class="card">
-        <img id="todayArt" alt="">
-        <span class="t1"><span id="todayNum">1</span> <span id="todayMon">jan</span></span>
-        <span class="t2">one track · same for everyone</span>
-      </span>
-      <span class="win"><span class="reel"></span><span class="reel thin"></span></span>
-      <span class="screws"><i></i><b></b><i></i></span>
-    </button>
-    <div class="cutinfo">
-      <span class="cuthead">Today's cut</span>
-      <span class="cuttitle">One track, one shot</span>
-      <span class="cutnote" id="todaySub">Same for everyone. Back tomorrow.</span>
-    </div>
+      <button class="disc" id="todayBtn" aria-label="Today's cut">
+        <span class="lab"><b><span id="todayMon">JAN</span><span id="todayNum" style="font-size:15px;letter-spacing:0;margin:0">1</span></b></span>
+      </button>
+      <div class="cutinfo">
+        <span class="cuthead">Today's cut</span>
+        <span class="cuttitle">One track, one shot</span>
+        <span class="cutnote" id="todaySub">Same for everyone. Back tomorrow.</span>
+      </div>
     </div>
   </div>
 
-  <div class="bottom modes">
-    <button class="tape sel" data-diff="classic">
-      <span class="card">
-        <img id="tapeArt1" alt="">
-        <span class="t1">CLASSIC</span>
-        <span class="t2" id="subType">6 tries · hints</span>
-      </span>
-      <span class="win"><span class="reel"></span><span class="reel thin"></span></span>
-      <span class="screws"><i></i><b></b><i></i></span>
+  <div class="picks modes">
+    <button class="pick sel" data-diff="classic">
+      <span class="disc"><span class="lab"><img id="tapeArt1" alt=""></span></span>
+      <span class="nm2">Classic</span><span class="meta2" id="subType">6 tries</span>
     </button>
-
-    <button class="tape" data-diff="hardcore">
-      <span class="card">
-        <img id="tapeArt2" alt="">
-        <span class="t1">HARDCORE</span>
-        <span class="t2">3 tries · 6s</span>
-      </span>
-      <span class="win"><span class="reel"></span><span class="reel thin"></span></span>
-      <span class="screws"><i></i><b></b><i></i></span>
+    <button class="pick" data-diff="hardcore">
+      <span class="disc"><span class="lab"><img id="tapeArt2" alt=""></span></span>
+      <span class="nm2">Hardcore</span><span class="meta2">3 tries</span>
     </button>
-
-    <button class="tape" id="surprise">
-      <span class="card">
-        <img id="tapeArt3" alt="">
-        <span class="t1">RANDOM</span>
-        <span class="t2">surprise me</span>
-      </span>
-      <span class="win"><span class="reel"></span><span class="reel thin"></span></span>
-      <span class="screws"><i></i><b></b><i></i></span>
+    <button class="pick" id="surprise">
+      <span class="disc"><span class="lab"><img id="tapeArt3" alt=""></span></span>
+      <span class="nm2">Random</span><span class="meta2">surprise me</span>
     </button>
   </div>
 </section>
@@ -1335,7 +1243,7 @@ function retryBtn(host, fn){
 $('surprise').onclick=async()=>{
   const b=$('surprise');
   // se cambia sólo la línea pequeña: tocar textContent borraría la cinta entera
-  const nota=b.querySelector('.t2');
+  const nota=b.querySelector('.meta2');
   const antes=nota.textContent;
   nota.textContent='looking…'; b.disabled=true;
   try{
@@ -2768,7 +2676,7 @@ async function loadDailyState(){
 function paintToday(){
   const d=new Date();
   $('todayNum').textContent=d.getDate();
-  $('todayMon').textContent=d.toLocaleString('en',{month:'short'});
+  $('todayMon').textContent=d.toLocaleString('en',{month:'short'}).toUpperCase();
   const done=dailyState.done && dailyState.date===hoy();
   $('cutWrap').classList.toggle('done',done);
   $('todaySub').textContent = done
