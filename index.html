@@ -181,8 +181,10 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .disc .lab{display:block;position:absolute;inset:29%;border-radius:50%;overflow:hidden;
   background:var(--sugg);display:grid;place-items:center}
 .disc .lab img{width:100%;height:100%;object-fit:cover}
-.disc .lab .no{position:absolute;font-family:var(--mono);font-size:10px;font-weight:700;
-  color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9);top:8%;letter-spacing:.1em}
+.disc .lab .no{position:absolute;left:50%;top:9%;transform-origin:50% 455%;
+  margin-left:-9px;width:18px;text-align:center;
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9);letter-spacing:.08em}
 .disc::after{content:"";position:absolute;left:50%;top:50%;width:7%;height:7%;
   transform:translate(-50%,-50%);border-radius:50%;background:var(--bg)}
 
@@ -192,8 +194,20 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .slot2 .nm{display:block;font-size:17px;font-weight:600;letter-spacing:-.02em;margin-top:11px}
 .slot2 .meta{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);
   margin-top:3px;letter-spacing:.04em}
-.slot2:active .disc{transform:scale(.97)}
-.slot2 .disc{transition:transform .18s}
+/* Los cuatro giran, cada uno a su ritmo: sincronizados parecerían un
+   gif; desfasados parecen cuatro discos puestos a la vez. */
+.slot2 .disc{animation:spin 16s linear infinite;will-change:transform}
+.slot2:nth-child(2) .disc{animation-duration:19s}
+.slot2:nth-child(3) .disc{animation-duration:14s}
+.slot2:nth-child(4) .disc{animation-duration:22s}
+.slot2:hover .disc{animation-duration:5s}
+/* el número gira al revés para quedarse derecho */
+.slot2 .disc .no{animation:spin 16s linear infinite reverse}
+.slot2:nth-child(2) .disc .no{animation-duration:19s}
+.slot2:nth-child(3) .disc .no{animation-duration:14s}
+.slot2:nth-child(4) .disc .no{animation-duration:22s}
+.slot2:hover .disc .no{animation-duration:5s}
+.slot2:active .disc{animation-play-state:paused;transform:scale(.97)}
 .slot2:hover .nm{color:var(--accent)}
 
 /* ---- discos pequeños: mismos objetos, otro tamaño ----
