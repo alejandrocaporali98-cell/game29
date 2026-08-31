@@ -133,6 +133,7 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 /* pantallas */
 .screen{display:none}
 .screen.on{display:block;animation:fade .25s ease}
+.screen:focus{outline:none}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}}
 
 h1{font-weight:600;font-size:clamp(40px,10.4vw,56px);
@@ -427,8 +428,8 @@ input::placeholder{color:var(--place)}
 
 <header>
   <div class="brand">M29</div>
-  <button id="infoBtn" title="How it works">i</button>
-  <button id="modeBtn" title="Appearance">◐</button>
+  <button id="infoBtn" title="How it works" aria-label="How it works">i</button>
+  <button id="modeBtn" title="Appearance" aria-label="Light or dark mode">◐</button>
   <button id="installBtn">⬇ Install</button>
   <div class="stats">
     <div class="chip" id="chipA">Streak <b id="statA">0</b></div>
@@ -491,7 +492,7 @@ input::placeholder{color:var(--place)}
 
 <!-- ARTIST PICKER -->
 <section class="screen" id="s-pick">
-  <button class="back" data-go="s-home">←</button>
+  <button class="back" data-go="s-home" aria-label="Back">←</button>
   <h1>Pick an artist</h1>
   <p class="lede">Start typing — Drake, Adele, Tame Impala, anyone on Deezer.</p>
   <input type="text" id="q" placeholder="Search artists" autocomplete="off">
@@ -500,7 +501,7 @@ input::placeholder{color:var(--place)}
 
 <!-- NAME IT -->
 <section class="screen" id="s-type">
-  <button class="back" data-go="s-pick">←</button>
+  <button class="back" data-go="s-pick" aria-label="Back">←</button>
 
   <div class="art" id="a-art"><img id="a-cover" alt=""><div class="vinyl"></div></div>
   <div class="bar"><div class="seg" id="a-seg"></div><div class="now" id="a-now"></div></div>
@@ -525,7 +526,7 @@ input::placeholder{color:var(--place)}
   </div>
 
   <div id="a-done" hidden>
-    <div class="verdict" id="a-verdict"></div>
+    <div class="verdict" id="a-verdict" role="status" aria-live="polite"></div>
     <div class="answer" id="a-answer"></div>
     <div class="actions">
       <button class="primary" id="a-next">Next song →</button>
@@ -539,7 +540,7 @@ input::placeholder{color:var(--place)}
 
 <!-- BLITZ -->
 <section class="screen" id="s-blitz">
-  <button class="back" data-go="s-pick">←</button>
+  <button class="back" data-go="s-pick" aria-label="Back">←</button>
 
   <div id="b-live">
     <div class="bhead">
@@ -550,7 +551,7 @@ input::placeholder{color:var(--place)}
     <div class="clock" id="b-clock"><i id="b-bar"></i></div>
     <div class="live"><span id="b-worth">1000 pts</span><span id="b-time">12.0s</span></div>
     <div class="opts" id="b-opts"></div>
-    <div class="gain" id="b-gain"></div>
+    <div class="gain" id="b-gain" role="status" aria-live="polite"></div>
   </div>
 
   <div id="b-final" hidden>
@@ -571,7 +572,7 @@ input::placeholder{color:var(--place)}
 
 <!-- TIMELINE: jugadores -->
 <section class="screen" id="s-seats">
-  <button class="back" data-go="s-home">←</button>
+  <button class="back" data-go="s-home" aria-label="Back">←</button>
   <h1>Who's playing?</h1>
   <p class="lede">Everyone shares this phone. On your turn you hear a song and call the decade it came out.</p>
   <div class="seats" id="seats"></div>
@@ -609,7 +610,7 @@ input::placeholder{color:var(--place)}
     <div class="reveal-row">
       <img id="l-rcover" alt="">
       <div>
-        <div class="v" id="l-verdict"></div>
+        <div class="v" id="l-verdict" role="status" aria-live="polite"></div>
         <div class="d" id="l-detail"></div>
       </div>
     </div>
@@ -634,7 +635,7 @@ input::placeholder{color:var(--place)}
 
 <!-- GÉNEROS: elegir -->
 <section class="screen" id="s-genres">
-  <button class="back" data-go="s-home">←</button>
+  <button class="back" data-go="s-home" aria-label="Back">←</button>
   <h1>Pick a genre</h1>
   <p class="lede">M29 pulls the artists that define it, then plays you one and hides the name.</p>
   <div class="genres" id="genres"></div>
@@ -643,7 +644,7 @@ input::placeholder{color:var(--place)}
 
 <!-- GÉNEROS: jugar -->
 <section class="screen" id="s-guess">
-  <button class="back" data-go="s-genres">←</button>
+  <button class="back" data-go="s-genres" aria-label="Back">←</button>
   <div id="g-live">
     <div class="bhead">
       <span class="rnd" id="g-round">Round 1 of 10</span>
@@ -653,7 +654,7 @@ input::placeholder{color:var(--place)}
     <div class="clock" id="g-clock"><i id="g-bar"></i></div>
     <div class="live"><span id="g-worth">1000 pts</span><span id="g-time">12.0s</span></div>
     <div class="opts" id="g-opts"></div>
-    <div class="gain" id="g-gain"></div>
+    <div class="gain" id="g-gain" role="status" aria-live="polite"></div>
   </div>
 
   <div id="g-final" hidden>
@@ -709,6 +710,17 @@ input::placeholder{color:var(--place)}
   </div>
 </div>
 
+<!-- aviso de pausa cuando el sistema corta el audio -->
+<div class="sheet" id="resume">
+  <div class="inner">
+    <h3>Paused</h3>
+    <p class="lede" style="margin-bottom:14px">The clock stopped when you left the app. Nothing lost.</p>
+    <div class="actions" style="margin-top:0">
+      <button class="primary" id="resumeBtn">Resume round</button>
+    </div>
+  </div>
+</div>
+
 <audio id="audio" preload="auto"></audio>
 </div>
 
@@ -717,7 +729,7 @@ input::placeholder{color:var(--place)}
    La API no manda cabeceras CORS, así que fetch() falla desde el
    navegador. Con output=jsonp responde con una etiqueta de script que
    llama a nuestra función: mismo dato, sin proxy ni servidor propio. */
-function deezer(path, params={}){
+function jsonp(path, params={}){
   return new Promise((res,rej)=>{
     const cb='dz'+Math.random().toString(36).slice(2);
     const s=document.createElement('script');
@@ -728,6 +740,62 @@ function deezer(path, params={}){
     s.src='https://api.deezer.com'+path+'?'+new URLSearchParams({...params,output:'jsonp',callback:cb});
     document.head.appendChild(s);
   });
+}
+
+/* Deezer corta si le llegan muchas peticiones seguidas, y cuando lo
+   hace no avisa: devuelve vacío. Tres a la vez como máximo y una
+   pausa corta entre tandas. */
+let inFlight=0; const waiting=[];
+function slot(){
+  if(inFlight<3){inFlight++;return Promise.resolve()}
+  return new Promise(r=>waiting.push(r));
+}
+function release(){
+  inFlight--;
+  const next=waiting.shift();
+  if(next){inFlight++;setTimeout(next,90)}
+}
+
+/* Una llamada suelta puede fallar por un bache de red. Se reintenta
+   dos veces, esperando cada vez un poco más, antes de darla por mala. */
+async function deezer(path, params={}, tries=3){
+  await slot();
+  try{
+    for(let i=0;i<tries;i++){
+      try{
+        const d=await jsonp(path,params);
+        if(d && d.error && d.error.code===4){   // límite alcanzado
+          await new Promise(r=>setTimeout(r,700*(i+1)));
+          continue;
+        }
+        return d;
+      }catch(e){
+        if(i===tries-1) throw e;
+        await new Promise(r=>setTimeout(r,500*(i+1)));
+      }
+    }
+    throw new Error('retry');
+  } finally { release(); }
+}
+
+/* Volver al mismo artista o género no debería descargar nada otra vez.
+   Se guarda mientras dure la sesión, no en disco. */
+const cache=new Map();
+function cached(key, fn){
+  if(cache.has(key)) return Promise.resolve(cache.get(key));
+  return fn().then(v=>{cache.set(key,v);return v});
+}
+
+/* Adelanta la descarga de la siguiente canción y su portada mientras
+   se juega la actual: así no hay silencio entre rondas. */
+const warmed=[];
+function warm(t){
+  if(!t)return;
+  try{
+    const a=new Audio(); a.preload='auto'; a.src=t.preview;
+    warmed.push(a); if(warmed.length>3) warmed.shift();
+    if(t.cover||(t.album&&t.album.cover_big)) new Image().src=t.cover||t.album.cover_big;
+  }catch(e){}
 }
 
 /* ---------- guardado ----------
@@ -751,7 +819,7 @@ const DIFF={
 const REWARD=15, PREVIEW=30;   // premio al acertar y largo del preview
 const TOP=1000, FLOOR=100;     // puntos de Blitz al empezar y al final
 
-const S={diff:'classic',game:'type',artist:null,pool:[],titles:[],used:new Set(),
+const S={diff:'classic',game:'type',artist:null,pool:[],titles:[],used:new Set(),queued:null,
   track:null,stage:0,over:false,hints:0,gaveUp:false,
   streak:0,bestStreak:0,session:[],
   round:0,score:0,hits:0,log:[],bestScore:0};
@@ -768,6 +836,9 @@ const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
 
 function go(id){
   document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.id===id));
+  // quien usa lector de pantalla debe aterrizar arriba, no donde estaba
+  const s=$(id);
+  if(s){s.setAttribute('tabindex','-1');setTimeout(()=>s.focus({preventScroll:true}),0)}
   if(id==='s-home'||id==='s-pick') resetAccent();
   if(id!=='s-type') stopAudio();
   if(id!=='s-blitz') bHalt();
@@ -902,6 +973,18 @@ document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{
   go('s-pick'); $('q').focus();
 });
 
+/* Un mensaje de error sin salida deja al jugador atascado: siempre
+   hay que ofrecerle volver a intentarlo. */
+function retryBtn(host, fn){
+  const wrap=document.createElement('div');
+  wrap.className='actions';
+  const b=document.createElement('button');
+  b.className='primary';b.textContent='Try again';
+  b.onclick=()=>{wrap.remove();fn()};
+  wrap.appendChild(b);
+  host.appendChild(wrap);
+}
+
 /* ---------- búsqueda de artista ---------- */
 let sT;
 $('q').oninput=e=>{
@@ -927,14 +1010,15 @@ async function findArtists(q){
       $('artists').appendChild(li);
     });
   }catch(e){
-    $('artists').innerHTML='<div class="err">Can\'t reach Deezer right now. Check your connection and search again.</div>';
+    $('artists').innerHTML='<div class="err">Can\'t reach Deezer right now.</div>';
+    retryBtn($('artists'),()=>findArtists(q));
   }
 }
 
 async function loadArtist(a){
   $('artists').innerHTML='<div class="load">loading catalog…</div>';
   try{
-    const d=await deezer(`/artist/${a.id}/top`,{limit:50});
+    const d=await cached('top:'+a.id, ()=>deezer(`/artist/${a.id}/top`,{limit:50}));
     const seen=new Set(), pool=[];
     (d.data||[]).forEach(t=>{
       if(!t.preview)return;                 // sin fragmento no sirve
@@ -958,9 +1042,11 @@ async function loadArtist(a){
     if(S.game==='blitz'){go('s-blitz');bStart()}
     else{S.session=[];go('s-type');aRound()}
   }catch(e){
-    $('artists').innerHTML = e.message==='thin'||e.message==='no dates'
+    const thin=e.message==='thin'||e.message==='no dates';
+    $('artists').innerHTML = thin
       ? '<div class="err">Not enough dated releases for that artist — Eras needs a longer career. Try someone else.</div>'
-      : '<div class="err">Couldn\'t load that catalog. Try again.</div>';
+      : '<div class="err">Couldn\'t load that catalog.</div>';
+    if(!thin) retryBtn($('artists'),()=>loadArtist(a));
   }
 }
 
@@ -971,6 +1057,19 @@ function pick(){
   return t;
 }
 
+/* La ronda siguiente se elige y se descarga mientras se juega la
+   actual. Sin esto hay un silencio de casi un segundo en datos
+   móviles cada vez que cambia la canción. */
+function takeNext(){
+  const t=S.queued||pick();
+  S.queued=null;
+  return t;
+}
+function queueNext(){
+  S.queued=pick();
+  warm(S.queued);
+}
+
 /* =====================================================
    NAME IT — escribir el título
    ===================================================== */
@@ -978,7 +1077,7 @@ let aStopT=null,aRaf=null;
 
 function aRound(){
   stopAudio();
-  S.track=pick();S.stage=0;S.hints=0;S.gaveUp=false;S.over=false;
+  S.track=takeNext();S.stage=0;S.hints=0;S.gaveUp=false;S.over=false;
   audio.src=S.track.preview;audio.load();
   $('a-cover').src=S.track.album?S.track.album.cover_big:'';
   $('a-art').classList.remove('reveal');
@@ -991,7 +1090,7 @@ function aRound(){
   $('a-hint').disabled=false;$('a-hint').textContent='💡 Hint';
   $('a-hint').style.display=cfg().hints?'':'none';
   $('a-foot').textContent=`${S.artist.name} · ${S.pool.length} songs in rotation`;
-  disarm();aPaint();chips();
+  disarm();aPaint();chips();queueNext();
 }
 
 function aPaint(){
@@ -1167,7 +1266,7 @@ function bStart(){
 function bRound(){
   bHalt();
   bLocked=false;S.round++;
-  S.track=pick();
+  S.track=takeNext();
   const t=S.track;
 
   // los señuelos salen del mismo catálogo: así el juego mide si
@@ -1202,6 +1301,7 @@ function bRound(){
   });
 
   audio.src=t.preview;audio.load();
+  queueNext();
   audio.play().then(()=>{
     $('b-art').classList.add('spin');
     bStartT=performance.now();
@@ -1232,9 +1332,12 @@ function bAnswer(btn,ok){
 
   [...$('b-opts').children].forEach(b=>{
     b.disabled=true;
-    if(b.querySelector('.t').textContent===S.track.title) b.classList.add('right');
+    if(b.querySelector('.t').textContent===S.track.title){
+      b.classList.add('right');
+      b.querySelector('.k').textContent='✓';   // no basta con el color
+    }
   });
-  if(btn && !ok) btn.classList.add('wrong');
+  if(btn && !ok){btn.classList.add('wrong');btn.querySelector('.k').textContent='✕'}
 
   if(ok){
     const pts=worth(el);
@@ -1268,9 +1371,10 @@ async function bFinish(){
   $('b-recap').innerHTML=`${S.hits} of ${cfg().rounds} right · ${escapeHtml(S.artist.name)}`
     + (record?'<div class="rec">New personal best</div>':`<br>Best ${S.bestScore}`);
   $('b-tape').innerHTML='';
-  S.log.forEach(hit=>{
+  S.log.forEach((hit,n)=>{
     const i=document.createElement('i');
     i.className=hit?'hit':'miss';
+    i.title=`Round ${n+1}: ${hit?'right':'missed'}`;
     $('b-tape').appendChild(i);
   });
 }
@@ -1291,6 +1395,8 @@ const REISSUE=/remaster|deluxe|anniversar|edition|reissue|live|karaoke|instrumen
 /* Elegimos álbumes repartidos por toda la carrera y nos quedamos con
    la aparición más antigua de cada canción. */
 async function loadDated(a){
+  const hit=cache.get('dated:'+a.id);
+  if(hit) return hit.slice();
   $('artists').innerHTML='<div class="load">reading discography…</div>';
   const alb=await deezer(`/artist/${a.id}/albums`,{limit:100});
   let list=(alb.data||[]).filter(x=>x.release_date && !REISSUE.test(x.title));
@@ -1359,6 +1465,7 @@ async function loadDated(a){
   });
 
   if(pool.length<10||perYear.size<3) throw new Error('thin');
+  cache.set('dated:'+a.id,pool.slice());
   return pool;
 }
 
@@ -1574,7 +1681,8 @@ async function showGenres(){
     });
     if(!groups.length) throw new Error('empty');
   }catch(e){
-    $('g-msg').innerHTML='<div class="err">Couldn\'t load genres. Check your connection and try again.</div>';
+    $('g-msg').innerHTML='<div class="err">Couldn\'t load genres.</div>';
+    retryBtn($('g-msg'),showGenres);
   }
 }
 
@@ -1584,7 +1692,7 @@ async function loadGenre(gen){
     // hasta tres emisoras del estilo: más variedad sin más espera
     const radios=(gen.radios||[]).slice().sort(()=>Math.random()-0.5).slice(0,3);
     const lists=await Promise.all(radios.map(r=>
-      deezer(`/radio/${r.id}/tracks`).catch(()=>null)));
+      cached('radio:'+r.id, ()=>deezer(`/radio/${r.id}/tracks`)).catch(()=>null)));
 
     const perArtist=new Map();
     lists.forEach(l=>{
@@ -1609,7 +1717,8 @@ async function loadGenre(gen){
     $('g-msg').innerHTML='';
     go('s-guess');gStartGame();
   }catch(e){
-    $('g-msg').innerHTML='<div class="err">That station came back too thin. Try another genre.</div>';
+    $('g-msg').innerHTML='<div class="err">That station came back too thin.</div>';
+    retryBtn($('g-msg'),()=>loadGenre(gen));
   }
 }
 
@@ -1627,6 +1736,9 @@ function gRound(){
   const list=fresh.length?fresh:G.pool;
   const t=list[Math.floor(Math.random()*list.length)];
   G.used.add(t.preview);G.track=t;
+  // deja lista una candidata para la ronda siguiente
+  const rest=G.pool.filter(x=>!G.used.has(x.preview));
+  if(rest.length) warm(rest[Math.floor(Math.random()*rest.length)]);
 
   // los señuelos son otros artistas del mismo género
   const others=G.artists.filter(n=>n!==t.artist).sort(()=>Math.random()-0.5).slice(0,3);
@@ -1683,9 +1795,12 @@ function gAnswer(btn,ok){
 
   [...$('g-opts').children].forEach(b=>{
     b.disabled=true;
-    if(b.querySelector('.t').textContent===G.track.artist) b.classList.add('right');
+    if(b.querySelector('.t').textContent===G.track.artist){
+      b.classList.add('right');
+      b.querySelector('.k').textContent='✓';
+    }
   });
-  if(btn&&!ok) btn.classList.add('wrong');
+  if(btn&&!ok){btn.classList.add('wrong');btn.querySelector('.k').textContent='✕'}
 
   if(ok){
     const pts=worth(el);
@@ -1911,6 +2026,62 @@ $('infoClose').onclick=()=>$('infoSheet').classList.remove('on');
 document.querySelectorAll('.sheet').forEach(s=>{
   s.onclick=e=>{if(e.target===s) s.classList.remove('on')};
 });
+
+/* ---------- interrupciones del sistema ----------
+   En el iPhone, una llamada o bloquear la pantalla corta el audio sin
+   avisar a la página. El reloj seguía corriendo y perdías la ronda sin
+   haberla escuchado. Ahora el reloj se congela y se reanuda al volver. */
+let frozen=null;
+
+function pauseClock(){
+  if(frozen)return;
+  const live = $('s-blitz').classList.contains('on') && !$('b-live').hidden ? 'blitz'
+             : $('s-guess').classList.contains('on') && !$('g-live').hidden ? 'genre'
+             : null;
+  if(!live)return;
+  frozen={mode:live, at:performance.now()};
+  audio.pause();
+  if(live==='blitz') cancelAnimationFrame(bRaf); else cancelAnimationFrame(gRaf);
+  $('resume').classList.add('on');
+}
+
+function resumeClock(){
+  if(!frozen)return;
+  const paused=performance.now()-frozen.at;
+  // el reloj no corre mientras está en pausa: se corre la salida
+  if(frozen.mode==='blitz'){ bStartT+=paused; } else { gStart+=paused; }
+  const m=frozen.mode; frozen=null;
+  $('resume').classList.remove('on');
+  audio.play().catch(()=>{});
+  if(m==='blitz'){
+    (function t(){
+      const el=(performance.now()-bStartT)/1000;
+      const left=Math.max(0,cfg().limit-el);
+      $('b-bar').style.width=(left/cfg().limit*100)+'%';
+      $('b-time').textContent=left.toFixed(1)+'s';
+      $('b-worth').textContent=worth(el)+' pts';
+      $('b-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
+      if(left<=0){bAnswer(null,false);return}
+      bRaf=requestAnimationFrame(t);
+    })();
+  }else{
+    (function t(){
+      const el=(performance.now()-gStart)/1000;
+      const left=Math.max(0,cfg().limit-el);
+      $('g-bar').style.width=(left/cfg().limit*100)+'%';
+      $('g-time').textContent=left.toFixed(1)+'s';
+      $('g-worth').textContent=worth(el)+' pts';
+      $('g-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
+      if(left<=0){gAnswer(null,false);return}
+      gRaf=requestAnimationFrame(t);
+    })();
+  }
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden) pauseClock();
+});
+$('resumeBtn').onclick=resumeClock;
 
 /* ---------- teclado ----------
    Para proyectar en clase: quien maneja el portátil no debería tener
