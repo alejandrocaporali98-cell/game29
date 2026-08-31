@@ -130,6 +130,32 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
   #s-home{padding-top:112px}
 }
 
+/* El progreso tiene que estar a la vista siempre: si sólo se ve
+   entrando al perfil, es como si no existiera. */
+.xptop{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+.xptop .lvl{width:22px;height:22px;flex:none;border-radius:50%;background:var(--accent);
+  color:var(--on-accent);font-size:11px;font-weight:700;display:grid;place-items:center}
+.xptop .track{flex:1;height:7px;border-radius:980px;background:var(--raise);overflow:hidden}
+.xptop .track i{display:block;height:100%;width:0;border-radius:980px;
+  background:linear-gradient(90deg,var(--accent),var(--green));
+  transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.xptop .amt{font-size:10.5px;color:var(--place);font-variant-numeric:tabular-nums}
+
+/* reto diario */
+.today{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);
+  background:var(--tint);border-radius:24px;padding:20px;color:var(--text);
+  font-family:var(--sans);cursor:pointer;margin-bottom:10px}
+.today .cal{width:48px;height:48px;flex:none;border-radius:16px;background:var(--accent);
+  color:var(--on-accent);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;line-height:1}
+.today .cal b{font-size:19px;font-weight:700}
+.today .cal span{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;margin-top:1px}
+.today h3{font-size:17px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
+.today p{font-size:12.5px;color:var(--muted)}
+.today.done{border-color:var(--line);background:var(--raise)}
+.today.done .cal{background:var(--green)}
+
 /* pantallas */
 .screen{display:none}
 .screen.on{display:block;animation:fade .25s ease}
@@ -490,11 +516,26 @@ input::placeholder{color:var(--place)}
   </div>
 </header>
 
+<div class="xptop" id="xpTop">
+  <span class="lvl" id="xpLvl">1</span>
+  <span class="track"><i id="xpFill"></i></span>
+  <span class="amt" id="xpAmt">0/300</span>
+</div>
+
 <!-- HOME -->
 <section class="screen on" id="s-home">
   <div id="wallwrap" aria-hidden="true"><div id="wall"></div></div>
   <h1>Guess the song, <em>live</em></h1>
   <p class="lede">Real 30-second previews, pulled fresh every round. Pick an artist and M29 quizzes you on their actual catalog.</p>
+
+  <button class="today" id="todayBtn">
+    <span class="cal"><b id="todayNum">1</b><span id="todayMon">jan</span></span>
+    <span>
+      <h3>Today's song</h3>
+      <p id="todaySub">One track, one shot. Same for everyone.</p>
+    </span>
+    <span class="arrow" style="margin-left:auto;color:var(--accent)">→</span>
+  </button>
 
   <div class="modes">
     <button class="sel" data-diff="classic">Classic</button>
@@ -1190,7 +1231,7 @@ let aStopT=null,aRaf=null;
 
 function aRound(){
   stopAudio();
-  S.track=takeNext();S.stage=0;S.hints=0;S.gaveUp=false;S.over=false;
+  S.track=S.forced||takeNext();S.forced=null;S.stage=0;S.hints=0;S.gaveUp=false;S.over=false;
   audio.src=S.track.preview;audio.load();
   $('a-cover').src=S.track.album?S.track.album.cover_big:'';
   $('a-art').classList.remove('reveal');
@@ -1346,6 +1387,14 @@ async function aEnd(won){
   $('a-seg').style.width='100%';
   $('a-play').textContent=`▶ Play ${REWARD}s more`;
   $('a-live').hidden=true;$('a-done').hidden=false;
+  const esDiario=S.game==='daily';
+  $('a-next').style.display=esDiario?'none':'';
+  $('a-change').textContent=esDiario?'Back home':'Change artist';
+  if(esDiario){
+    dailyState={date:hoy(),done:true,won,tries:S.stage+1};
+    store.set('daily',JSON.stringify(dailyState));
+    paintToday();
+  }
   $('a-verdict').textContent=won?`Got it in ${S.stage+1}`:(S.gaveUp?'Gave up':'Missed');
   $('a-verdict').className='verdict '+(won?'win':'lose');
   if(S.hints){
@@ -2234,6 +2283,15 @@ const needFor=lv=>300+(lv-1)*150;
 const avaOf=id=>AVATARS.find(a=>a.id===id)||AVATARS[0];
 const avaSvg=a=>`<svg viewBox="0 0 48 48" aria-hidden="true">${a.svg}</svg>`;
 
+function paintXp(){
+  const need=needFor(P.level);
+  $('xpLvl').textContent=P.level;
+  $('xpAmt').textContent=P.xp+'/'+need;
+  requestAnimationFrame(()=>{
+    $('xpFill').style.width=Math.min(100,P.xp/need*100)+'%';
+  });
+}
+
 function paintAva(){
   const a=avaOf(P.ava);
   ['avaMini','avaBig'].forEach(id=>{
@@ -2254,6 +2312,7 @@ async function loadProfile(){
   }catch(e){}
   touchStreak();
   paintAva();
+  paintXp();
 }
 
 /* La racha cuenta días naturales seguidos. Si te saltas uno, vuelve a
@@ -2289,6 +2348,7 @@ function award(xp, ev={}){
   if(P.streak>=7) unlock('week');
 
   saveProfile();
+  paintXp();
 
   if(up){ levelUp(up); confetti(); }
   else if(nuevos.length){ badgeUp(nuevos[0]); confetti(); }
@@ -2387,6 +2447,67 @@ $('pfNameIn').oninput=e=>{
   P.name=e.target.value.trim()||'Player';
   $('pfName').textContent=P.name;
   saveProfile();
+};
+
+/* =====================================================
+   RETO DIARIO — una canción, una oportunidad
+   ===================================================== */
+const hoy=()=>new Date().toISOString().slice(0,10);
+
+/* La canción sale de la lista de éxitos y se elige con una cuenta a
+   partir de la fecha: sin servidor, todos los que juegan hoy en el
+   mismo país reciben la misma. */
+function seedOf(str){
+  let n=0;
+  for(let i=0;i<str.length;i++) n=(n*31+str.charCodeAt(i))>>>0;
+  return n;
+}
+
+let dailyState={date:'',done:false,won:false,tries:0};
+
+async function loadDailyState(){
+  try{
+    const raw=await store.get('daily');
+    if(raw){
+      const d=JSON.parse(raw);
+      if(d.date===hoy()) dailyState=d;
+    }
+  }catch(e){}
+  paintToday();
+}
+
+function paintToday(){
+  const d=new Date();
+  $('todayNum').textContent=d.getDate();
+  $('todayMon').textContent=d.toLocaleString('en',{month:'short'});
+  const done=dailyState.done && dailyState.date===hoy();
+  $('todayBtn').classList.toggle('done',done);
+  $('todaySub').textContent = done
+    ? (dailyState.won ? `Solved in ${dailyState.tries} · back tomorrow`
+                      : 'Missed today · back tomorrow')
+    : 'One track, one shot. Same for everyone.';
+}
+
+$('todayBtn').onclick=async()=>{
+  if(dailyState.done && dailyState.date===hoy()){
+    // sólo si la partida sigue en memoria; tras recargar no hay nada que enseñar
+    if(S.game==='daily' && S.track) go('s-type');
+    return;
+  }
+  $('todaySub').textContent='loading…';
+  try{
+    const ch=await cached('chart:0',()=>deezer('/chart/0/tracks',{limit:100}));
+    const pool=(ch.data||[]).filter(t=>t.preview&&t.title);
+    if(pool.length<12) throw new Error('thin');
+    const idx=seedOf(hoy())%pool.length;
+    S.game='daily';S.diff='classic';
+    S.artist={name:"Today's song"};
+    S.pool=pool;S.titles=pool.map(t=>t.title);S.used=new Set();S.session=[];
+    S.forced=pool[idx];
+    go('s-type');aRound();
+  }catch(e){
+    $('todaySub').textContent='Could not load today. Tap to retry.';
+  }
 };
 
 /* ---------- interrupciones del sistema ----------
@@ -2493,6 +2614,7 @@ document.addEventListener('keydown',e=>{
   chips();
   applyMode(await store.get('mode')||'auto');
   await loadProfile();
+  await loadDailyState();
 })();
 
 /* El service worker sólo arranca sobre https (o localhost).
