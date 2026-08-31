@@ -328,28 +328,51 @@ input::placeholder{color:var(--place)}
 .list .nm{font-size:14px;font-weight:500}
 .list .sub{font-size:11px;color:var(--muted);margin-top:2px}
 
-/* portada compartida por los dos juegos */
-.art{position:relative;width:min(100%,190px);aspect-ratio:1;margin:0 auto 16px;
-  border-radius:22px;overflow:hidden;background:var(--raise);display:grid;place-items:center}
-/* El desenfoque es el marcador: se va disipando conforme desbloqueas
-   segundos, así ves cuánto llevas sin mirar ningún número. */
-.art img{width:100%;height:100%;object-fit:cover;
-  filter:blur(var(--blur,26px)) saturate(1.25);
-  transform:scale(1.15);transition:filter .45s ease,transform .45s ease}
-.art.reveal img{filter:none;transform:none}
-.art .vinyl{position:absolute;width:60px;height:60px;border-radius:50%;
-  border:2px solid color-mix(in srgb,var(--text) 35%,transparent);
-  background:radial-gradient(circle,color-mix(in srgb,var(--bg) 92%,transparent) 0 22%,transparent 22%)}
-.art.spin .vinyl{animation:spin 2.6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.art.reveal .vinyl{display:none}
+/* ---- el plato: disco, aro de tiempo y brazo ----
+   Mismo acabado que los álbumes de la portada. El aro sustituye a la
+   barra: el tiempo rodea al disco y se mira en el mismo sitio. */
+.deck{position:relative;width:min(100%,300px);margin:0 auto 18px;aspect-ratio:1}
+.deck .ringbox{position:absolute;inset:0;transform:rotate(-90deg)}
+.deck .ringbox circle{fill:none;stroke-linecap:round}
+.deck .track2{stroke:color-mix(in srgb,var(--text) 13%,transparent);stroke-width:5}
+.deck .fill2{stroke:var(--accent);stroke-width:5;
+  transition:stroke-dashoffset .25s linear,stroke .25s}
+.deck.warn .fill2{stroke:var(--red)}
+
+.art{position:absolute;inset:9%;border-radius:50%;overflow:hidden;
+  background:
+    repeating-radial-gradient(circle at 50% 50%,
+      rgba(255,255,255,.05) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,.13), transparent 46%),
+    #0F0F11;
+  box-shadow:0 14px 40px rgba(0,0,0,.6);
+  display:grid;place-items:center;
+  animation:spin 3.4s linear infinite;animation-play-state:paused}
+.art.spin{animation-play-state:running}
+/* la etiqueta lleva la carátula, difuminada según lo que lleves */
+.art img{position:absolute;top:50%;left:50%;width:42%;height:42%;
+  transform:translate(-50%,-50%);border-radius:50%;object-fit:cover;
+  filter:blur(var(--blur,26px)) saturate(1.25);transition:filter .45s ease}
+.art.reveal img{filter:none}
+.art::after{content:"";position:absolute;left:50%;top:50%;width:5.5%;height:5.5%;
+  transform:translate(-50%,-50%);border-radius:50%;background:var(--bg);z-index:2}
+.art .vinyl{display:none}
+
+/* el brazo entra desde la derecha al reproducir */
+.arm{position:absolute;right:-2%;top:2%;width:46%;height:56%;pointer-events:none;
+  transform-origin:88% 12%;transform:rotate(-26deg);transition:transform .6s cubic-bezier(.3,.8,.3,1)}
+.deck.spin .arm{transform:rotate(0deg)}
+.arm .pivot{position:absolute;right:0;top:0;width:15px;height:15px;border-radius:50%;
+  background:linear-gradient(180deg,#5A5A62,#2E2E34);box-shadow:0 2px 6px rgba(0,0,0,.6)}
+.arm .rod{position:absolute;right:7px;top:7px;width:76%;height:4px;border-radius:3px;
+  background:linear-gradient(90deg,#8A8A92,#D6D6DC);transform-origin:100% 50%;
+  transform:rotate(34deg)}
+.arm .head{position:absolute;left:2%;bottom:8%;width:17px;height:13px;border-radius:3px;
+  background:#E4E4EA;box-shadow:0 2px 5px rgba(0,0,0,.6)}
+@media(max-width:400px){.arm{display:none}}
 
 /* ---- juego de escribir ---- */
-.bar{height:6px;border-radius:980px;background:var(--raise);overflow:hidden;position:relative}
-.bar .seg{position:absolute;top:0;bottom:0;left:0;background:var(--accent);width:0;transition:width .3s}
-.bar .now{position:absolute;top:0;bottom:0;width:2px;background:var(--text);left:0;opacity:0}
-.spin .bar .now{opacity:1}
-.times{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);
+.spin .times{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);
   margin-top:7px;font-variant-numeric:tabular-nums}
 .play{width:100%;margin-top:16px;padding:16px;border:none;border-radius:980px;
   background:var(--accent);color:var(--on-accent);font-family:var(--sans);
@@ -503,9 +526,6 @@ input::placeholder{color:var(--place)}
 .bhead .rnd{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--place)}
 .bhead .pts{font-size:clamp(38px,11vw,52px);font-weight:600;letter-spacing:-.04em;
   font-variant-numeric:tabular-nums;line-height:.9}
-.clock{height:6px;border-radius:980px;background:var(--raise);overflow:hidden}
-.clock i{display:block;height:100%;width:100%;background:var(--accent)}
-.clock.warn i{background:var(--red)}
 .live{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);
   margin:7px 0 16px;font-variant-numeric:tabular-nums}
 .opts{display:flex;flex-direction:column;gap:8px}
@@ -574,8 +594,7 @@ input::placeholder{color:var(--place)}
   .bhead .pts{font-size:64px}
   .bhead .rnd{font-size:13px}
   .live{font-size:15px}
-  .clock,.bar{height:9px}
-  .play{font-size:19px;padding:21px}
+  .clock,  .play{font-size:19px;padding:21px}
   .decades button{font-size:30px;padding:28px 6px}
   .who .nm{font-size:26px}
   .who .cnt{font-size:14px}
@@ -731,8 +750,15 @@ input::placeholder{color:var(--place)}
 <section class="screen" id="s-type">
   <button class="back" data-go="s-pick" aria-label="Back">←</button>
 
-  <div class="art" id="a-art"><img id="a-cover" alt=""><div class="vinyl"></div></div>
-  <div class="bar"><div class="seg" id="a-seg"></div><div class="now" id="a-now"></div></div>
+<div class="deck" id="a-deck">
+    <svg class="ringbox" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="track2" cx="50" cy="50" r="47"></circle>
+      <circle class="fill2" id="a-ring" cx="50" cy="50" r="47"
+              stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
+    </svg>
+    <div class="art" id="a-art"><img id="a-cover" alt=""></div>
+    <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
+  </div>
   <div class="times"><span id="a-left">0:00</span><span id="a-right">1s unlocked</span></div>
   <button class="play" id="a-play">▶ Play 1s</button>
 
@@ -775,8 +801,15 @@ input::placeholder{color:var(--place)}
       <span class="rnd" id="b-round">Round 1 of 10</span>
       <span class="pts" id="b-score">0</span>
     </div>
-    <div class="art" id="b-art"><img id="b-cover" alt=""><div class="vinyl"></div></div>
-    <div class="clock" id="b-clock"><i id="b-bar"></i></div>
+<div class="deck" id="b-deck">
+    <svg class="ringbox" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="track2" cx="50" cy="50" r="47"></circle>
+      <circle class="fill2" id="b-ring" cx="50" cy="50" r="47"
+              stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
+    </svg>
+    <div class="art" id="b-art"><img id="b-cover" alt=""></div>
+    <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
+  </div>
     <div class="live"><span id="b-worth">1000 pts</span><span id="b-time">12.0s</span></div>
     <div class="opts" id="b-opts"></div>
     <div class="gain" id="b-gain" role="status" aria-live="polite"></div>
@@ -826,7 +859,15 @@ input::placeholder{color:var(--place)}
     <span class="nm" id="l-who"></span>
     <span class="cnt" id="l-cnt"></span>
   </div>
-  <div class="art" id="l-art"><img id="l-cover" alt=""><div class="vinyl"></div></div>
+<div class="deck" id="l-deck">
+    <svg class="ringbox" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="track2" cx="50" cy="50" r="47"></circle>
+      <circle class="fill2" id="l-ring" cx="50" cy="50" r="47"
+              stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
+    </svg>
+    <div class="art" id="l-art"><img id="l-cover" alt=""></div>
+    <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
+  </div>
   <button class="play" id="l-play">▶ Play</button>
 
   <div id="l-choose">
@@ -911,8 +952,15 @@ input::placeholder{color:var(--place)}
       <span class="rnd" id="g-round">Round 1 of 10</span>
       <span class="pts" id="g-score">0</span>
     </div>
-    <div class="art" id="g-art"><img id="g-cover" alt=""><div class="vinyl"></div></div>
-    <div class="clock" id="g-clock"><i id="g-bar"></i></div>
+<div class="deck" id="g-deck">
+    <svg class="ringbox" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="track2" cx="50" cy="50" r="47"></circle>
+      <circle class="fill2" id="g-ring" cx="50" cy="50" r="47"
+              stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
+    </svg>
+    <div class="art" id="g-art"><img id="g-cover" alt=""></div>
+    <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
+  </div>
     <div class="live"><span id="g-worth">1000 pts</span><span id="g-time">12.0s</span></div>
     <div class="opts" id="g-opts"></div>
     <div class="gain" id="g-gain" role="status" aria-live="polite"></div>
@@ -1278,6 +1326,14 @@ $('npBtn').onclick=()=>{ HOME.on ? homeStop() : homePlay(); };
   }catch(e){}
 })();
 
+/* El aro es un círculo SVG al que se le recorta el trazo: con
+   stroke-dashoffset se decide cuánto se ve. 295.3 es su perímetro. */
+const RING=295.3;
+function setRing(id,frac){
+  const el=$(id);
+  if(el) el.style.strokeDashoffset=RING*(1-Math.max(0,Math.min(1,frac)));
+}
+
 /* ---------- portada ---------- */
 document.querySelectorAll('.modes [data-diff]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.modes [data-diff]').forEach(x=>x.classList.remove('sel'));
@@ -1446,7 +1502,7 @@ function aPaint(){
   const s=cfg().stages[S.stage];
   // de 30px a 6px conforme se desbloquea el fragmento
   $('a-art').style.setProperty('--blur',(30-24*(s/total())).toFixed(1)+'px');
-  $('a-seg').style.width=(s/total()*100)+'%';
+  setRing('a-ring',s/total());
   $('a-right').textContent=s+'s unlocked';
   $('a-play').textContent=`▶ Play ${s}s`;
   const last=S.stage>=cfg().stages.length-1;
@@ -1472,9 +1528,9 @@ function aPlay(){
   try{audio.currentTime=from}catch(e){}
   audio.play().then(()=>{
     $('a-art').classList.add('spin');
+    $('a-deck').classList.add('spin');    // baja el brazo
     aStopT=setTimeout(stopAudio,ms);
     (function tick(){
-      $('a-now').style.left=(audio.currentTime/scale()*100)+'%';
       $('a-left').textContent='0:'+Math.floor(audio.currentTime).toString().padStart(2,'0');
       aRaf=requestAnimationFrame(tick);
     })();
@@ -1484,7 +1540,9 @@ function aPlay(){
 }
 function stopAudio(){
   clearTimeout(aStopT);cancelAnimationFrame(aRaf);
-  audio.pause();$('a-art').classList.remove('spin');
+  audio.pause();
+  $('a-art').classList.remove('spin');
+  $('a-deck').classList.remove('spin');
 }
 
 $('a-guess').oninput=()=>{
@@ -1579,7 +1637,7 @@ async function aEnd(won){
   award(xp,{rounds:1,hits:won?1:0,mode:'type'});
 
   $('a-art').classList.add('reveal');
-  $('a-seg').style.width='100%';
+  setRing('a-ring',1);
   $('a-play').textContent=`▶ Play ${REWARD}s more`;
   $('a-live').hidden=true;$('a-done').hidden=false;
   const esDiario=S.game==='daily';
@@ -1647,8 +1705,8 @@ function bRound(){
   accentFrom(t.album?t.album.cover_medium:null);
   ambient(t.album?t.album.cover_big:null);
   $('b-gain').textContent='';$('b-gain').className='gain';
-  $('b-clock').classList.remove('warn');
-  $('b-bar').style.width='100%';
+  $('b-deck').classList.remove('warn');
+  setRing('b-ring',1);
   $('b-foot').textContent=`${S.artist.name} · ${S.pool.length} songs in rotation`;
 
   $('b-opts').innerHTML='';
@@ -1665,16 +1723,17 @@ function bRound(){
   queueNext();
   audio.play().then(()=>{
     $('b-art').classList.add('spin');
+    $('b-deck').classList.add('spin');
     bStartT=performance.now();
     (function tick(){
       const el=(performance.now()-bStartT)/1000;
       const left=Math.max(0,cfg().limit-el);
-      $('b-bar').style.width=(left/cfg().limit*100)+'%';
+      setRing('b-ring',left/cfg().limit);
       $('b-time').textContent=left.toFixed(1)+'s';
       $('b-worth').textContent=worth(el)+' pts';
       // la imagen se va aclarando: cuanto más tardas, más pista tienes
       $('b-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
-      $('b-clock').classList.toggle('warn',left<cfg().limit/3.5);
+      $('b-deck').classList.toggle('warn',left<cfg().limit/3.5);
       if(left<=0){bAnswer(null,false);return}
       bRaf=requestAnimationFrame(tick);
     })();
@@ -1723,6 +1782,7 @@ function bHalt(){
   clearTimeout(bT);cancelAnimationFrame(bRaf);
   audio.pause();
   const a=$('b-art'); if(a) a.classList.remove('spin');
+  const dk=$('b-deck'); if(dk) dk.classList.remove('spin');
 }
 
 async function bFinish(){
@@ -1926,6 +1986,7 @@ function turnUI(){
   $('l-choose').hidden=false;$('l-result').hidden=true;
   $('l-art').classList.remove('reveal');
   $('l-art').style.setProperty('--blur','30px');
+  setRing('l-ring',0);
   if(H.card.cover) $('l-cover').src=H.card.cover;
   else $('l-cover').removeAttribute('src');
   $('l-foot').textContent=`${S.artist.name} · ${H.pool.length} songs left`;
@@ -1942,7 +2003,13 @@ function linePlay(){
   try{audio.currentTime=0}catch(e){}
   audio.play().then(()=>{
     $('l-art').classList.add('spin');
-    aStopT=setTimeout(stopAudio,15000);   // quince segundos, suficiente para situarla
+    $('l-deck').classList.add('spin');
+    aStopT=setTimeout(()=>{stopAudio();$('l-deck').classList.remove('spin')},15000);
+    (function tick(){
+      const el=audio.currentTime;
+      setRing('l-ring',Math.min(el/15,1));
+      if(el<15 && !audio.paused) requestAnimationFrame(tick);
+    })();
   }).catch(()=>{});
 }
 
@@ -2123,8 +2190,8 @@ function gRound(){
   $('g-art').classList.remove('reveal');
   $('g-art').style.setProperty('--blur','30px');
   $('g-gain').textContent='';$('g-gain').className='gain';
-  $('g-clock').classList.remove('warn');
-  $('g-bar').style.width='100%';
+  $('g-deck').classList.remove('warn');
+  setRing('g-ring',1);
   $('g-foot').textContent=`${G.genre.name} · ${G.artists.length} artists in play`;
   accentFrom(t.cover);ambient(t.cover);
 
@@ -2141,14 +2208,15 @@ function gRound(){
   audio.src=t.preview;audio.load();
   audio.play().then(()=>{
     $('g-art').classList.add('spin');
+    $('g-deck').classList.add('spin');
     gStart=performance.now();
     (function tick(){
       const el=(performance.now()-gStart)/1000;
       const left=Math.max(0,cfg().limit-el);
-      $('g-bar').style.width=(left/cfg().limit*100)+'%';
+      setRing('g-ring',left/cfg().limit);
       $('g-time').textContent=left.toFixed(1)+'s';
       $('g-worth').textContent=worth(el)+' pts';
-      $('g-clock').classList.toggle('warn',left<cfg().limit/3.5);
+      $('g-deck').classList.toggle('warn',left<cfg().limit/3.5);
       $('g-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
       if(left<=0){gAnswer(null,false);return}
       gRaf=requestAnimationFrame(tick);
@@ -2198,6 +2266,7 @@ function gHalt(){
   clearTimeout(gT);cancelAnimationFrame(gRaf);
   audio.pause();
   const a=$('g-art'); if(a) a.classList.remove('spin');
+  const dk=$('g-deck'); if(dk) dk.classList.remove('spin');
 }
 
 async function gFinish(){
@@ -2826,7 +2895,7 @@ function resumeClock(){
     (function t(){
       const el=(performance.now()-bStartT)/1000;
       const left=Math.max(0,cfg().limit-el);
-      $('b-bar').style.width=(left/cfg().limit*100)+'%';
+      setRing('b-ring',left/cfg().limit);
       $('b-time').textContent=left.toFixed(1)+'s';
       $('b-worth').textContent=worth(el)+' pts';
       $('b-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
@@ -2837,7 +2906,7 @@ function resumeClock(){
     (function t(){
       const el=(performance.now()-gStart)/1000;
       const left=Math.max(0,cfg().limit-el);
-      $('g-bar').style.width=(left/cfg().limit*100)+'%';
+      setRing('g-ring',left/cfg().limit);
       $('g-time').textContent=left.toFixed(1)+'s';
       $('g-worth').textContent=worth(el)+' pts';
       $('g-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
