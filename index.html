@@ -88,14 +88,39 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);
 .app{width:100%;max-width:440px;position:relative;z-index:1}
 
 /* cabecera */
-header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area-inset-top)) 0 16px}
-.brand{font-size:17px;font-weight:600;letter-spacing:-.01em}
-.stats{display:flex;gap:6px;margin-left:auto}
-.chip{background:var(--raise);border:1px solid var(--line);border-radius:980px;
-  padding:6px 11px;font-size:11px;color:var(--muted);white-space:nowrap}
-.chip b{color:var(--text);font-size:12px;margin-left:5px}
-#modeBtn,#installBtn,#infoBtn,#sfxBtn{background:none;border:1px solid var(--line);color:var(--muted);
-  border-radius:980px;padding:6px 10px;font-size:12px;line-height:1;cursor:pointer}
+header{display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 0 14px}
+.fire{font-family:var(--mono);font-size:11px;color:var(--amber);
+  background:color-mix(in srgb,var(--amber) 14%,transparent);
+  border-radius:7px;padding:5px 9px;letter-spacing:.04em}
+.fire b{font-weight:700}
+.lvtag{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  color:var(--place)}
+.lvtag b{color:var(--text);font-weight:700}
+
+/* El avance no es una barra de aplicación: es un surco con la aguja
+   marcando por dónde va el brazo. */
+.groove{margin-bottom:20px}
+.groove .rail{display:block;position:relative;height:3px;border-radius:2px;
+  background:color-mix(in srgb,var(--text) 14%,transparent)}
+.groove .rail i{display:block;height:100%;width:0;border-radius:2px;background:var(--accent);
+  transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.groove .rail em{position:absolute;top:50%;left:0;width:13px;height:13px;border-radius:50%;
+  transform:translate(-50%,-50%);background:var(--accent);
+  box-shadow:0 0 0 3px var(--bg);transition:left .9s cubic-bezier(.2,.7,.2,1)}
+.groove .rail em::after{content:"";position:absolute;inset:36%;border-radius:50%;background:var(--bg)}
+.groove .gline{display:flex;justify-content:space-between;margin-top:9px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--place)}
+.brand{font-size:19px;font-weight:600;letter-spacing:-.02em;margin-right:2px}
+/* Ajustes: viven en el perfil, no ocupan sitio permanente arriba */
+.settings{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.settings button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:none;border:none;border-bottom:1px solid var(--line);
+  padding:15px 4px;color:var(--text);font-family:var(--sans);font-size:14px;cursor:pointer}
+.settings button .ic{width:24px;text-align:center;color:var(--muted);font-size:14px}
+.settings button .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--place)}
+.settings button:hover{color:var(--accent)}
 /* la i necesita ser cuadrada para no verse como una píldora torcida */
 #infoBtn{width:26px;height:26px;padding:0;font-style:italic;font-weight:600;font-family:Georgia,serif}
 #sfxBtn{width:26px;height:26px;padding:0;font-size:14px}
@@ -194,14 +219,6 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 
 /* El progreso tiene que estar a la vista siempre: si sólo se ve
    entrando al perfil, es como si no existiera. */
-.xptop{display:flex;align-items:center;gap:9px;margin-bottom:16px}
-.xptop .lvl{width:22px;height:22px;flex:none;border-radius:50%;background:var(--accent);
-  color:var(--on-accent);font-size:11px;font-weight:700;display:grid;place-items:center}
-.xptop .track{flex:1;height:7px;border-radius:980px;background:var(--raise);overflow:hidden}
-.xptop .track i{display:block;height:100%;width:0;border-radius:980px;
-  background:linear-gradient(90deg,var(--accent),var(--green));
-  transition:width .9s cubic-bezier(.2,.7,.2,1)}
-.xptop .amt{font-size:10.5px;color:var(--place);font-variant-numeric:tabular-nums}
 
 /* reto diario */
 .today{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
@@ -562,21 +579,14 @@ input::placeholder{color:var(--place)}
 
 <header>
   <div class="brand">M29</div>
-  <button id="sfxBtn" title="Sound" aria-label="Sound on or off">♪</button>
-  <button id="infoBtn" title="How it works" aria-label="How it works">i</button>
-  <button id="modeBtn" title="Appearance" aria-label="Light or dark mode">◐</button>
-  <button id="installBtn">⬇ Install</button>
-  <button id="avaBtn" aria-label="Your profile"><span class="ava" id="avaMini">M</span></button>
-  <div class="stats">
-    <div class="chip" id="chipA">Streak <b id="statA">0</b></div>
-    <div class="chip" id="chipB">Best <b id="statB">0</b></div>
-  </div>
+  <span class="fire" id="streakTag" hidden>🔥 <b id="streakDays">0</b>d</span>
+  <span class="lvtag">LV <b id="xpLvl">1</b></span>
+  <button id="avaBtn" aria-label="Your profile"><span class="ava" id="avaMini"></span></button>
 </header>
 
-<div class="xptop" id="xpTop">
-  <span class="lvl" id="xpLvl">1</span>
-  <span class="track"><i id="xpFill"></i></span>
-  <span class="amt" id="xpAmt">0/300</span>
+<div class="groove">
+  <span class="rail"><i id="xpFill"></i><em id="needle"></em></span>
+  <span class="gline"><span id="xpAmt">0 / 300 XP</span><span id="xpNext">Next: level 2</span></span>
 </div>
 
 <!-- HOME -->
@@ -811,6 +821,14 @@ input::placeholder{color:var(--place)}
   <div class="eyebrow">Look</div>
   <div class="tiles2" id="avaPick" style="grid-template-columns:repeat(3,1fr);gap:12px"></div>
   <input type="text" id="pfNameIn" placeholder="Your name" autocomplete="off" maxlength="14">
+
+  <div class="eyebrow">Settings</div>
+  <div class="settings">
+    <button id="sfxBtn"><span class="ic">♪</span>Sound<span class="st" id="sfxState">on</span></button>
+    <button id="modeBtn"><span class="ic">◐</span>Appearance<span class="st" id="modeState">auto</span></button>
+    <button id="infoBtn"><span class="ic">?</span>How it works<span class="st">read</span></button>
+    <button id="installBtn"><span class="ic">⬇</span>Install app<span class="st">home screen</span></button>
+  </div>
 
   <div class="actions" style="margin-top:22px">
     <button class="ghost" id="pfReset">Reset all progress</button>
@@ -1064,19 +1082,9 @@ document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go)
 
 /* la cabecera dice cosas distintas según el juego: la racha no
    significa lo mismo que los puntos */
-function chips(){
-  const hide=S.game==='line'||S.game==='genre';
-  $('chipA').style.display=hide?'none':'';
-  $('chipB').style.display=hide?'none':'';
-  if(hide)return;
-  if(S.game==='blitz'){
-    $('chipA').innerHTML='Score <b>'+S.score+'</b>';
-    $('chipB').innerHTML='Best <b>'+S.bestScore+'</b>';
-  }else{
-    $('chipA').innerHTML='Streak <b>'+S.streak+'</b>';
-    $('chipB').innerHTML='Best <b>'+S.bestStreak+'</b>';
-  }
-}
+/* La cabecera ya no lleva marcadores: cada juego enseña el suyo en
+   su propia pantalla, que es donde se mira. */
+function chips(){}
 
 /* ---------- el color de cada ronda sale de su carátula ----------
    Se muestrea el tono más vivo de la portada y se usa como acento de
@@ -2306,13 +2314,13 @@ function applyMode(m){
   mode=m;
   if(m==='auto') delete document.documentElement.dataset.mode;
   else document.documentElement.dataset.mode=m;
-  $('modeBtn').textContent=ICON[m];
-  $('modeBtn').title=`Appearance: ${m}`;
+  $('modeState').textContent=m;
   const bg=getComputedStyle(document.body).getPropertyValue('--bg').trim();
   document.querySelector('meta[name=theme-color]').setAttribute('content',bg);
   store.set('mode',m);
 }
 $('modeBtn').onclick=()=>applyMode(mode==='auto'?'light':mode==='light'?'dark':'auto');
+const ICON_UNUSED=ICON;   // el icono ya no se pinta: el estado va en texto
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{
   if(mode==='auto') applyMode('auto');
 });
@@ -2320,13 +2328,13 @@ matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{
 /* ---------- instalación ---------- */
 let deferred=null;
 window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferred=e;$('installBtn').classList.add('on');
+  e.preventDefault();deferred=e;
 });
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
-if(isIOS&&!standalone)$('installBtn').classList.add('on');
+if(standalone) $('installBtn').hidden=true;   // ya está instalada
 $('installBtn').onclick=()=>{
-  if(deferred){deferred.prompt();deferred=null;$('installBtn').classList.remove('on');return}
+  if(deferred){deferred.prompt();deferred=null;$('installBtn').hidden=true;return}
   $('installTip').textContent='Tap the Share button in Safari, then choose "Add to Home Screen".';
   $('installSheet').classList.add('on');
 };
@@ -2334,7 +2342,7 @@ $('gotIt').onclick=()=>$('installSheet').classList.remove('on');
 
 $('sfxBtn').onclick=()=>{
   muted=!muted;
-  $('sfxBtn').classList.toggle('off',muted);
+  $('sfxState').textContent=muted?'off':'on';
   store.set('muted',muted?'1':'');
   if(!muted) sfx.tick();
 };
@@ -2425,11 +2433,17 @@ const avaSvg=a=>`<svg viewBox="0 0 48 48" aria-hidden="true">${a.svg}</svg>`;
 
 function paintXp(){
   const need=needFor(P.level);
+  const pct=Math.min(100,P.xp/need*100);
   $('xpLvl').textContent=P.level;
-  $('xpAmt').textContent=P.xp+'/'+need;
+  $('xpAmt').textContent=`${P.xp} / ${need} XP`;
+  $('xpNext').textContent='Next: level '+(P.level+1);
   requestAnimationFrame(()=>{
-    $('xpFill').style.width=Math.min(100,P.xp/need*100)+'%';
+    $('xpFill').style.width=pct+'%';
+    $('needle').style.left=pct+'%';      // la aguja va donde acaba el surco
   });
+  // la racha sólo aparece si existe: un cero no motiva a nadie
+  $('streakTag').hidden = !(P.streak>0);
+  $('streakDays').textContent=P.streak;
 }
 
 function paintAva(){
@@ -2812,7 +2826,7 @@ document.addEventListener('keydown',e=>{
   await loadProfile();
   await loadDailyState();
   muted=!!(await store.get('muted'));
-  $('sfxBtn').classList.toggle('off',muted);
+  $('sfxState').textContent=muted?'off':'on';
 })();
 
 /* El service worker sólo arranca sobre https (o localhost).
