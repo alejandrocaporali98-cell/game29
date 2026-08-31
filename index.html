@@ -36,6 +36,7 @@
   --red:#FF453A;
   --glow:rgba(48,209,88,.13);
   --tint:rgba(100,210,255,.13);
+  --tape-on:#E8813A;   /* naranja de cinta: no depende de la carátula */
   --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,"Roboto Mono",monospace;
 }
@@ -47,14 +48,14 @@
     --bg:#FFFFFF;--raise:#F5F5F7;--sugg:#EBEBED;--sheet:#FFFFFF;
     --line:rgba(0,0,0,.11);--text:#1D1D1F;--muted:#6E6E73;--place:#A1A1A6;--spent:#D6D6DA;
     --accent:#0071E3;--on-accent:#FFFFFF;--green:#248A3D;--amber:#8F6400;--red:#D70015;
-    --glow:rgba(0,113,227,.08);--tint:rgba(0,113,227,.10);
+    --glow:rgba(0,113,227,.08);--tint:rgba(0,113,227,.10);--tape-on:#C25A18;
   }
 }
 :root[data-mode="light"]{
   --bg:#FFFFFF;--raise:#F5F5F7;--sugg:#EBEBED;--sheet:#FFFFFF;
   --line:rgba(0,0,0,.11);--text:#1D1D1F;--muted:#6E6E73;--place:#A1A1A6;--spent:#D6D6DA;
   --accent:#0071E3;--on-accent:#FFFFFF;--green:#248A3D;--amber:#8F6400;--red:#D70015;
-  --glow:rgba(0,113,227,.08);--tint:rgba(0,113,227,.10);
+  --glow:rgba(0,113,227,.08);--tint:rgba(0,113,227,.10);--tape-on:#C25A18;
 }
 
 /* Luz ambiente: la carátula que suena se proyecta desenfocada sobre
@@ -154,7 +155,8 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 /* ---- casetes ----
    Arriba vinilos, abajo cintas: el mismo mundo en dos formatos. Todo
    dibujado con degradados, sin una sola imagen de más. */
-.tape{position:relative;display:block;width:100%;border:none;padding:9px 9px 13px;
+.tape{position:relative;display:flex;flex-direction:column;align-items:stretch;
+  width:100%;border:none;padding:9px 9px 13px;
   border-radius:12px;cursor:pointer;font-family:var(--sans);color:var(--text);
   text-align:left;overflow:hidden;
   background:linear-gradient(180deg,#2C2C31 0%,#1B1B1F 42%,#121214 100%);
@@ -167,7 +169,7 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
              rgba(255,255,255,.03) 34%,transparent 55%)}
 .tape.sel{box-shadow:0 6px 20px rgba(0,0,0,.55),
           inset 0 1px 0 rgba(255,255,255,.2),
-          inset 0 0 0 2px var(--accent)}
+          inset 0 0 0 2px var(--tape-on)}
 
 /* etiqueta: papel translúcido sobre la carátula del disco */
 .tape .card{display:block;position:relative;border-radius:5px;overflow:hidden;padding:9px 10px 8px;
@@ -182,7 +184,7 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 .tape .card .t1{display:block;font-family:var(--mono);font-size:13px;font-weight:700;
   letter-spacing:.02em;color:#1B1710}
 .tape .card .t2{display:block;font-family:var(--mono);font-size:9px;color:#6A6252;
-  margin-top:9px;padding-top:6px;border-top:1px solid rgba(110,102,86,.5)}
+  margin-top:9px;padding-top:6px;border-top:1px solid rgba(40,34,26,.28)}
 .tape:not(.sel) .card{filter:saturate(.65) brightness(.86)}
 
 /* ventana: fondo hundido y dos bobinas con la cinta enrollada */
