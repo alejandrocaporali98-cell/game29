@@ -290,6 +290,57 @@ input::placeholder{color:var(--place)}
 .board li.lead{border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
 .board li .n{margin-left:auto;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
 
+/* ---- perfil, progreso y celebración ---- */
+#avaBtn{border:none;background:none;padding:0;cursor:pointer;line-height:0}
+.ava{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  font-weight:600;font-size:13px;color:#000;flex:none;
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.35)}
+.ava.big{width:96px;height:96px;font-size:38px;box-shadow:inset 0 0 0 5px rgba(0,0,0,.35)}
+.ava.pick{width:56px;height:56px;font-size:22px;cursor:pointer}
+.ava.pick.sel{outline:3px solid var(--text);outline-offset:3px}
+
+.prof{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.prof .who2{min-width:0}
+.prof .nm{font-size:24px;font-weight:600;letter-spacing:-.03em}
+.prof .lv{font-size:13px;color:var(--muted);margin-top:3px}
+
+.xpbar{height:12px;border-radius:980px;background:var(--raise);overflow:hidden;margin-bottom:8px}
+.xpbar i{display:block;height:100%;width:0;border-radius:980px;
+  background:linear-gradient(90deg,var(--accent),var(--green));
+  transition:width 1s cubic-bezier(.2,.7,.2,1)}
+.xpline{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:22px}
+
+.tiles2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}
+.stat{background:var(--raise);border:1px solid var(--line);border-radius:18px;
+  padding:14px 10px;text-align:center}
+.stat b{display:block;font-size:26px;font-weight:600;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.stat span{font-size:10.5px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.stat.fire b{color:var(--amber)}
+
+.badges{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.badge{display:flex;align-items:center;gap:12px;background:var(--raise);
+  border:1px solid var(--line);border-radius:18px;padding:13px}
+.badge .ico2{width:38px;height:38px;flex:none;border-radius:12px;display:grid;
+  place-items:center;font-size:17px;background:var(--sugg)}
+.badge.on .ico2{background:var(--tint);color:var(--accent)}
+.badge h4{font-size:13px;font-weight:600;margin-bottom:2px}
+.badge p{font-size:11px;color:var(--muted);line-height:1.3}
+.badge.off{opacity:.45}
+
+/* celebración */
+#party{position:fixed;inset:0;z-index:60;pointer-events:none;display:none}
+#party.on{display:block}
+.pop{animation:pop .42s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.06)}100%{transform:scale(1)}}
+.rise{animation:rise .5s cubic-bezier(.2,.9,.3,1)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.levelup{text-align:center;padding:10px 0 4px}
+.levelup .cap{font-size:11.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent)}
+.levelup .big2{font-size:64px;font-weight:600;letter-spacing:-.04em;line-height:1.05;margin:6px 0}
+.xpgain{color:var(--green);font-weight:600;font-size:14px;margin-top:6px}
+
 /* ---- géneros ---- */
 .genres{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .genres button{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;
@@ -431,6 +482,7 @@ input::placeholder{color:var(--place)}
   <button id="infoBtn" title="How it works" aria-label="How it works">i</button>
   <button id="modeBtn" title="Appearance" aria-label="Light or dark mode">◐</button>
   <button id="installBtn">⬇ Install</button>
+  <button id="avaBtn" aria-label="Your profile"><span class="ava" id="avaMini">M</span></button>
   <div class="stats">
     <div class="chip" id="chipA">Streak <b id="statA">0</b></div>
     <div class="chip" id="chipB">Best <b id="statB">0</b></div>
@@ -633,6 +685,35 @@ input::placeholder{color:var(--place)}
   </div>
 </section>
 
+<!-- PERFIL -->
+<section class="screen" id="s-prof">
+  <button class="back" data-go="s-home" aria-label="Back">←</button>
+
+  <div class="prof">
+    <span class="ava big" id="avaBig">M</span>
+    <div class="who2">
+      <div class="nm" id="pfName">Player</div>
+      <div class="lv" id="pfLevel">Level 1</div>
+    </div>
+  </div>
+
+  <div class="xpbar"><i id="pfBar"></i></div>
+  <div class="xpline"><span id="pfXp">0 XP</span><span id="pfNext">300 to go</span></div>
+
+  <div class="tiles2">
+    <div class="stat fire"><b id="pfStreak">0</b><span>day streak</span></div>
+    <div class="stat"><b id="pfRounds">0</b><span>rounds</span></div>
+    <div class="stat"><b id="pfAcc">0%</b><span>accuracy</span></div>
+  </div>
+
+  <div class="eyebrow">Your record</div>
+  <div class="badges" id="pfBadges"></div>
+
+  <div class="eyebrow">Look</div>
+  <div class="tiles2" id="avaPick" style="grid-template-columns:repeat(4,1fr)"></div>
+  <input type="text" id="pfNameIn" placeholder="Your name" autocomplete="off" maxlength="14">
+</section>
+
 <!-- GÉNEROS: elegir -->
 <section class="screen" id="s-genres">
   <button class="back" data-go="s-home" aria-label="Back">←</button>
@@ -709,6 +790,37 @@ input::placeholder{color:var(--place)}
     <div class="actions" style="margin-top:0"><button id="gotIt">Got it</button></div>
   </div>
 </div>
+
+<!-- subida de nivel -->
+<div class="sheet" id="levelSheet">
+  <div class="inner">
+    <div class="levelup">
+      <div class="cap">Level up</div>
+      <div class="big2" id="lvNum">2</div>
+      <div class="lede" id="lvSub" style="margin:0"></div>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="primary" id="lvOk">Keep going</button>
+    </div>
+  </div>
+</div>
+
+<!-- logro desbloqueado -->
+<div class="sheet" id="badgeSheet">
+  <div class="inner">
+    <div class="levelup">
+      <div class="cap">Unlocked</div>
+      <div class="big2" id="bgIco" style="font-size:52px"></div>
+      <div style="font-size:19px;font-weight:600" id="bgName"></div>
+      <div class="lede" id="bgDesc" style="margin-top:6px"></div>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="primary" id="bgOk">Nice</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="party"></canvas>
 
 <!-- aviso de pausa cuando el sistema corta el audio -->
 <div class="sheet" id="resume">
@@ -1225,6 +1337,9 @@ async function aEnd(won){
   if(S.streak>S.bestStreak){S.bestStreak=S.streak;await store.set('bestStreak',S.bestStreak)}
   chips();
   S.session.push({won,tries:S.stage+1,hints:S.hints,gaveUp:S.gaveUp});
+  // menos intentos y sin pistas vale más
+  const xp = won ? Math.max(8, 30-(S.stage*4) - S.hints*3) : 2;
+  award(xp,{rounds:1,hits:won?1:0,mode:'type'});
 
   $('a-art').classList.add('reveal');
   $('a-seg').style.width='100%';
@@ -1258,7 +1373,7 @@ const worth=el=>{
 };
 
 function bStart(){
-  S.round=0;S.score=0;S.hits=0;S.log=[];S.used=new Set();
+  S.round=0;S.score=0;S.hits=0;S.log=[];S.used=new Set();S.bestHit=0;
   $('b-final').hidden=true;$('b-live').hidden=false;
   bRound();
 }
@@ -1333,7 +1448,7 @@ function bAnswer(btn,ok){
   [...$('b-opts').children].forEach(b=>{
     b.disabled=true;
     if(b.querySelector('.t').textContent===S.track.title){
-      b.classList.add('right');
+      b.classList.add('right','pop');
       b.querySelector('.k').textContent='✓';   // no basta con el color
     }
   });
@@ -1342,8 +1457,9 @@ function bAnswer(btn,ok){
   if(ok){
     const pts=worth(el);
     S.score+=pts;S.hits++;
+    S.bestHit=Math.max(S.bestHit||0,pts);
     $('b-score').textContent=S.score;
-    $('b-gain').textContent=`+${pts}`;$('b-gain').className='gain plus';
+    $('b-gain').textContent=`+${pts}`;$('b-gain').className='gain plus rise';
   }else{
     $('b-gain').textContent=btn?'Nope':"Time's up";
     $('b-gain').className='gain zero';
@@ -1366,6 +1482,10 @@ async function bFinish(){
   $('b-live').hidden=true;$('b-final').hidden=false;
   const record=S.score>S.bestScore;
   if(record){S.bestScore=S.score;await store.set('bestScore',S.score)}
+  award(Math.round(S.score/40)+S.hits*4,{
+    rounds:cfg().rounds, hits:S.hits, mode:'blitz',
+    perfect:S.hits===cfg().rounds, best:S.bestHit||0
+  });
   chips();
   $('b-total').textContent=S.score;
   $('b-recap').innerHTML=`${S.hits} of ${cfg().rounds} right · ${escapeHtml(S.artist.name)}`
@@ -1623,6 +1743,10 @@ $('l-next').onclick=()=>nextTurn();
 
 function endLine(){
   stopAudio();
+  const mio=H.players[0]||{score:0,hits:0};
+  award(Math.round(mio.score/6),{
+    rounds:TURNS, hits:mio.hits, mode:'line', exactDecades:mio.hits
+  });
   const best=Math.max(...H.players.map(p=>p.score));
   const winners=H.players.filter(p=>p.score===best);
   $('w-name').textContent=winners.length>1?'Tie':winners[0].name+' wins';
@@ -1724,7 +1848,7 @@ async function loadGenre(gen){
 
 
 function gStartGame(){
-  G.round=0;G.score=0;G.hits=0;G.log=[];G.used=new Set();
+  G.round=0;G.score=0;G.hits=0;G.log=[];G.used=new Set();G.bestHit=0;
   $('g-final').hidden=true;$('g-live').hidden=false;
   gRound();
 }
@@ -1796,7 +1920,7 @@ function gAnswer(btn,ok){
   [...$('g-opts').children].forEach(b=>{
     b.disabled=true;
     if(b.querySelector('.t').textContent===G.track.artist){
-      b.classList.add('right');
+      b.classList.add('right','pop');
       b.querySelector('.k').textContent='✓';
     }
   });
@@ -1805,8 +1929,9 @@ function gAnswer(btn,ok){
   if(ok){
     const pts=worth(el);
     G.score+=pts;G.hits++;
+    G.bestHit=Math.max(G.bestHit||0,pts);
     $('g-score').textContent=G.score;
-    $('g-gain').textContent=`+${pts}`;$('g-gain').className='gain plus';
+    $('g-gain').textContent=`+${pts}`;$('g-gain').className='gain plus rise';
   }else{
     $('g-gain').textContent=btn?G.track.artist:"Time's up · "+G.track.artist;
     $('g-gain').className='gain zero';
@@ -1830,6 +1955,10 @@ async function gFinish(){
   const prev=+(await store.get('bestGenre')||0);
   const record=G.score>prev;
   if(record) await store.set('bestGenre',G.score);
+  award(Math.round(G.score/40)+G.hits*4,{
+    rounds:cfg().rounds, hits:G.hits, mode:'genre',
+    perfect:G.hits===cfg().rounds, best:G.bestHit
+  });
   G.best=Math.max(prev,G.score);
   $('g-total').textContent=G.score;
   $('g-recap').innerHTML=`${G.hits} of ${cfg().rounds} right · ${escapeHtml(G.genre.name)}`
@@ -2027,6 +2156,188 @@ document.querySelectorAll('.sheet').forEach(s=>{
   s.onclick=e=>{if(e.target===s) s.classList.remove('on')};
 });
 
+/* =====================================================
+   PROGRESO — perfil, nivel, racha y logros
+   ===================================================== */
+const AVATARS=[
+  {id:'a',c:'#64D2FF'},{id:'b',c:'#30D158'},{id:'c',c:'#FFD60A'},{id:'d',c:'#FF9F0A'},
+  {id:'e',c:'#FF453A'},{id:'f',c:'#BF5AF2'},{id:'g',c:'#FF6482'},{id:'h',c:'#5AC8FA'}
+];
+
+const BADGES=[
+  {id:'first', ico:'🎧', n:'First spin',    d:'Play your first round'},
+  {id:'quick', ico:'⚡', n:'Reflexes',      d:'Answer worth 900 points or more'},
+  {id:'perfect',ico:'🎯',n:'Flawless',      d:'Ten out of ten in one game'},
+  {id:'decade',ico:'📅', n:'Time traveller',d:'Five decades called exactly'},
+  {id:'all4',  ico:'🧭', n:'Explorer',      d:'Play all four modes'},
+  {id:'week',  ico:'🔥', n:'Seven days',    d:'A seven-day streak'}
+];
+
+const P={name:'Player',ava:'a',xp:0,level:1,streak:0,last:'',
+         rounds:0,hits:0,modes:{},badges:[]};
+
+// El siguiente nivel cuesta más que el anterior, pero no tanto como
+// para que se note un muro: 300, 450, 600, 750...
+const needFor=lv=>300+(lv-1)*150;
+
+function avaColor(id){ return (AVATARS.find(a=>a.id===id)||AVATARS[0]).c; }
+function initial(){ return (P.name||'?').trim().charAt(0).toUpperCase()||'?'; }
+
+function paintAva(){
+  [['avaMini',false],['avaBig',true]].forEach(([id])=>{
+    const el=$(id);
+    el.style.background=avaColor(P.ava);
+    el.textContent=initial();
+  });
+}
+
+async function saveProfile(){
+  await store.set('profile',JSON.stringify(P));
+}
+
+async function loadProfile(){
+  try{
+    const raw=await store.get('profile');
+    if(raw) Object.assign(P,JSON.parse(raw));
+  }catch(e){}
+  touchStreak();
+  paintAva();
+}
+
+/* La racha cuenta días naturales seguidos. Si te saltas uno, vuelve a
+   empezar; si vuelves el mismo día, no suma dos veces. */
+function touchStreak(){
+  const today=new Date().toISOString().slice(0,10);
+  if(P.last===today) return;
+  const ayer=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  P.streak = P.last===ayer ? P.streak+1 : 1;
+  P.last=today;
+  saveProfile();
+}
+
+/* Todo el progreso pasa por aquí: suma experiencia, comprueba si se
+   sube de nivel y si se desbloquea algún logro. */
+function award(xp, ev={}){
+  touchStreak();
+  P.xp+=xp;
+  P.rounds+=ev.rounds||0;
+  P.hits+=ev.hits||0;
+  if(ev.mode) P.modes[ev.mode]=(P.modes[ev.mode]||0)+1;
+
+  let up=null;
+  while(P.xp>=needFor(P.level)){ P.xp-=needFor(P.level); P.level++; up=P.level; }
+
+  const nuevos=[];
+  const unlock=id=>{ if(!P.badges.includes(id)){P.badges.push(id);nuevos.push(id)} };
+  if(P.rounds>=1) unlock('first');
+  if(ev.best>=900) unlock('quick');
+  if(ev.perfect) unlock('perfect');
+  if(ev.exactDecades>=5) unlock('decade');
+  if(Object.keys(P.modes).length>=4) unlock('all4');
+  if(P.streak>=7) unlock('week');
+
+  saveProfile();
+
+  if(up){ levelUp(up); confetti(); }
+  else if(nuevos.length){ badgeUp(nuevos[0]); confetti(); }
+}
+
+function levelUp(n){
+  $('lvNum').textContent=n;
+  $('lvSub').textContent=`${needFor(n)} XP to reach level ${n+1}`;
+  $('levelSheet').classList.add('on');
+}
+$('lvOk').onclick=()=>$('levelSheet').classList.remove('on');
+
+function badgeUp(id){
+  const b=BADGES.find(x=>x.id===id);
+  if(!b)return;
+  $('bgIco').textContent=b.ico;
+  $('bgName').textContent=b.n;
+  $('bgDesc').textContent=b.d;
+  $('badgeSheet').classList.add('on');
+}
+$('bgOk').onclick=()=>$('badgeSheet').classList.remove('on');
+
+/* Confeti en lienzo. Nada de librerías: son cien rectángulos cayendo
+   con rotación, y se apaga solo a los dos segundos y medio. */
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c=$('party'), x=c.getContext('2d');
+  c.width=innerWidth; c.height=innerHeight;
+  c.classList.add('on');
+  const css=getComputedStyle(document.body);
+  const cols=['--accent','--green','--amber','--red'].map(n=>css.getPropertyValue(n).trim());
+  const bits=Array.from({length:110},()=>({
+    x:Math.random()*c.width, y:-20-Math.random()*c.height*.4,
+    w:5+Math.random()*7, h:8+Math.random()*10,
+    vy:2.2+Math.random()*3.2, vx:-1.2+Math.random()*2.4,
+    r:Math.random()*Math.PI, vr:-.16+Math.random()*.32,
+    col:cols[Math.floor(Math.random()*cols.length)]
+  }));
+  const t0=performance.now();
+  (function tick(now){
+    const age=now-t0;
+    x.clearRect(0,0,c.width,c.height);
+    bits.forEach(b=>{
+      b.x+=b.vx; b.y+=b.vy; b.r+=b.vr; b.vy+=0.04;
+      x.save(); x.translate(b.x,b.y); x.rotate(b.r);
+      x.globalAlpha=Math.max(0,1-age/2500);
+      x.fillStyle=b.col; x.fillRect(-b.w/2,-b.h/2,b.w,b.h);
+      x.restore();
+    });
+    if(age<2500) requestAnimationFrame(tick);
+    else { x.clearRect(0,0,c.width,c.height); c.classList.remove('on'); }
+  })(t0);
+}
+
+/* ---------- pantalla de perfil ---------- */
+$('avaBtn').onclick=()=>{go('s-prof');paintProfile()};
+
+function paintProfile(){
+  paintAva();
+  $('pfName').textContent=P.name;
+  $('pfLevel').textContent='Level '+P.level;
+  $('pfNameIn').value=P.name==='Player'?'':P.name;
+  const need=needFor(P.level);
+  $('pfBar').style.width='0%';
+  setTimeout(()=>{$('pfBar').style.width=Math.min(100,P.xp/need*100)+'%'},60);
+  $('pfXp').textContent=P.xp+' XP';
+  $('pfNext').textContent=(need-P.xp)+' to level '+(P.level+1);
+  $('pfStreak').textContent=P.streak;
+  $('pfRounds').textContent=P.rounds;
+  $('pfAcc').textContent=(P.rounds?Math.round(P.hits/P.rounds*100):0)+'%';
+
+  $('pfBadges').innerHTML='';
+  BADGES.forEach(b=>{
+    const on=P.badges.includes(b.id);
+    const d=document.createElement('div');
+    d.className='badge '+(on?'on':'off');
+    d.innerHTML='<span class="ico2"></span><div><h4></h4><p></p></div>';
+    d.querySelector('.ico2').textContent=on?b.ico:'🔒';
+    d.querySelector('h4').textContent=b.n;
+    d.querySelector('p').textContent=b.d;
+    $('pfBadges').appendChild(d);
+  });
+
+  $('avaPick').innerHTML='';
+  AVATARS.forEach(a=>{
+    const el=document.createElement('span');
+    el.className='ava pick'+(a.id===P.ava?' sel':'');
+    el.style.background=a.c;
+    el.textContent=initial();
+    el.onclick=()=>{P.ava=a.id;saveProfile();paintProfile()};
+    $('avaPick').appendChild(el);
+  });
+}
+$('pfNameIn').oninput=e=>{
+  P.name=e.target.value.trim()||'Player';
+  $('pfName').textContent=P.name;
+  paintAva();
+  document.querySelectorAll('#avaPick .ava').forEach(el=>el.textContent=initial());
+  saveProfile();
+};
+
 /* ---------- interrupciones del sistema ----------
    En el iPhone, una llamada o bloquear la pantalla corta el audio sin
    avisar a la página. El reloj seguía corriendo y perdías la ronda sin
@@ -2130,6 +2441,7 @@ document.addEventListener('keydown',e=>{
   S.bestScore=+(await store.get('bestScore')||0);
   chips();
   applyMode(await store.get('mode')||'auto');
+  await loadProfile();
 })();
 
 /* El service worker sólo arranca sobre https (o localhost).
