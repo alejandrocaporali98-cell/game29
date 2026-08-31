@@ -88,11 +88,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);
 .app{width:100%;max-width:440px;position:relative;z-index:1}
 
 /* cabecera */
-header{display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 0 14px}
-.fire{font-family:var(--mono);font-size:11px;color:var(--amber);
-  background:color-mix(in srgb,var(--amber) 14%,transparent);
-  border-radius:7px;padding:5px 9px;letter-spacing:.04em}
-.fire b{font-weight:700}
+header{position:relative;display:flex;align-items:center;gap:10px;
+  padding:calc(14px + env(safe-area-inset-top)) 0 14px}
+
+/* El logo es el menú: un toque y se despliega */
+.logo{display:flex;align-items:center;gap:9px;background:none;border:none;padding:4px 8px 4px 0;
+  cursor:pointer;color:var(--bg);font-family:var(--sans);border-radius:10px}
+.logo svg{width:26px;height:26px;flex:none;display:block}
+.logo .caret{color:var(--place);font-size:10px;transition:transform .2s}
+.logo[aria-expanded="true"] .caret{transform:rotate(180deg)}
+.logo:hover .caret{color:var(--text)}
+
+.menu{position:absolute;top:calc(100% - 4px);left:0;z-index:30;width:260px;
+  background:var(--sheet);border:1px solid var(--line);border-radius:16px;
+  padding:6px;box-shadow:0 18px 44px rgba(0,0,0,.6);animation:fade .16s ease}
+.menu>button,.menu .settings button{display:flex;align-items:center;gap:12px;width:100%;
+  background:none;border:none;padding:12px 10px;border-radius:11px;cursor:pointer;
+  color:var(--text);font-family:var(--sans);font-size:14px;text-align:left}
+.menu .settings{display:block;border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
+.menu .ic{flex:none;width:20px;text-align:center;color:var(--muted);font-size:13px}
+.menu .tx{flex:1;min-width:0;white-space:nowrap}
+.menu .st{flex:none;font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--place)}
+.menu button:hover{background:var(--raise)}
 .lvtag{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.12em;
   color:var(--place)}
 .lvtag b{color:var(--text);font-weight:700}
@@ -115,12 +133,7 @@ header{display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-are
 .groove .gline{display:flex;justify-content:space-between;margin-top:9px;
   font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--place)}
-.brand{font-size:19px;font-weight:600;letter-spacing:-.02em;margin-right:2px}
-/* un disco diminuto delante del nombre: la marca en miniatura */
-.mark{width:15px;height:15px;flex:none;border-radius:50%;position:relative;
-  background:repeating-radial-gradient(circle at 50% 50%,
-    rgba(255,255,255,.22) 0 1px,transparent 1px 2.5px),#111}
-.mark::after{content:"";position:absolute;inset:41%;border-radius:50%;background:var(--accent)}
+.brand{font-size:19px;font-weight:600;letter-spacing:-.02em;color:var(--text)}
 #avaBtn .ava{box-shadow:inset 0 0 0 2px rgba(0,0,0,.25),0 0 0 2px var(--line)}
 #avaBtn:hover .ava{box-shadow:inset 0 0 0 2px rgba(0,0,0,.25),0 0 0 2px var(--accent)}
 /* Ajustes: viven en el perfil, no ocupan sitio permanente arriba */
@@ -432,8 +445,7 @@ input::placeholder{color:var(--place)}
 .stat b{display:block;font-size:26px;font-weight:600;letter-spacing:-.03em;
   font-variant-numeric:tabular-nums}
 .stat span{font-size:10.5px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
-.stat.fire b{color:var(--amber)}
-
+.stat
 .badges{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .badge{display:flex;align-items:center;gap:12px;background:var(--raise);
   border:1px solid var(--line);border-radius:18px;padding:13px}
@@ -593,11 +605,36 @@ input::placeholder{color:var(--place)}
 <div class="app">
 
 <header>
-  <span class="mark" aria-hidden="true"></span>
-  <div class="brand">M29</div>
-  <span class="fire" id="streakTag" hidden>🔥 <b id="streakDays">0</b>d</span>
+  <button id="menuBtn" class="logo" aria-label="Menu" aria-expanded="false">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <defs>
+        <linearGradient id="mg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#64D2FF"/>
+          <stop offset=".52" stop-color="#30D158"/>
+          <stop offset="1" stop-color="#FFD60A"/>
+        </linearGradient>
+      </defs>
+      <circle cx="24" cy="24" r="19" fill="url(#mg)"/>
+      <path d="M14 34V16l10 10 10-10v18" fill="none" stroke="currentColor"
+            stroke-width="6.4" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+    <span class="brand">M29</span>
+    <span class="caret">▾</span>
+  </button>
+
   <span class="lvtag">LV <b id="xpLvl">1</b></span>
   <button id="avaBtn" aria-label="Your profile"><span class="ava" id="avaMini"></span></button>
+
+  <nav class="menu" id="menu" hidden>
+    <button id="toProfile"><span class="ic">◍</span><span class="tx">Profile</span>
+      <span class="st"><span id="menuStreak">0</span>d streak</span></button>
+    <div class="settings">
+      <button id="sfxBtn"><span class="ic">♪</span><span class="tx">Sound</span><span class="st" id="sfxState">on</span></button>
+      <button id="modeBtn"><span class="ic">◐</span><span class="tx">Appearance</span><span class="st" id="modeState">auto</span></button>
+      <button id="infoBtn"><span class="ic">?</span><span class="tx">How it works</span><span class="st">read</span></button>
+      <button id="installBtn"><span class="ic">⬇</span><span class="tx">Install app</span><span class="st">home screen</span></button>
+    </div>
+  </nav>
 </header>
 
 <div class="groove">
@@ -837,14 +874,6 @@ input::placeholder{color:var(--place)}
   <div class="eyebrow">Look</div>
   <div class="tiles2" id="avaPick" style="grid-template-columns:repeat(3,1fr);gap:12px"></div>
   <input type="text" id="pfNameIn" placeholder="Your name" autocomplete="off" maxlength="14">
-
-  <div class="eyebrow">Settings</div>
-  <div class="settings">
-    <button id="sfxBtn"><span class="ic">♪</span><span class="tx">Sound</span><span class="st" id="sfxState">on</span></button>
-    <button id="modeBtn"><span class="ic">◐</span><span class="tx">Appearance</span><span class="st" id="modeState">auto</span></button>
-    <button id="infoBtn"><span class="ic">?</span><span class="tx">How it works</span><span class="st">read</span></button>
-    <button id="installBtn"><span class="ic">⬇</span><span class="tx">Install app</span><span class="st">home screen</span></button>
-  </div>
 
   <div class="actions" style="margin-top:22px">
     <button class="ghost" id="pfReset">Reset all progress</button>
@@ -2364,7 +2393,7 @@ $('sfxBtn').onclick=()=>{
   if(!muted) sfx.tick();
 };
 
-$('infoBtn').onclick=()=>$('infoSheet').classList.add('on');
+$('infoBtn').onclick=()=>{closeMenu();$('infoSheet').classList.add('on')};
 $('infoClose').onclick=()=>$('infoSheet').classList.remove('on');
 // tocar fuera cierra cualquier hoja: en móvil es el gesto que se espera
 document.querySelectorAll('.sheet').forEach(s=>{
@@ -2458,9 +2487,8 @@ function paintXp(){
     $('xpFill').style.width=pct+'%';
     $('needle').style.left=pct+'%';      // la aguja va donde acaba el surco
   });
-  // la racha sólo aparece si existe: un cero no motiva a nadie
-  $('streakTag').hidden = !(P.streak>0);
-  $('streakDays').textContent=P.streak;
+  const st=$('menuStreak');
+  if(st) st.textContent=P.streak;
 }
 
 function paintAva(){
@@ -2575,7 +2603,24 @@ function confetti(){
 }
 
 /* ---------- pantalla de perfil ---------- */
-$('avaBtn').onclick=()=>{go('s-prof');paintProfile()};
+$('avaBtn').onclick=()=>{closeMenu();go('s-prof');paintProfile()};
+$('toProfile').onclick=()=>{closeMenu();go('s-prof');paintProfile()};
+
+/* El menú se cierra al elegir algo, al tocar fuera o con Escape. */
+function closeMenu(){
+  $('menu').hidden=true;
+  $('menuBtn').setAttribute('aria-expanded','false');
+}
+$('menuBtn').onclick=e=>{
+  e.stopPropagation();
+  const abierto=!$('menu').hidden;
+  $('menu').hidden=abierto;
+  $('menuBtn').setAttribute('aria-expanded',String(!abierto));
+  if(!abierto) $('menuStreak').textContent=P.streak;
+};
+document.addEventListener('click',e=>{
+  if(!$('menu').hidden && !$('menu').contains(e.target)) closeMenu();
+});
 
 function paintProfile(){
   paintAva();
@@ -2802,6 +2847,7 @@ document.addEventListener('keydown',e=>{
 
   if(e.key==='Escape'){
     document.querySelectorAll('.sheet.on').forEach(s=>s.classList.remove('on'));
+    closeMenu();
     return;
   }
   if(typing)return;
