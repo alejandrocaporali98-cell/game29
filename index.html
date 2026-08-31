@@ -292,11 +292,12 @@ input::placeholder{color:var(--place)}
 
 /* ---- perfil, progreso y celebración ---- */
 #avaBtn{border:none;background:none;padding:0;cursor:pointer;line-height:0}
-.ava{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
-  font-weight:600;font-size:13px;color:#000;flex:none;
-  box-shadow:inset 0 0 0 2px rgba(0,0,0,.35)}
-.ava.big{width:96px;height:96px;font-size:38px;box-shadow:inset 0 0 0 5px rgba(0,0,0,.35)}
-.ava.pick{width:56px;height:56px;font-size:22px;cursor:pointer}
+.ava{width:32px;height:32px;border-radius:50%;overflow:hidden;flex:none;
+  display:grid;place-items:center;padding:0;border:none;
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.22)}
+.ava svg{width:100%;height:100%;display:block}
+.ava.big{width:96px;height:96px;box-shadow:inset 0 0 0 4px rgba(0,0,0,.22)}
+.ava.pick{width:100%;aspect-ratio:1;height:auto;cursor:pointer}
 .ava.pick.sel{outline:3px solid var(--text);outline-offset:3px}
 
 .prof{display:flex;align-items:center;gap:16px;margin-bottom:20px}
@@ -710,7 +711,7 @@ input::placeholder{color:var(--place)}
   <div class="badges" id="pfBadges"></div>
 
   <div class="eyebrow">Look</div>
-  <div class="tiles2" id="avaPick" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="tiles2" id="avaPick" style="grid-template-columns:repeat(3,1fr);gap:12px"></div>
   <input type="text" id="pfNameIn" placeholder="Your name" autocomplete="off" maxlength="14">
 </section>
 
@@ -2160,8 +2161,58 @@ document.querySelectorAll('.sheet').forEach(s=>{
    PROGRESO — perfil, nivel, racha y logros
    ===================================================== */
 const AVATARS=[
-  {id:'a',c:'#64D2FF'},{id:'b',c:'#30D158'},{id:'c',c:'#FFD60A'},{id:'d',c:'#FF9F0A'},
-  {id:'e',c:'#FF453A'},{id:'f',c:'#BF5AF2'},{id:'g',c:'#FF6482'},{id:'h',c:'#5AC8FA'}
+  {id:'cowboy', n:'Vaquero',  bg:'#E9B872', svg:
+    '<circle cx="24" cy="29" r="11" fill="#F2CDA4"/>'+
+    '<circle cx="20" cy="29" r="1.5" fill="#3A2415"/><circle cx="28" cy="29" r="1.5" fill="#3A2415"/>'+
+    '<path d="M21 34c1.8 1.6 4.2 1.6 6 0" stroke="#3A2415" stroke-width="1.6" fill="none" stroke-linecap="round"/>'+
+    '<ellipse cx="24" cy="19" rx="17" ry="4.2" fill="#8B5E34"/>'+
+    '<path d="M16 19V13c0-2.6 3.2-4.4 8-4.4s8 1.8 8 4.4v6z" fill="#A87243"/>'+
+    '<rect x="16" y="16" width="16" height="3" fill="#5C3A1E"/>'},
+
+  {id:'astro',  n:'Astronauta',bg:'#93BEEF', svg:
+    '<rect x="13" y="36" width="22" height="6" rx="3" fill="#C9D2E0"/>'+
+    '<circle cx="24" cy="25" r="13" fill="#EDF0F6"/>'+
+    '<path d="M14 24c0-4 4.5-7 10-7s10 3 10 7v3c0 3.4-4.5 6-10 6s-10-2.6-10-6z" fill="#16324F"/>'+
+    '<path d="M17 22c1.6-2 4.2-3.2 7-3.4-2.6 1.2-4.6 3-5.6 5.4z" fill="#5B8FC9"/>'+
+    '<rect x="34" y="22" width="4" height="7" rx="2" fill="#C9D2E0"/>'},
+
+  {id:'bear',   n:'Osito',    bg:'#E3AC6E', svg:
+    '<circle cx="13" cy="17" r="5.5" fill="#9E6B37"/><circle cx="35" cy="17" r="5.5" fill="#9E6B37"/>'+
+    '<circle cx="13" cy="17" r="2.6" fill="#D8A97C"/><circle cx="35" cy="17" r="2.6" fill="#D8A97C"/>'+
+    '<circle cx="24" cy="28" r="12" fill="#B87C42"/>'+
+    '<ellipse cx="24" cy="33" rx="6.5" ry="5" fill="#EBD3B4"/>'+
+    '<ellipse cx="24" cy="30.5" rx="2.4" ry="1.8" fill="#42260F"/>'+
+    '<circle cx="19" cy="25" r="1.6" fill="#42260F"/><circle cx="29" cy="25" r="1.6" fill="#42260F"/>'},
+
+  {id:'eng',    n:'Ingeniero',bg:'#F0CB5B', svg:
+    '<circle cx="24" cy="30" r="11" fill="#F2CDA4"/>'+
+    '<circle cx="20" cy="30" r="1.5" fill="#3A2415"/><circle cx="28" cy="30" r="1.5" fill="#3A2415"/>'+
+    '<path d="M21 35c1.8 1.7 4.2 1.7 6 0" stroke="#3A2415" stroke-width="1.6" fill="none" stroke-linecap="round"/>'+
+    '<path d="M11 21h26v3H11z" fill="#E0A007"/>'+
+    '<path d="M14 21c0-6 4.5-10 10-10s10 4 10 10z" fill="#FFC531"/>'+
+    '<path d="M24 11v10" stroke="#E0A007" stroke-width="2"/>'},
+
+  {id:'dragon', n:'Dragón',   bg:'#7FD3A4', svg:
+    '<path d="M13 17 8 6l10 7z" fill="#F2E2B4"/><path d="M35 17 40 6l-10 7z" fill="#F2E2B4"/>'+
+    '<path d="M15 34c0-3 2-5 5-5h13c2.8 0 4.6 2 4.6 4.4 0 3.4-3.4 6.6-9 6.6-8 0-13.6-2.6-13.6-6z" fill="#2E9B64"/>'+
+    '<ellipse cx="24" cy="26" rx="12.5" ry="10.5" fill="#3BAF74"/>'+
+    '<path d="M17 33c1-2.4 3.6-4 7-4h9c2.6 0 4.4 1.8 4.4 4 0 2.8-3.4 5-8.4 5-6.6 0-11-2-12-5z" fill="#58CB8F"/>'+
+    '<circle cx="30" cy="33" r="1.1" fill="#1B5138"/><circle cx="34" cy="33" r="1.1" fill="#1B5138"/>'+
+    '<path d="M15 22c1.4-1.6 4-1.6 5.4 0-1.4 2.4-4 2.4-5.4 0z" fill="#FFF"/>'+
+    '<path d="M27 22c1.4-1.6 4-1.6 5.4 0-1.4 2.4-4 2.4-5.4 0z" fill="#FFF"/>'+
+    '<ellipse cx="17.7" cy="22.2" rx="1" ry="1.5" fill="#12301F"/>'+
+    '<ellipse cx="29.7" cy="22.2" rx="1" ry="1.5" fill="#12301F"/>'},
+
+  {id:'frenchie',n:'Bulldog', bg:'#C7C9D4', svg:
+    '<path d="M12 20V10c0-1.6 1.8-2.4 3-1.4l6 5.4z" fill="#8E8E96"/>'+
+    '<path d="M36 20V10c0-1.6-1.8-2.4-3-1.4l-6 5.4z" fill="#8E8E96"/>'+
+    '<path d="M14 18V12c0-.8.9-1.2 1.5-.7l3.5 3.1z" fill="#E0A9AE"/>'+
+    '<path d="M34 18V12c0-.8-.9-1.2-1.5-.7l-3.5 3.1z" fill="#E0A9AE"/>'+
+    '<ellipse cx="24" cy="29" rx="12.5" ry="11" fill="#A9AAB2"/>'+
+    '<ellipse cx="24" cy="34" rx="8" ry="5.5" fill="#EDEDF0"/>'+
+    '<ellipse cx="24" cy="31" rx="2.8" ry="2.1" fill="#2B2B30"/>'+
+    '<path d="M24 33v2M21 36c1.6 1.2 4.4 1.2 6 0" stroke="#5B5B63" stroke-width="1.4" fill="none" stroke-linecap="round"/>'+
+    '<circle cx="18.5" cy="25" r="1.7" fill="#2B2B30"/><circle cx="29.5" cy="25" r="1.7" fill="#2B2B30"/>'}
 ];
 
 const BADGES=[
@@ -2173,21 +2224,22 @@ const BADGES=[
   {id:'week',  ico:'🔥', n:'Seven days',    d:'A seven-day streak'}
 ];
 
-const P={name:'Player',ava:'a',xp:0,level:1,streak:0,last:'',
+const P={name:'Player',ava:'cowboy',xp:0,level:1,streak:0,last:'',
          rounds:0,hits:0,modes:{},badges:[]};
 
 // El siguiente nivel cuesta más que el anterior, pero no tanto como
 // para que se note un muro: 300, 450, 600, 750...
 const needFor=lv=>300+(lv-1)*150;
 
-function avaColor(id){ return (AVATARS.find(a=>a.id===id)||AVATARS[0]).c; }
-function initial(){ return (P.name||'?').trim().charAt(0).toUpperCase()||'?'; }
+const avaOf=id=>AVATARS.find(a=>a.id===id)||AVATARS[0];
+const avaSvg=a=>`<svg viewBox="0 0 48 48" aria-hidden="true">${a.svg}</svg>`;
 
 function paintAva(){
-  [['avaMini',false],['avaBig',true]].forEach(([id])=>{
+  const a=avaOf(P.ava);
+  ['avaMini','avaBig'].forEach(id=>{
     const el=$(id);
-    el.style.background=avaColor(P.ava);
-    el.textContent=initial();
+    el.style.background=a.bg;
+    el.innerHTML=avaSvg(a);
   });
 }
 
@@ -2322,10 +2374,11 @@ function paintProfile(){
 
   $('avaPick').innerHTML='';
   AVATARS.forEach(a=>{
-    const el=document.createElement('span');
+    const el=document.createElement('button');
     el.className='ava pick'+(a.id===P.ava?' sel':'');
-    el.style.background=a.c;
-    el.textContent=initial();
+    el.style.background=a.bg;
+    el.title=a.n; el.setAttribute('aria-label',a.n);
+    el.innerHTML=avaSvg(a);
     el.onclick=()=>{P.ava=a.id;saveProfile();paintProfile()};
     $('avaPick').appendChild(el);
   });
@@ -2333,8 +2386,6 @@ function paintProfile(){
 $('pfNameIn').oninput=e=>{
   P.name=e.target.value.trim()||'Player';
   $('pfName').textContent=P.name;
-  paintAva();
-  document.querySelectorAll('#avaPick .ava').forEach(el=>el.textContent=initial());
   saveProfile();
 };
 
