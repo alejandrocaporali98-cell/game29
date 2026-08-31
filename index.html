@@ -72,8 +72,9 @@
 #ambient::after{content:"";position:absolute;inset:0;opacity:.05;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
 @media(max-width:719px){
-  /* en el móvil la columna ocupa todo: el desenfoque grande sólo costaría batería */
-  #ambient img{display:none}
+  /* En partida el desenfoque grande gastaría batería en cada ronda,
+     pero en la portada es una imagen fija y ahí sí compensa. */
+  #ambient img:not(.home){display:none}
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -105,91 +106,81 @@ header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area
 /* Muro de carátulas reales del top de Deezer. Va detrás del titular,
    muy atenuado y a la deriva: una app de música tiene que enseñar
    música antes de que toques nada. */
-/* El muro vive arriba del todo y se apaga antes de llegar al texto:
-   si compite con el titular, deja de ser fondo y estorba. */
-/* Dos filas completas de carátulas: la segunda antes quedaba mordida
-   por el titular, y abajo sobraba negro. */
-#wallwrap{position:absolute;top:-14px;left:-16px;right:-16px;height:272px;
-  z-index:0;overflow:hidden;pointer-events:none;
-  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.72) 52%,transparent 94%);
-  mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.72) 52%,transparent 94%)}
-#wall{display:flex;flex-direction:column;gap:7px;opacity:.42}
-/* Dos cintas en sentidos opuestos. El truco del bucle sin costura:
-   el contenido va duplicado y la animación recorre justo la mitad,
-   así el salto cae en un fotograma idéntico al de partida. */
-.strip{display:flex;gap:7px;width:max-content;will-change:transform;
-  animation:slide 64s linear infinite}
-.strip.rev{animation-duration:86s;animation-direction:reverse}
-.strip img{width:96px;height:96px;object-fit:cover;border-radius:12px;display:block;flex:none}
-@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media(min-width:720px){
-  .strip img{width:104px;height:104px}
-}
-#s-home{position:relative;padding-top:152px}
-#s-home>*:not(#wallwrap){position:relative;z-index:1}
-@media(min-width:720px){
-  #wall{grid-template-columns:repeat(6,1fr)}
-  #wallwrap{height:236px}
-  #s-home{padding-top:112px}
-}
+/* ---- portada: suena y los modos son discos ----
+   El fondo es la carátula de lo que está sonando, desenfocada. La
+   pantalla cambia de color con cada canción sin que haya que decorar
+   nada más. */
+.np{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:color-mix(in srgb,var(--text) 10%,transparent);
+  border:1px solid var(--line);border-radius:16px;padding:10px 12px;
+  color:var(--text);font-family:var(--sans);cursor:pointer;margin-bottom:20px}
+.np .mini{width:36px;height:36px;flex:none;position:relative}
+.np .mini .disc{width:100%;height:100%}
+.np.spin .mini{animation:spin 2.6s linear infinite}
+.np .lab2{font-family:var(--mono);font-size:9px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:3px}
+.np .tit{font-size:13px;font-weight:500;display:block;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np .grow{flex:1;min-width:0}
+.np .ctl{font-size:17px;color:var(--muted);flex:none;width:26px;text-align:center}
 
-/* ---- portada: contraportada de disco ----
-   Nada de filas con icono, título, subtítulo y flecha: ese patrón es
-   el que sale por defecto en cualquier plantilla. Aquí manda la
-   tipografía y los puntos guía, como en el reverso de un vinilo. */
-.sleeve{display:flex;align-items:center;gap:10px;margin-bottom:14px;
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--place)}
-.sleeve i{width:22px;height:2px;background:var(--accent);display:block}
+/* El disco se dibuja con CSS: surcos con un degradado radial repetido
+   y la carátula recortada en círculo como etiqueta. */
+.disc{position:relative;width:100%;aspect-ratio:1;border-radius:50%;
+  background:
+    repeating-radial-gradient(circle at 50% 50%,
+      rgba(255,255,255,.05) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,.14), transparent 46%),
+    #0F0F11;
+  box-shadow:0 8px 26px rgba(0,0,0,.55)}
+.disc .lab{position:absolute;inset:29%;border-radius:50%;overflow:hidden;
+  background:var(--sugg);display:grid;place-items:center}
+.disc .lab img{width:100%;height:100%;object-fit:cover}
+.disc .lab .no{position:absolute;font-family:var(--mono);font-size:10px;font-weight:700;
+  color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9);top:8%;letter-spacing:.1em}
+.disc::after{content:"";position:absolute;left:50%;top:50%;width:7%;height:7%;
+  transform:translate(-50%,-50%);border-radius:50%;background:var(--bg)}
+
+.rack{display:grid;grid-template-columns:1fr 1fr;gap:22px 20px;margin-bottom:26px}
+.slot2{background:none;border:none;padding:0;cursor:pointer;color:var(--text);
+  font-family:var(--sans);text-align:left}
+.slot2 .nm{display:block;font-size:17px;font-weight:600;letter-spacing:-.02em;margin-top:11px}
+.slot2 .meta{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);
+  margin-top:3px;letter-spacing:.04em}
+.slot2:active .disc{transform:scale(.97)}
+.slot2 .disc{transition:transform .18s}
+.slot2:hover .nm{color:var(--accent)}
 
 .cut{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
-  background:none;border:none;border-top:1px solid var(--line);
-  border-bottom:1px solid var(--line);padding:16px 2px;margin-bottom:26px;
+  border:1px solid color-mix(in srgb,var(--amber) 45%,transparent);
+  background:color-mix(in srgb,var(--amber) 12%,transparent);
+  border-radius:18px;padding:15px;margin-bottom:16px;
   color:var(--text);font-family:var(--sans);cursor:pointer}
-.cut .cutlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:5px}
-.cut .cutsub{font-size:14px;color:var(--muted);display:block}
+.cut .cutlab{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--amber);display:block;margin-bottom:4px}
+.cut .cutsub{font-size:13px;color:var(--muted);display:block}
 .cut .grow{flex:1;min-width:0}
 .cut .date{font-family:var(--mono);text-align:right;line-height:1;flex:none}
-.cut .date b{display:block;font-size:30px;font-weight:700;letter-spacing:-.03em}
-.cut .date span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--place)}
+.cut .date b{display:block;font-size:26px;font-weight:700;letter-spacing:-.03em}
+.cut .date span{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--place)}
+.cut.done{border-color:color-mix(in srgb,var(--green) 45%,transparent);
+  background:color-mix(in srgb,var(--green) 10%,transparent)}
 .cut.done .cutlab{color:var(--green)}
 
-.listhead{display:flex;justify-content:space-between;align-items:baseline;
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--place);margin-bottom:6px}
-
-.tracks{list-style:none}
-.tracks button{display:flex;align-items:baseline;gap:12px;width:100%;
-  background:none;border:none;border-bottom:1px solid var(--line);
-  padding:17px 4px;color:var(--text);font-family:var(--sans);cursor:pointer;text-align:left}
-.tracks li:first-child button{border-top:1px solid var(--line)}
-.tracks .no{font-family:var(--mono);font-size:12px;color:var(--place);flex:none;width:22px}
-.tracks .nm{font-size:19px;font-weight:600;letter-spacing:-.025em;flex:none}
-.tracks .dots{flex:1;border-bottom:1px dotted var(--line);transform:translateY(-4px);min-width:14px}
-.tracks .meta{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none;
-  letter-spacing:.04em;white-space:nowrap}
-.tracks button:hover .nm,.tracks button:focus-visible .nm{color:var(--accent)}
-.tracks button:hover .no{color:var(--accent)}
-.tracks button:active{background:var(--raise)}
-
-.bottom{display:flex;align-items:center;justify-content:space-between;
-  gap:12px;margin-top:22px}
-.speed{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.bottom{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.speed{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
 .speed button{background:none;border:none;color:var(--muted);cursor:pointer;
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
-  padding:9px 12px}
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:9px 12px}
 .speed button.sel{background:var(--accent);color:var(--on-accent);font-weight:700}
-#surprise{background:none;border:1px solid var(--line);border-radius:8px;
-  color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
-  text-transform:uppercase;padding:9px 12px;cursor:pointer;flex:none}
+#surprise{background:none;border:1px solid var(--line);border-radius:9px;color:var(--muted);
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  padding:9px 12px;cursor:pointer}
 #surprise:hover{color:var(--text);border-color:var(--text)}
 
 @media(min-width:1000px){
-  .tracks .nm{font-size:26px}
-  .tracks button{padding:22px 4px}
-  .tracks .meta,.tracks .no{font-size:13px}
-  .cut .date b{font-size:38px}
+  .rack{gap:28px 26px}
+  .slot2 .nm{font-size:22px}
+  .cut .date b{font-size:34px}
 }
 
 /* El progreso tiene que estar a la vista siempre: si sólo se ve
@@ -587,11 +578,36 @@ input::placeholder{color:var(--place)}
 
 <!-- HOME -->
 <section class="screen on" id="s-home">
-  <div id="wallwrap" aria-hidden="true"><div id="wall"></div></div>
+  <button class="np" id="npBtn">
+    <span class="mini"><span class="disc"><span class="lab"><img id="npArt" alt=""></span></span></span>
+    <span class="grow">
+      <span class="lab2" id="npLab">Tap to play</span>
+      <span class="tit" id="npTit">A song from today's charts</span>
+    </span>
+    <span class="ctl" id="npCtl">▶</span>
+  </button>
 
-  <p class="sleeve"><i></i> M29 · lado A</p>
   <h1>Guess the song</h1>
-  <p class="lede">Real 30-second previews, pulled live. Nothing is stored, nothing is scripted.</p>
+  <p class="lede">Real 30-second previews, pulled live. Four ways to play.</p>
+
+  <div class="rack">
+    <button class="slot2" data-game="type">
+      <span class="disc"><span class="lab"><img id="lab1" alt=""><span class="no">01</span></span></span>
+      <span class="nm">Name It</span><span class="meta" id="subType">6 tries · hints</span>
+    </button>
+    <button class="slot2" data-game="blitz">
+      <span class="disc"><span class="lab"><img id="lab2" alt=""><span class="no">02</span></span></span>
+      <span class="nm">Blitz</span><span class="meta" id="subBlitz">12s · 4 options</span>
+    </button>
+    <button class="slot2" data-game="line">
+      <span class="disc"><span class="lab"><img id="lab3" alt=""><span class="no">03</span></span></span>
+      <span class="nm">Eras</span><span class="meta" id="subLine">2–4 players</span>
+    </button>
+    <button class="slot2" data-game="genre">
+      <span class="disc"><span class="lab"><img id="lab4" alt=""><span class="no">04</span></span></span>
+      <span class="nm">Who's This</span><span class="meta">by genre</span>
+    </button>
+  </div>
 
   <button class="cut" id="todayBtn">
     <span class="grow">
@@ -600,26 +616,6 @@ input::placeholder{color:var(--place)}
     </span>
     <span class="date"><b id="todayNum">1</b><span id="todayMon">jan</span></span>
   </button>
-
-  <div class="listhead"><span>Tracklist</span><span>Four ways to play</span></div>
-  <ol class="tracks">
-    <li><button data-game="type">
-      <span class="no">01</span><span class="nm">Name It</span>
-      <span class="dots"></span><span class="meta" id="subType">6 tries</span>
-    </button></li>
-    <li><button data-game="blitz">
-      <span class="no">02</span><span class="nm">Blitz</span>
-      <span class="dots"></span><span class="meta" id="subBlitz">12s · 4 options</span>
-    </button></li>
-    <li><button data-game="line">
-      <span class="no">03</span><span class="nm">Eras</span>
-      <span class="dots"></span><span class="meta" id="subLine">2–4 players</span>
-    </button></li>
-    <li><button data-game="genre">
-      <span class="no">04</span><span class="nm">Who's This</span>
-      <span class="dots"></span><span class="meta">by genre</span>
-    </button></li>
-  </ol>
 
   <div class="bottom">
     <div class="speed modes">
@@ -1043,7 +1039,8 @@ function go(id){
   // quien usa lector de pantalla debe aterrizar arriba, no donde estaba
   const s=$(id);
   if(s){s.setAttribute('tabindex','-1');setTimeout(()=>s.focus({preventScroll:true}),0)}
-  if(id==='s-home'||id==='s-pick') resetAccent();
+  if(id==='s-pick') resetAccent();
+  if(id!=='s-home' && typeof homeStop==='function') homeStop();
   if(id!=='s-type') stopAudio();
   if(id!=='s-blitz') bHalt();
   if(id!=='s-guess'&&typeof gHalt==='function') gHalt();
@@ -1130,33 +1127,67 @@ function resetAccent(){
   ambient(null);
 }
 
-/* ---------- muro de carátulas ---------- */
+/* ---------- la portada suena ----------
+   Un fragmento de la lista de éxitos, a volumen bajo, con su carátula
+   de fondo. Nunca arranca sola: sonar sin permiso a alguien que va en
+   el metro es la forma más rápida de que cierre la app. */
+const HOME={list:[],i:0,audio:null,on:false};
+
+function homeArt(t){
+  return t && t.album ? (t.album.cover_big||t.album.cover_medium) : null;
+}
+
+function setHomeTrack(t){
+  if(!t)return;
+  const art=homeArt(t);
+  $('npTit').textContent=`${t.title} · ${t.artist?t.artist.name:''}`;
+  if(art){
+    $('npArt').src=art;
+    const bg=$('ambientArt');
+    bg.src=art; bg.classList.add('on','home');
+  }
+  accentFrom(art);
+}
+
+function homeStop(){
+  HOME.on=false;
+  if(HOME.audio) HOME.audio.pause();
+  $('npBtn').classList.remove('spin');
+  $('npCtl').textContent='▶';
+  $('npLab').textContent='Tap to play';
+}
+
+function homePlay(){
+  const t=HOME.list[HOME.i];
+  if(!t)return;
+  if(!HOME.audio){ HOME.audio=new Audio(); HOME.audio.volume=0.34; }
+  HOME.audio.src=t.preview;
+  HOME.audio.onended=()=>{ HOME.i=(HOME.i+1)%HOME.list.length; setHomeTrack(HOME.list[HOME.i]); homePlay(); };
+  HOME.audio.play().then(()=>{
+    HOME.on=true;
+    $('npBtn').classList.add('spin');
+    $('npCtl').textContent='⏸';
+    $('npLab').textContent='Now playing';
+  }).catch(()=>{});
+}
+
+$('npBtn').onclick=()=>{ HOME.on ? homeStop() : homePlay(); };
+
 (async()=>{
   try{
-    const d=await deezer('/chart/0/tracks',{limit:24});
-    const seen=new Set(), urls=[];
-    (d.data||[]).forEach(t=>{
-      const u=t.album&&t.album.cover_medium;
-      if(!u||seen.has(u))return;
-      seen.add(u);urls.push(u);
+    const d=await cached('chart:0',()=>deezer('/chart/0/tracks',{limit:100}));
+    const list=(d.data||[]).filter(t=>t.preview&&t.album);
+    if(!list.length)return;
+    HOME.list=list.sort(()=>Math.random()-0.5);
+    HOME.i=0;
+    setHomeTrack(HOME.list[0]);
+    // cada disco de la rejilla lleva una carátula distinta de etiqueta
+    [1,2,3,4].forEach((n,k)=>{
+      const t=HOME.list[(k+1)%HOME.list.length];
+      const u=homeArt(t);
+      if(u) $('lab'+n).src=u;
     });
-    if(urls.length<6)return;
-
-    // una cinta con las pares y otra con las impares, para que las dos
-    // filas no muestren las mismas carátulas al mismo tiempo
-    [0,1].forEach(row=>{
-      const strip=document.createElement('div');
-      strip.className='strip'+(row?' rev':'');
-      const mine=urls.filter((_,i)=>i%2===row);
-      // duplicado: la animación recorre la mitad y vuelve a empezar igual
-      [...mine,...mine].forEach(u=>{
-        const img=new Image();
-        img.src=u;img.alt='';img.loading='lazy';
-        strip.appendChild(img);
-      });
-      $('wall').appendChild(strip);
-    });
-  }catch(e){}   // sin muro se ve igual de bien, no vale la pena avisar
+  }catch(e){}
 })();
 
 /* ---------- portada ---------- */
