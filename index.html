@@ -116,9 +116,10 @@ header{display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-are
 .settings{display:flex;flex-direction:column;gap:2px;margin-top:6px}
 .settings button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
   background:none;border:none;border-bottom:1px solid var(--line);
-  padding:15px 4px;color:var(--text);font-family:var(--sans);font-size:14px;cursor:pointer}
-.settings button .ic{width:24px;text-align:center;color:var(--muted);font-size:14px}
-.settings button .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;
+  padding:16px 4px;color:var(--text);font-family:var(--sans);font-size:14px;cursor:pointer}
+.settings button .ic{flex:none;width:22px;text-align:center;color:var(--muted);font-size:14px}
+.settings button .tx{flex:1;min-width:0;white-space:nowrap}
+.settings button .st{flex:none;font-family:var(--mono);font-size:10.5px;
   letter-spacing:.1em;text-transform:uppercase;color:var(--place)}
 .settings button:hover{color:var(--accent)}
 /* la i necesita ser cuadrada para no verse como una píldora torcida */
@@ -189,20 +190,28 @@ header{display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-are
   text-transform:uppercase;color:var(--place);margin-top:10px}
 .pick .meta2{display:block;font-family:var(--mono);font-size:9px;color:var(--place);
   opacity:.7;margin-top:3px}
-.pick.sel .disc{box-shadow:0 0 0 2px var(--tape-on),0 10px 28px rgba(0,0,0,.6);
+.pick .disc{box-shadow:0 0 0 2px color-mix(in srgb,var(--ring) 40%,transparent),
+  0 8px 22px rgba(0,0,0,.5)}
+.pick:nth-child(1){--ring:#E8813A}
+.pick:nth-child(2){--ring:#FF453A}
+.pick:nth-child(3){--ring:#64D2FF}
+.pick.sel .disc{box-shadow:0 0 0 2.5px var(--ring),0 10px 30px rgba(0,0,0,.6);
   animation:spin 5.5s linear infinite}
-.pick.sel .nm2{color:var(--text);font-weight:700}
-.pick:not(.sel) .disc{filter:brightness(.72) saturate(.6)}
+.pick.sel .nm2{color:var(--ring);font-weight:700}
+.pick:not(.sel) .disc{filter:brightness(.8) saturate(.75)}
 .pick:hover .nm2{color:var(--text)}
 
 /* el corte del día: un sencillo con la fecha en la etiqueta */
 .cutwrap{margin-bottom:26px}
 .cutrow{display:flex;align-items:center;gap:18px}
-.cutrow .disc{width:110px;flex:none;animation:spin 7s linear infinite}
+.cutrow .disc{width:110px;flex:none;animation:spin 7s linear infinite;
+  box-shadow:0 0 0 2.5px var(--amber),0 10px 30px rgba(0,0,0,.6)}
 .cutrow .disc .lab{background:var(--amber);display:grid;place-items:center}
+.cutrow .disc{animation:none}
 .cutrow .disc .lab b{font-family:var(--mono);font-size:15px;font-weight:700;
   color:#1B1400;line-height:1.05;text-align:center}
 .cutrow .disc .lab b span{display:block;font-size:8px;letter-spacing:.14em;margin-top:2px}
+.cutwrap.done .cutrow .disc{box-shadow:0 0 0 2.5px var(--green),0 10px 30px rgba(0,0,0,.6)}
 .cutwrap.done .cutrow .disc .lab{background:var(--green)}
 .cutinfo{min-width:0}
 .cuthead{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
@@ -397,7 +406,8 @@ input::placeholder{color:var(--place)}
   box-shadow:inset 0 0 0 2px rgba(0,0,0,.22)}
 .ava svg{width:100%;height:100%;display:block}
 .ava.big{width:96px;height:96px;box-shadow:inset 0 0 0 4px rgba(0,0,0,.22)}
-.ava.pick{width:100%;aspect-ratio:1;height:auto;cursor:pointer}
+.ava.pick{width:100%;max-width:76px;aspect-ratio:1;height:auto;cursor:pointer;
+  justify-self:center}
 .ava.pick.sel{outline:3px solid var(--text);outline-offset:3px}
 
 .prof{display:flex;align-items:center;gap:16px;margin-bottom:20px}
@@ -824,10 +834,10 @@ input::placeholder{color:var(--place)}
 
   <div class="eyebrow">Settings</div>
   <div class="settings">
-    <button id="sfxBtn"><span class="ic">♪</span>Sound<span class="st" id="sfxState">on</span></button>
-    <button id="modeBtn"><span class="ic">◐</span>Appearance<span class="st" id="modeState">auto</span></button>
-    <button id="infoBtn"><span class="ic">?</span>How it works<span class="st">read</span></button>
-    <button id="installBtn"><span class="ic">⬇</span>Install app<span class="st">home screen</span></button>
+    <button id="sfxBtn"><span class="ic">♪</span><span class="tx">Sound</span><span class="st" id="sfxState">on</span></button>
+    <button id="modeBtn"><span class="ic">◐</span><span class="tx">Appearance</span><span class="st" id="modeState">auto</span></button>
+    <button id="infoBtn"><span class="ic">?</span><span class="tx">How it works</span><span class="st">read</span></button>
+    <button id="installBtn"><span class="ic">⬇</span><span class="tx">Install app</span><span class="st">home screen</span></button>
   </div>
 
   <div class="actions" style="margin-top:22px">
@@ -1211,9 +1221,10 @@ $('npBtn').onclick=()=>{ HOME.on ? homeStop() : homePlay(); };
       if(u) $('lab'+n).src=u;
     });
     // las cintas también llevan carátula bajo el papel
-    ['todayArt','tapeArt1','tapeArt2','tapeArt3'].forEach((id,k)=>{
+    ['tapeArt1','tapeArt2','tapeArt3'].forEach((id,k)=>{
+      const el=$(id);
       const u=homeArt(HOME.list[(k+5)%HOME.list.length]);
-      if(u) $(id).src=u;
+      if(el&&u) el.src=u;
     });
   }catch(e){}
 })();
