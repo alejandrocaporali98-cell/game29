@@ -4,6 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
+<!-- Sólo se permiten los orígenes que la app necesita. Importa porque
+     los datos llegan por JSONP, que ejecuta código de fuera. -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://api.deezer.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  img-src 'self' data: blob: https://*.dzcdn.net https://api.deezer.com;
+  media-src blob: https://*.dzcdn.net;
+  connect-src 'self';
+  worker-src 'self';
+  manifest-src 'self';
+  base-uri 'none';
+  form-action 'none';
+  frame-ancestors 'none'">
 <meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -532,6 +547,8 @@ input::placeholder{color:var(--place)}
 /* ---- juego de opciones ---- */
 .bhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
 .bhead .rnd{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--place)}
+.chain{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--amber);margin-left:10px}
 .bhead .pts{font-size:clamp(38px,11vw,52px);font-weight:600;letter-spacing:-.04em;
   font-variant-numeric:tabular-nums;line-height:.9}
 .live{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);
@@ -807,6 +824,7 @@ input::placeholder{color:var(--place)}
   <div id="b-live">
     <div class="bhead">
       <span class="rnd" id="b-round">Round 1 of 10</span>
+      <span class="chain" id="b-combo"></span>
       <span class="pts" id="b-score">0</span>
     </div>
 <div class="deck" id="b-deck">
@@ -938,6 +956,13 @@ input::placeholder{color:var(--place)}
   <div class="tiles2" id="avaPick" style="grid-template-columns:repeat(3,1fr);gap:12px"></div>
   <input type="text" id="pfNameIn" placeholder="Your name" autocomplete="off" maxlength="14">
 
+  <div class="eyebrow">Backup</div>
+  <p class="foot" style="text-align:left;margin:0 0 10px">Your progress lives in this browser only. Copy this code to keep it safe or move it to another device.</p>
+  <div class="actions" style="margin-top:0">
+    <button id="pfExport">Copy my code</button>
+    <button id="pfImport">Restore</button>
+  </div>
+
   <div class="actions" style="margin-top:22px">
     <button class="ghost" id="pfReset">Reset all progress</button>
   </div>
@@ -958,6 +983,7 @@ input::placeholder{color:var(--place)}
   <div id="g-live">
     <div class="bhead">
       <span class="rnd" id="g-round">Round 1 of 10</span>
+      <span class="chain" id="g-combo"></span>
       <span class="pts" id="g-score">0</span>
     </div>
 <div class="deck" id="g-deck">
@@ -1150,12 +1176,41 @@ function warm(t){
    Dentro de Claude usa window.storage; si lo alojas tú, descomenta
    las líneas de localStorage. */
 const mem={};
+/* Tres niveles: el almacén del navegador, el de Claude si existe, y
+   memoria como último recurso. Antes sólo estaba el último, así que
+   el progreso se perdía al recargar. */
 const store={
-  async get(k){try{if(window.storage){const r=await window.storage.get(k);return r?r.value:null}}catch(e){}
-    /* return localStorage.getItem(k); */ return mem[k]??null},
-  async set(k,v){mem[k]=String(v);try{if(window.storage)await window.storage.set(k,String(v))}catch(e){}
-    /* localStorage.setItem(k,String(v)); */}
+  async get(k){
+    try{ const v=localStorage.getItem('m29:'+k); if(v!==null) return v; }catch(e){}
+    try{ if(window.storage){const r=await window.storage.get(k); if(r) return r.value} }catch(e){}
+    return mem[k]??null;
+  },
+  async set(k,v){
+    mem[k]=String(v);
+    try{ localStorage.setItem('m29:'+k,String(v)); }catch(e){}
+    try{ if(window.storage) await window.storage.set(k,String(v)); }catch(e){}
+  }
 };
+
+/* Copia de seguridad: el progreso vive en este navegador y se pierde
+   si borras los datos del sitio. Este código lo empaqueta en texto
+   para poder pegarlo en otro dispositivo. */
+const BACKUP_KEYS=['profile','daily','bestScore','bestGenre','bestStreak','mode','muted'];
+
+async function makeBackup(){
+  const o={};
+  for(const k of BACKUP_KEYS){ const v=await store.get(k); if(v!=null) o[k]=v; }
+  o._v=1;
+  // base64 sobre UTF-8: los nombres con acentos romperían btoa a secas
+  return btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+}
+
+async function useBackup(code){
+  const o=JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+  if(typeof o!=='object'||!o) throw new Error('bad');
+  for(const k of BACKUP_KEYS) if(typeof o[k]==='string') await store.set(k,o[k]);
+  return true;
+}
 
 /* ---------- ajustes ----------
    La dificultad es una sola palanca que cada juego interpreta:
@@ -1166,6 +1221,7 @@ const DIFF={
 };
 const REWARD=15, PREVIEW=30;   // premio al acertar y largo del preview
 const TOP=1000, FLOOR=100;     // puntos de Blitz al empezar y al final
+const COMBO=[1,1,1.25,1.5,2];  // multiplicador según aciertos seguidos
 
 const S={diff:'classic',game:'type',artist:null,pool:[],titles:[],used:new Set(),queued:null,
   track:null,stage:0,over:false,hints:0,gaveUp:false,
@@ -1416,9 +1472,14 @@ async function findArtists(q){
     $('artists').innerHTML='';
     list.forEach(a=>{
       const li=document.createElement('li');
-      li.innerHTML=`<img src="${a.picture_small}" alt=""><div><div class="nm"></div>
-        <div class="sub">${(a.nb_fan||0).toLocaleString('en')} fans</div></div>`;
+      // nada de meter datos ajenos dentro de una plantilla de HTML:
+      // una URL con comillas podría cerrar el atributo e inyectar código
+      li.innerHTML='<img alt=""><div><div class="nm"></div><div class="sub"></div></div>';
+      const im=li.querySelector('img');
+      im.onerror=()=>{im.style.visibility='hidden'};
+      if(a.picture_small) im.src=a.picture_small;
       li.querySelector('.nm').textContent=a.name;
+      li.querySelector('.sub').textContent=(a.nb_fan||0).toLocaleString('en')+' fans';
       li.onclick=()=>loadArtist(a);
       $('artists').appendChild(li);
     });
@@ -1686,7 +1747,8 @@ const worth=el=>{
 };
 
 function bStart(){
-  S.round=0;S.score=0;S.hits=0;S.log=[];S.used=new Set();S.bestHit=0;
+  S.round=0;S.score=0;S.hits=0;S.log=[];S.used=new Set();S.bestHit=0;S.chain=0;
+  $('b-combo').textContent='';
   $('b-final').hidden=true;$('b-live').hidden=false;
   bRound();
 }
@@ -1771,13 +1833,19 @@ function bAnswer(btn,ok){
 
   if(ok){
     sfx.right();
-    const pts=worth(el);
+    S.chain=(S.chain||0)+1;
+    const mult=COMBO[Math.min(S.chain,COMBO.length-1)];
+    const pts=Math.round(worth(el)*mult);
     S.score+=pts;S.hits++;
     S.bestHit=Math.max(S.bestHit||0,pts);
     $('b-score').textContent=S.score;
-    $('b-gain').textContent=`+${pts}`;$('b-gain').className='gain plus rise';
+    $('b-gain').textContent=mult>1?`+${pts}  ×${mult}`:`+${pts}`;
+    $('b-gain').className='gain plus rise';
+    $('b-combo').textContent=S.chain>=2?`${S.chain} in a row`:'';
   }else{
     sfx.wrong();
+    S.chain=0;
+    $('b-combo').textContent='';
     $('b-gain').textContent=btn?'Nope':"Time's up";
     $('b-gain').className='gain zero';
   }
@@ -2174,7 +2242,8 @@ async function loadGenre(gen){
 
 
 function gStartGame(){
-  G.round=0;G.score=0;G.hits=0;G.log=[];G.used=new Set();G.bestHit=0;
+  G.round=0;G.score=0;G.hits=0;G.log=[];G.used=new Set();G.bestHit=0;G.chain=0;
+  $('g-combo').textContent='';
   $('g-final').hidden=true;$('g-live').hidden=false;
   gRound();
 }
@@ -2256,13 +2325,19 @@ function gAnswer(btn,ok){
 
   if(ok){
     sfx.right();
-    const pts=worth(el);
+    G.chain=(G.chain||0)+1;
+    const mult=COMBO[Math.min(G.chain,COMBO.length-1)];
+    const pts=Math.round(worth(el)*mult);
     G.score+=pts;G.hits++;
     G.bestHit=Math.max(G.bestHit||0,pts);
     $('g-score').textContent=G.score;
-    $('g-gain').textContent=`+${pts}`;$('g-gain').className='gain plus rise';
+    $('g-gain').textContent=mult>1?`+${pts}  ×${mult}`:`+${pts}`;
+    $('g-gain').className='gain plus rise';
+    $('g-combo').textContent=G.chain>=2?`${G.chain} in a row`:'';
   }else{
     sfx.wrong();
+    G.chain=0;
+    $('g-combo').textContent='';
     $('g-gain').textContent=btn?G.track.artist:"Time's up · "+G.track.artist;
     $('g-gain').className='gain zero';
   }
@@ -2601,7 +2676,7 @@ async function saveProfile(){
 async function loadProfile(){
   try{
     const raw=await store.get('profile');
-    if(raw) Object.assign(P,JSON.parse(raw));
+    if(raw && raw!=='') Object.assign(P,JSON.parse(raw));
   }catch(e){}
   touchStreak();
   paintAva();
@@ -2764,12 +2839,35 @@ $('pfReset').onclick=async()=>{
     setTimeout(()=>{resetArmed=false;$('pfReset').textContent='Reset all progress'},4000);
     return;
   }
-  await store.set('profile','');
-  await store.set('daily','');
-  await store.set('bestScore','0');
-  await store.set('bestGenre','0');
-  await store.set('bestStreak','0');
+  for(const k of BACKUP_KEYS){
+    try{ localStorage.removeItem('m29:'+k); }catch(e){}
+    await store.set(k,'');
+  }
   location.reload();
+};
+
+$('pfExport').onclick=async()=>{
+  const code=await makeBackup();
+  try{
+    await navigator.clipboard.writeText(code);
+    $('pfExport').textContent='Copied ✓';
+  }catch(e){
+    // sin permiso de portapapeles, se enseña para copiarlo a mano
+    prompt('Your backup code:',code);
+  }
+  setTimeout(()=>{$('pfExport').textContent='Copy my code'},1800);
+};
+
+$('pfImport').onclick=async()=>{
+  const code=prompt('Paste your backup code:');
+  if(!code)return;
+  try{
+    await useBackup(code);
+    location.reload();
+  }catch(e){
+    $('pfImport').textContent='Invalid code';
+    setTimeout(()=>{$('pfImport').textContent='Restore'},1800);
+  }
 };
 
 $('pfNameIn').oninput=e=>{
@@ -2835,7 +2933,7 @@ let dailyState={date:'',done:false,won:false,tries:0};
 async function loadDailyState(){
   try{
     const raw=await store.get('daily');
-    if(raw){
+    if(raw && raw!==''){
       const d=JSON.parse(raw);
       if(d.date===hoy()) dailyState=d;
     }
