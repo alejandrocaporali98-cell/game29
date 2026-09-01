@@ -8,12 +8,12 @@
      los datos llegan por JSONP, que ejecuta código de fuera. -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://api.deezer.com;
+  script-src 'self' 'unsafe-inline' https://api.deezer.com https://unpkg.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src https://fonts.gstatic.com;
   img-src 'self' data: blob: https://*.dzcdn.net https://api.deezer.com;
   media-src blob: https://*.dzcdn.net;
-  connect-src 'self';
+  connect-src 'self' wss://0.peerjs.com https://0.peerjs.com;
   worker-src 'self';
   manifest-src 'self';
   base-uri 'none';
@@ -30,6 +30,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Sólo presenta los teléfonos entre sí; después hablan directos -->
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
 <style>
 :root{
   /* Superficies escalonadas: el ritmo lo dan los grises, no los bordes */
@@ -237,6 +239,25 @@ header{position:relative;display:flex;align-items:center;gap:10px;
   font-family:var(--sans);font-size:12.5px;padding:9px 14px;border-radius:980px;cursor:pointer}
 .hello button:first-child{background:var(--accent);color:var(--on-accent);
   border-color:transparent;font-weight:600}
+
+/* ---- multijugador ---- */
+.code{font-family:var(--mono);font-size:clamp(38px,13vw,58px);font-weight:700;
+  letter-spacing:.22em;text-align:center;color:var(--accent);margin:6px 0 4px}
+.codehint{text-align:center;font-size:12.5px;color:var(--muted);margin-bottom:22px}
+.who3{list-style:none;display:flex;flex-direction:column;gap:6px}
+.who3 li{display:flex;align-items:center;gap:12px;background:var(--raise);
+  border:1px solid var(--line);border-radius:14px;padding:11px 13px;font-size:14px}
+.who3 li .ava{width:28px;height:28px}
+.who3 li .nm3{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who3 li .pts2{margin-left:auto;font-family:var(--mono);font-size:12px;
+  color:var(--text);font-weight:700}
+.who3 li.me{border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
+.who3 li .tag2{font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--place)}
+.who3 li.ready .tag2{color:var(--green)}
+.pinput{font-family:var(--mono);font-size:26px;letter-spacing:.28em;text-align:center;
+  text-transform:uppercase}
+.netmsg{font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5}
 
 /* ---- misiones del día ---- */
 .miss{margin-bottom:24px}
@@ -769,6 +790,17 @@ input::placeholder{color:var(--place)}
     </button>
   </div>
 
+  <button class="tile" id="partyBtn" style="margin-bottom:22px">
+    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/>
+      <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5M15 14.2c2.6.3 4.5 2.2 4.5 4.8"/></svg></span>
+    <span>
+      <h3>Party</h3>
+      <p>Everyone on their own phone · same songs</p>
+    </span>
+    <span class="arrow">→</span>
+  </button>
+
   <div class="miss" id="miss">
     <div class="cuthead" style="color:var(--place)">Today's goals</div>
   </div>
@@ -965,6 +997,65 @@ input::placeholder{color:var(--place)}
   <div class="actions">
     <button class="primary" id="w-again">Play again</button>
     <button class="ghost" id="w-home">Home</button>
+  </div>
+</section>
+
+<!-- PARTY: entrar o crear -->
+<section class="screen" id="s-party">
+  <button class="back" data-go="s-home" aria-label="Back">←</button>
+  <h1>Party</h1>
+  <p class="lede">One phone hosts, everyone else joins with a code. Same songs, same time, four options each.</p>
+  <div class="actions" style="margin-top:0">
+    <button class="primary" id="ppHost">Create a room</button>
+  </div>
+  <div class="eyebrow">Or join one</div>
+  <input type="text" id="ppCode" class="pinput" placeholder="CODE" maxlength="4" autocomplete="off">
+  <div class="actions"><button id="ppJoin">Join</button></div>
+  <p class="netmsg" id="ppMsg"></p>
+</section>
+
+<!-- PARTY: sala de espera -->
+<section class="screen" id="s-lobby">
+  <button class="back" id="ppLeave" aria-label="Leave">←</button>
+  <div class="eyebrow" style="margin-top:0">Room code</div>
+  <div class="code" id="ppShow">····</div>
+  <p class="codehint" id="ppHint">Share this code. Everyone joins from their own phone.</p>
+  <ul class="who3" id="ppList"></ul>
+  <div class="actions"><button class="primary" id="ppStart">Start the game</button></div>
+  <p class="netmsg" id="ppLobbyMsg"></p>
+</section>
+
+<!-- PARTY: partida -->
+<section class="screen" id="s-pgame">
+  <div class="bhead">
+    <span class="rnd" id="pp-round">Round 1</span>
+    <span class="pts" id="pp-score">0</span>
+  </div>
+  <div class="deck" id="pp-deck">
+    <svg class="ringbox" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="track2" cx="50" cy="50" r="47"></circle>
+      <circle class="fill2" id="pp-ring" cx="50" cy="50" r="47"
+              stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
+    </svg>
+    <div class="art" id="pp-art"><img id="pp-cover" alt=""></div>
+    <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
+  </div>
+  <div class="live"><span id="pp-worth">1000 pts</span><span id="pp-time">12.0s</span></div>
+  <div class="opts" id="pp-opts"></div>
+  <div class="gain" id="pp-gain" role="status" aria-live="polite"></div>
+  <ul class="who3" id="pp-board" style="margin-top:18px"></ul>
+</section>
+
+<!-- PARTY: final -->
+<section class="screen" id="s-pend">
+  <div class="final">
+    <div class="big" id="pp-winner">—</div>
+    <div class="sub" id="pp-sub"></div>
+  </div>
+  <ul class="who3" id="pp-final" style="margin-top:20px"></ul>
+  <div class="actions">
+    <button class="primary" id="ppAgain">Play again</button>
+    <button class="ghost" id="ppHome">Home</button>
   </div>
 </section>
 
@@ -1285,6 +1376,8 @@ function go(id){
   if(s){s.setAttribute('tabindex','-1');setTimeout(()=>s.focus({preventScroll:true}),0)}
   if(id==='s-pick') resetAccent();
   if(id!=='s-home' && typeof homeStop==='function') homeStop();
+  const salas=['s-party','s-lobby','s-pgame','s-pend'];
+  if(!salas.includes(id) && typeof ptQuit==='function' && PT.peer) ptQuit();
   if(id!=='s-type') stopAudio();
   if(id!=='s-blitz') bHalt();
   if(id!=='s-guess'&&typeof gHalt==='function') gHalt();
@@ -2993,6 +3086,332 @@ const sfx={
   level(){ [523,659,784,1046].forEach((f,i)=>beep(f,.20,'triangle',.14,i*0.09)); },
   tick(){  beep(1200,.04,'square',.05); }
 };
+
+/* =====================================================
+   PARTY — cada quien en su teléfono
+   =====================================================
+   Los teléfonos hablan directos por WebRTC. PeerJS sólo los presenta
+   al principio. Quien crea la sala manda: elige las canciones, recibe
+   las respuestas y reparte los puntos, para que nadie vea una partida
+   distinta a la de los demás. */
+const PT={peer:null,conns:[],host:false,code:'',id:'',
+          players:{},pool:[],track:null,round:0,rounds:8,limit:12,
+          answered:false,startAt:0,raf:null,tmr:null};
+
+const CODE_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // sin I, L, O, 0, 1
+const mkCode=()=>Array.from({length:4},()=>
+  CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
+const roomId=c=>'m29-room-'+c;
+
+function ptMe(){ return {name:P.name||'Player',ava:P.ava}; }
+function send(conn,msg){ try{ conn.send(msg) }catch(e){} }
+function broadcast(msg){ PT.conns.forEach(c=>send(c,msg)); }
+
+/* La lista de jugadores se pinta igual en la sala y en la partida. */
+function paintPlayers(host,{scores=false}={}){
+  const el=$(host);
+  el.innerHTML='';
+  const arr=Object.values(PT.players).sort((a,b)=>(b.score||0)-(a.score||0));
+  arr.forEach(pl=>{
+    const li=document.createElement('li');
+    li.className=(pl.id===PT.id?'me ':'')+(pl.ready?'ready':'');
+    const a=avaOf(pl.ava);
+    li.innerHTML='<span class="ava"></span><span class="nm3"></span>'
+      +(scores?'<span class="pts2"></span>':'<span class="tag2"></span>');
+    const av=li.querySelector('.ava');
+    av.style.background=a.bg; av.innerHTML=avaSvg(a);
+    li.querySelector('.nm3').textContent=pl.name+(pl.id===PT.id?' (you)':'');
+    if(scores) li.querySelector('.pts2').textContent=pl.score||0;
+    else li.querySelector('.tag2').textContent=pl.host?'host':'ready';
+    el.appendChild(li);
+  });
+}
+
+async function ptPool(){
+  const ch=await cached('chart:0',()=>deezer('/chart/0/tracks',{limit:100}));
+  const seen=new Set(), pool=[];
+  (ch.data||[]).forEach(t=>{
+    if(!t.preview||!t.title)return;
+    const k=norm(t.title);
+    if(!k||seen.has(k))return;
+    seen.add(k);
+    pool.push({title:t.title,preview:t.preview,
+      cover:t.album?(t.album.cover_big||t.album.cover_medium):null,
+      artist:t.artist?t.artist.name:''});
+  });
+  return pool;
+}
+
+/* ---------- crear sala ---------- */
+$('partyBtn').onclick=()=>{go('s-party');$('ppMsg').textContent=''};
+
+$('ppHost').onclick=async()=>{
+  if(typeof Peer==='undefined'){
+    $('ppMsg').textContent='Multiplayer library still loading. Try again in a second.';
+    return;
+  }
+  $('ppMsg').textContent='Opening the room…';
+  PT.code=mkCode();
+  PT.host=true;
+  try{ PT.pool=await ptPool(); }catch(e){ $('ppMsg').textContent='Could not load songs.'; return; }
+
+  PT.peer=new Peer(roomId(PT.code));
+  PT.peer.on('open',()=>{
+    PT.id='host';
+    PT.players={host:{id:'host',...ptMe(),host:true,score:0}};
+    $('ppShow').textContent=PT.code;
+    $('ppStart').hidden=false;
+    $('ppHint').textContent='Share this code. Everyone joins from their own phone.';
+    paintPlayers('ppList');
+    go('s-lobby');
+  });
+  PT.peer.on('error',e=>{
+    $('ppMsg').textContent = e.type==='unavailable-id'
+      ? 'That room already exists — tap again for a new code.'
+      : 'Could not open the room. Check your connection.';
+  });
+  PT.peer.on('connection',conn=>{
+    PT.conns.push(conn);
+    conn.on('data',m=>hostGot(conn,m));
+    conn.on('close',()=>{
+      delete PT.players[conn.peer];
+      PT.conns=PT.conns.filter(c=>c!==conn);
+      paintPlayers(PT.round?'pp-board':'ppList',{scores:!!PT.round});
+      broadcast({t:'lobby',players:PT.players});
+    });
+  });
+};
+
+function hostGot(conn,m){
+  if(m.t==='hello'){
+    PT.players[conn.peer]={id:conn.peer,name:m.name,ava:m.ava,score:0};
+    paintPlayers('ppList');
+    broadcast({t:'lobby',players:PT.players});
+  }
+  if(m.t==='answer'){
+    const pl=PT.players[conn.peer];
+    if(!pl||pl.answeredRound===PT.round)return;
+    pl.answeredRound=PT.round;
+    // el invitado sólo dice qué pulsó y cuándo; el reparto se calcula aquí
+    const ok=m.idx===PT.correct;
+    if(ok) pl.score=(pl.score||0)+worth(Math.max(0,m.ms||0));
+    // si ya respondieron todos, no hay por qué esperar al reloj
+    const total=Object.keys(PT.players).length;
+    const listos=Object.values(PT.players).filter(x=>x.answeredRound===PT.round).length;
+    if(listos>=total) endRound();
+  }
+}
+
+/* ---------- unirse ---------- */
+$('ppCode').oninput=e=>{
+  e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);
+};
+
+$('ppJoin').onclick=()=>{
+  const code=($('ppCode').value||'').trim().toUpperCase();
+  if(code.length!==4){ $('ppMsg').textContent='The code has four characters.'; return; }
+  if(typeof Peer==='undefined'){ $('ppMsg').textContent='Still loading. One second.'; return; }
+  $('ppMsg').textContent='Looking for the room…';
+  PT.host=false; PT.code=code;
+  PT.peer=new Peer();
+  PT.peer.on('open',id=>{
+    PT.id=id;
+    const conn=PT.peer.connect(roomId(code),{reliable:true});
+    PT.conns=[conn];
+    conn.on('open',()=>{
+      send(conn,{t:'hello',...ptMe()});
+      $('ppShow').textContent=code;
+      $('ppStart').hidden=true;
+      $('ppHint').textContent='Waiting for the host to start…';
+      go('s-lobby');
+    });
+    conn.on('data',m=>guestGot(m));
+    conn.on('close',()=>{
+      $('ppLobbyMsg').textContent='The host left. The room is closed.';
+      setTimeout(()=>{ptQuit();go('s-home')},2200);
+    });
+    conn.on('error',()=>{$('ppMsg').textContent='No room with that code.'});
+  });
+  PT.peer.on('error',()=>{$('ppMsg').textContent='No room with that code.'});
+};
+
+function guestGot(m){
+  if(m.t==='lobby'){ PT.players=m.players; paintPlayers('ppList'); }
+  if(m.t==='round'){ showRound(m); }
+  if(m.t==='reveal'){ revealRound(m); }
+  if(m.t==='over'){ PT.players=m.players; ptEnd(); }
+}
+
+/* ---------- rondas ---------- */
+$('ppStart').onclick=()=>{
+  if(!PT.host)return;
+  if(Object.keys(PT.players).length<2){
+    $('ppLobbyMsg').textContent='Nobody has joined yet.';
+    return;
+  }
+  PT.round=0;
+  Object.values(PT.players).forEach(p=>{p.score=0;p.answeredRound=-1});
+  nextPtRound();
+};
+
+function nextPtRound(){
+  PT.round++;
+  if(PT.round>PT.rounds){
+    broadcast({t:'over',players:PT.players});
+    ptEnd();
+    return;
+  }
+  const t=PT.pool[Math.floor(Math.random()*PT.pool.length)];
+  PT.track=t;
+  const otros=PT.pool.filter(x=>x.title!==t.title).sort(()=>Math.random()-0.5).slice(0,3);
+  const opts=[t.title,...otros.map(x=>x.title)].sort(()=>Math.random()-0.5);
+  PT.correct=opts.indexOf(t.title);
+
+  const msg={t:'round',n:PT.round,total:PT.rounds,preview:t.preview,
+             cover:t.cover,opts,limit:PT.limit};
+  broadcast(msg);
+  showRound(msg);
+}
+
+function showRound(m){
+  PT.answered=false;
+  PT.limit=m.limit||12;
+  go('s-pgame');
+  $('pp-round').textContent=`Round ${m.n} of ${m.total}`;
+  $('pp-score').textContent=(PT.players[PT.id]||{}).score||0;
+  $('pp-gain').textContent='';
+  $('pp-deck').classList.remove('warn');
+  $('pp-art').classList.remove('reveal');
+  $('pp-art').style.setProperty('--blur','30px');
+  if(m.cover) $('pp-cover').src=m.cover; else $('pp-cover').removeAttribute('src');
+  setRing('pp-ring',1);
+  paintPlayers('pp-board',{scores:true});
+
+  $('pp-opts').innerHTML='';
+  m.opts.forEach((title,i)=>{
+    const b=document.createElement('button');
+    b.innerHTML='<span class="k"></span><span class="t"></span>';
+    b.querySelector('.k').textContent='ABCD'[i];
+    b.querySelector('.t').textContent=title;
+    b.onclick=()=>ptAnswer(i,b);
+    $('pp-opts').appendChild(b);
+  });
+
+  audio.src=m.preview;audio.load();
+  audio.play().then(()=>{
+    $('pp-art').classList.add('spin');
+    $('pp-deck').classList.add('spin');
+  }).catch(()=>{});
+  PT.startAt=performance.now();
+
+  cancelAnimationFrame(PT.raf);
+  (function tick(){
+    const el=(performance.now()-PT.startAt)/1000;
+    const left=Math.max(0,PT.limit-el);
+    setRing('pp-ring',left/PT.limit);
+    $('pp-time').textContent=left.toFixed(1)+'s';
+    $('pp-worth').textContent=worth(el)+' pts';
+    $('pp-deck').classList.toggle('warn',left<PT.limit/3.5);
+    $('pp-art').style.setProperty('--blur',(30-22*Math.min(el/PT.limit,1)).toFixed(1)+'px');
+    if(left<=0){ if(!PT.answered) ptAnswer(-1,null); return; }
+    PT.raf=requestAnimationFrame(tick);
+  })();
+
+  if(PT.host){
+    clearTimeout(PT.tmr);
+    PT.tmr=setTimeout(endRound,(PT.limit+1.2)*1000);
+  }
+}
+
+function ptAnswer(i,btn){
+  if(PT.answered)return;
+  PT.answered=true;
+  const el=(performance.now()-PT.startAt)/1000;
+  cancelAnimationFrame(PT.raf);
+  audio.pause();
+  $('pp-art').classList.remove('spin');
+  $('pp-deck').classList.remove('spin');
+  [...$('pp-opts').children].forEach(b=>b.disabled=true);
+  if(btn) btn.classList.add('pop');
+
+  if(PT.host){
+    const ok=i===PT.correct;
+    const pts=ok?worth(el):0;
+    const me=PT.players[PT.id];
+    me.answeredRound=PT.round;
+    if(ok) me.score=(me.score||0)+pts;
+    $('pp-gain').textContent=ok?`+${pts}`:'…';
+    $('pp-gain').className='gain '+(ok?'plus rise':'zero');
+    const total=Object.keys(PT.players).length;
+    const listos=Object.values(PT.players).filter(x=>x.answeredRound===PT.round).length;
+    if(listos>=total) endRound();
+  }else{
+    // el anfitrión decide si es correcta: aquí sólo se informa
+    send(PT.conns[0],{t:'answer',idx:i,ms:el,ok:null,pts:0});
+    PT.pending={idx:i,el};
+    $('pp-gain').textContent='…';
+    $('pp-gain').className='gain';
+  }
+}
+
+/* El anfitrión cierra la ronda y reparte. */
+function endRound(){
+  if(!PT.host)return;
+  clearTimeout(PT.tmr);
+  const msg={t:'reveal',correct:PT.correct,title:PT.track.title,
+             artist:PT.track.artist,players:PT.players};
+  broadcast(msg);
+  revealRound(msg);
+  setTimeout(()=>nextPtRound(),2600);
+}
+
+function revealRound(m){
+  PT.players=m.players;
+  cancelAnimationFrame(PT.raf);
+  audio.pause();
+  $('pp-art').classList.add('reveal');
+  $('pp-art').classList.remove('spin');
+  $('pp-deck').classList.remove('spin');
+  [...$('pp-opts').children].forEach((b,i)=>{
+    b.disabled=true;
+    if(i===m.correct){ b.classList.add('right'); b.querySelector('.k').textContent='✓'; }
+  });
+  if(!PT.host && PT.pending){
+    const ok=PT.pending.idx===m.correct;
+    if(ok){ sfx.right(); $('pp-gain').textContent='Correct'; $('pp-gain').className='gain plus rise'; }
+    else  { sfx.wrong(); $('pp-gain').textContent=m.title; $('pp-gain').className='gain zero'; }
+    PT.pending=null;
+  }
+  $('pp-score').textContent=(PT.players[PT.id]||{}).score||0;
+  paintPlayers('pp-board',{scores:true});
+}
+
+function ptEnd(){
+  cancelAnimationFrame(PT.raf);
+  audio.pause();
+  const arr=Object.values(PT.players).sort((a,b)=>(b.score||0)-(a.score||0));
+  const top=arr[0]||{name:'—',score:0};
+  $('pp-winner').textContent=top.id===PT.id?'You win':top.name+' wins';
+  $('pp-sub').textContent=`${top.score} points over ${PT.rounds} rounds`;
+  paintPlayers('pp-final',{scores:true});
+  $('ppAgain').hidden=!PT.host;
+  go('s-pend');
+  if(top.id===PT.id){ confetti(); sfx.level(); }
+  const mine=(PT.players[PT.id]||{}).score||0;
+  award(Math.round(mine/40),{rounds:PT.rounds,mode:'party'});
+}
+
+$('ppAgain').onclick=()=>{ if(PT.host) $('ppStart').onclick(); };
+$('ppHome').onclick=()=>{ptQuit();go('s-home')};
+$('ppLeave').onclick=()=>{ptQuit();go('s-home')};
+
+function ptQuit(){
+  try{ PT.conns.forEach(c=>c.close()); }catch(e){}
+  try{ if(PT.peer) PT.peer.destroy(); }catch(e){}
+  cancelAnimationFrame(PT.raf); clearTimeout(PT.tmr);
+  audio.pause();
+  PT.peer=null;PT.conns=[];PT.players={};PT.round=0;PT.host=false;
+}
 
 /* =====================================================
    MISIONES DEL DÍA
