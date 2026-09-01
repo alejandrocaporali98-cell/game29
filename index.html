@@ -225,6 +225,36 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .slot2:active .disc{animation-play-state:paused;transform:scale(.97)}
 .slot2:hover .nm{color:var(--accent)}
 
+/* Sólo la primera vez: sin esto, alguien que entra ve cuatro discos
+   y no sabe por dónde empezar. */
+.hello{display:block;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--tint);border-radius:18px;padding:16px;margin-bottom:20px}
+.hello .ht{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.hello .hd{display:block;font-size:14px;line-height:1.45;color:var(--text)}
+.hello .hb{display:flex;gap:8px;margin-top:12px}
+.hello button{border:1px solid var(--line);background:none;color:var(--text);
+  font-family:var(--sans);font-size:12.5px;padding:9px 14px;border-radius:980px;cursor:pointer}
+.hello button:first-child{background:var(--accent);color:var(--on-accent);
+  border-color:transparent;font-weight:600}
+
+/* ---- misiones del día ---- */
+.miss{margin-bottom:24px}
+.miss .mrow{display:flex;align-items:center;gap:12px;padding:12px 2px;
+  border-bottom:1px solid var(--line)}
+.miss .mrow:last-child{border-bottom:none}
+.miss .mtick{width:20px;height:20px;flex:none;border-radius:50%;
+  border:1.5px solid var(--line);display:grid;place-items:center;
+  font-size:11px;color:var(--bg)}
+.miss .mrow.on .mtick{background:var(--green);border-color:var(--green)}
+.miss .mtx{flex:1;min-width:0;font-size:13.5px}
+.miss .mrow.on .mtx{color:var(--muted);text-decoration:line-through}
+.miss .mct{font-family:var(--mono);font-size:10.5px;color:var(--place);flex:none}
+.miss .mbar{display:block;height:3px;border-radius:2px;background:var(--raise);
+  margin-top:6px;overflow:hidden}
+.miss .mbar i{display:block;height:100%;background:var(--accent);width:0;
+  transition:width .5s ease}
+
 /* ---- discos pequeños: mismos objetos, otro tamaño ----
    Los ajustes son vinilos de 7 pulgadas junto a los álbumes de arriba.
    Uno solo gira: el que está puesto. */
@@ -714,6 +744,12 @@ input::placeholder{color:var(--place)}
   <h1>Guess the song</h1>
   <p class="lede">Real 30-second previews, pulled live. Four ways to play.</p>
 
+  <div class="hello" id="hello" hidden>
+    <span class="ht">New here?</span>
+    <span class="hd">Blitz is the easiest start — four options, nothing to type.</span>
+    <span class="hb"><button id="helloGo">Start one</button><button id="helloNo">Dismiss</button></span>
+  </div>
+
   <div class="rack">
     <button class="slot2" data-game="type">
       <span class="disc"><span class="lab"><img id="lab1" alt=""><span class="no">01</span></span></span>
@@ -731,6 +767,10 @@ input::placeholder{color:var(--place)}
       <span class="disc"><span class="lab"><img id="lab4" alt=""><span class="no">04</span></span></span>
       <span class="nm">Who's This</span><span class="meta">by genre</span>
     </button>
+  </div>
+
+  <div class="miss" id="miss">
+    <div class="cuthead" style="color:var(--place)">Today's goals</div>
   </div>
 
   <div class="cutwrap" id="cutWrap">
@@ -1414,6 +1454,29 @@ document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{
   go('s-pick'); $('q').focus();
 });
 
+/* Eras necesita discografías largas y bien fechadas. Decir «prueba
+   con otro» sin decir cuál deja al jugador probando a ciegas. */
+const LONG_CAREERS=['Radiohead','Soda Stereo','Shakira','Café Tacvba','Oasis',
+  'Madonna','Metallica','U2','Maná','Depeche Mode','Los Fabulosos Cadillacs',
+  'Red Hot Chili Peppers','Juan Gabriel','The Cure'];
+
+function suggestArtists(){
+  const tres=LONG_CAREERS.slice().sort(()=>Math.random()-0.5).slice(0,3);
+  const box=document.createElement('div');
+  box.innerHTML='<div class="cuthead" style="color:var(--place);margin:16px 0 8px">Try one of these</div>';
+  const ul=document.createElement('ul');
+  ul.className='list';
+  tres.forEach(n=>{
+    const li=document.createElement('li');
+    li.innerHTML='<div><div class="nm"></div><div class="sub">long, well-dated career</div></div>';
+    li.querySelector('.nm').textContent=n;
+    li.onclick=()=>{$('q').value=n;findArtists(n)};
+    ul.appendChild(li);
+  });
+  box.appendChild(ul);
+  $('artists').appendChild(box);
+}
+
 /* Un mensaje de error sin salida deja al jugador atascado: siempre
    hay que ofrecerle volver a intentarlo. */
 function retryBtn(host, fn){
@@ -1521,6 +1584,7 @@ async function loadArtist(a){
       ? '<div class="err">Not enough dated releases for that artist — Eras needs a longer career. Try someone else.</div>'
       : '<div class="err">Couldn\'t load that catalog.</div>';
     if(!thin) retryBtn($('artists'),()=>loadArtist(a));
+    else suggestArtists();
   }
 }
 
@@ -1703,7 +1767,8 @@ async function aEnd(won){
   S.session.push({won,tries:S.stage+1,hints:S.hints,gaveUp:S.gaveUp});
   // menos intentos y sin pistas vale más
   const xp = won ? Math.max(8, 30-(S.stage*4) - S.hints*3) : 2;
-  award(xp,{rounds:1,hits:won?1:0,mode:'type'});
+  award(xp,{rounds:1,hits:won?1:0,mode:S.game==='daily'?'daily':'type',
+            noHints:won&&S.hints===0, daily:S.game==='daily'&&won});
 
   $('a-art').classList.add('reveal');
   setRing('a-ring',1);
@@ -1747,7 +1812,7 @@ const worth=el=>{
 };
 
 function bStart(){
-  S.round=0;S.score=0;S.hits=0;S.log=[];S.used=new Set();S.bestHit=0;S.chain=0;
+  S.round=0;S.score=0;S.hits=0;S.log=[];S.used=new Set();S.bestHit=0;S.chain=0;S.bestChain=0;
   $('b-combo').textContent='';
   $('b-final').hidden=true;$('b-live').hidden=false;
   bRound();
@@ -1834,6 +1899,7 @@ function bAnswer(btn,ok){
   if(ok){
     sfx.right();
     S.chain=(S.chain||0)+1;
+    S.bestChain=Math.max(S.bestChain||0,S.chain);
     const mult=COMBO[Math.min(S.chain,COMBO.length-1)];
     const pts=Math.round(worth(el)*mult);
     S.score+=pts;S.hits++;
@@ -1870,7 +1936,7 @@ async function bFinish(){
   if(record){S.bestScore=S.score;await store.set('bestScore',S.score)}
   award(Math.round(S.score/40)+S.hits*4,{
     rounds:cfg().rounds, hits:S.hits, mode:'blitz',
-    perfect:S.hits===cfg().rounds, best:S.bestHit||0
+    perfect:S.hits===cfg().rounds, best:S.bestHit||0, chain:S.bestChain||0
   });
   chips();
   $('b-total').textContent=S.score;
@@ -1994,7 +2060,10 @@ function seats(){
     $('names').appendChild(inp);
   }
 }
-$('l-go').onclick=()=>{S.game='line';go('s-pick');$('q').focus()};
+$('l-go').onclick=()=>{
+  S.game='line';go('s-pick');$('q').focus();
+  if(!$('artists').children.length) suggestArtists();
+};
 
 const TURNS=5;   // rondas por jugador
 
@@ -2242,7 +2311,7 @@ async function loadGenre(gen){
 
 
 function gStartGame(){
-  G.round=0;G.score=0;G.hits=0;G.log=[];G.used=new Set();G.bestHit=0;G.chain=0;
+  G.round=0;G.score=0;G.hits=0;G.log=[];G.used=new Set();G.bestHit=0;G.chain=0;G.bestChain=0;
   $('g-combo').textContent='';
   $('g-final').hidden=true;$('g-live').hidden=false;
   gRound();
@@ -2326,6 +2395,7 @@ function gAnswer(btn,ok){
   if(ok){
     sfx.right();
     G.chain=(G.chain||0)+1;
+    G.bestChain=Math.max(G.bestChain||0,G.chain);
     const mult=COMBO[Math.min(G.chain,COMBO.length-1)];
     const pts=Math.round(worth(el)*mult);
     G.score+=pts;G.hits++;
@@ -2363,7 +2433,7 @@ async function gFinish(){
   if(record) await store.set('bestGenre',G.score);
   award(Math.round(G.score/40)+G.hits*4,{
     rounds:cfg().rounds, hits:G.hits, mode:'genre',
-    perfect:G.hits===cfg().rounds, best:G.bestHit
+    perfect:G.hits===cfg().rounds, best:G.bestHit, chain:G.bestChain||0
   });
   G.best=Math.max(prev,G.score);
   $('g-total').textContent=G.score;
@@ -2698,6 +2768,8 @@ function touchStreak(){
    sube de nivel y si se desbloquea algún logro. */
 function award(xp, ev={}){
   touchStreak();
+  const logradas=bumpMissions(ev);
+  xp += logradas.length*MISS_XP;
   P.xp+=xp;
   P.rounds+=ev.rounds||0;
   P.hits+=ev.hits||0;
@@ -2720,6 +2792,7 @@ function award(xp, ev={}){
 
   if(up){ levelUp(up); confetti(); sfx.level(); }
   else if(nuevos.length){ badgeUp(nuevos[0]); confetti(); sfx.level(); }
+  else if(logradas.length){ missionDone(logradas[0]); confetti(); sfx.level(); }
 }
 
 function levelUp(n){
@@ -2728,6 +2801,13 @@ function levelUp(n){
   $('levelSheet').classList.add('on');
 }
 $('lvOk').onclick=()=>$('levelSheet').classList.remove('on');
+
+function missionDone(m){
+  $('bgIco').textContent='◎';
+  $('bgName').textContent=m.n;
+  $('bgDesc').textContent=`Daily goal cleared · +${MISS_XP} XP`;
+  $('badgeSheet').classList.add('on');
+}
 
 function badgeUp(id){
   const b=BADGES.find(x=>x.id===id);
@@ -2915,6 +2995,108 @@ const sfx={
 };
 
 /* =====================================================
+   MISIONES DEL DÍA
+   =====================================================
+   Tres objetivos que cambian cada día, elegidos con la fecha como
+   semilla: todos los que juegan hoy tienen los mismos. Sin esto, la
+   racha te pide volver pero al volver haces lo mismo de ayer. */
+const MISSIONS=[
+  {id:'rounds',  n:'Play 5 rounds',            goal:5},
+  {id:'hits',    n:'Get 6 right',              goal:6},
+  {id:'modes',   n:'Play 2 different modes',   goal:2},
+  {id:'chain',   n:'Get 3 right in a row',     goal:3},
+  {id:'fast',    n:'Answer worth 800+ points', goal:1},
+  {id:'daily',   n:"Solve today's cut",        goal:1},
+  {id:'clean',   n:'Finish a game with 8+',    goal:1},
+  {id:'hintless',n:'Name a song with no hints',goal:1}
+];
+const MISS_XP=40;
+
+let miss={date:'',ids:[],prog:{},done:[]};
+
+function pickMissions(){
+  // baraja determinista: misma fecha, mismas tres misiones
+  let s=seedOf(hoy());
+  const pool=MISSIONS.map(m=>m.id);
+  const out=[];
+  while(out.length<3 && pool.length){
+    s=(s*1103515245+12345)>>>0;
+    out.push(pool.splice(s%pool.length,1)[0]);
+  }
+  return out;
+}
+
+async function loadMissions(){
+  try{
+    const raw=await store.get('missions');
+    if(raw && raw!==''){
+      const m=JSON.parse(raw);
+      if(m.date===hoy()) miss=m;
+    }
+  }catch(e){}
+  if(miss.date!==hoy()) miss={date:hoy(),ids:pickMissions(),prog:{},done:[]};
+  paintMissions();
+}
+
+function paintMissions(){
+  const host=$('miss');
+  host.querySelectorAll('.mrow').forEach(x=>x.remove());
+  miss.ids.forEach(id=>{
+    const m=MISSIONS.find(x=>x.id===id);
+    if(!m)return;
+    const hecho=miss.done.includes(id);
+    const p=Math.min(miss.prog[id]||0,m.goal);
+    const row=document.createElement('div');
+    row.className='mrow'+(hecho?' on':'');
+    row.innerHTML='<span class="mtick"></span><span class="mtx"></span><span class="mct"></span>';
+    row.querySelector('.mtick').textContent=hecho?'✓':'';
+    row.querySelector('.mtx').textContent=m.n;
+    row.querySelector('.mct').textContent=hecho?`+${MISS_XP} XP`:`${p}/${m.goal}`;
+    if(!hecho && m.goal>1){
+      const bar=document.createElement('span');
+      bar.className='mbar';
+      const i=document.createElement('i');
+      i.style.width=(p/m.goal*100)+'%';
+      bar.appendChild(i);
+      row.querySelector('.mtx').appendChild(bar);
+    }
+    host.appendChild(row);
+  });
+}
+
+/* Suma progreso y devuelve las que se acaban de completar. */
+function bumpMissions(ev){
+  if(miss.date!==hoy()) return [];
+  const add=(id,n)=>{
+    if(miss.done.includes(id)||!miss.ids.includes(id))return;
+    miss.prog[id]=(miss.prog[id]||0)+n;
+  };
+  if(ev.rounds) add('rounds',ev.rounds);
+  if(ev.hits)   add('hits',ev.hits);
+  if(ev.best>=800) add('fast',1);
+  if(ev.chain>=3)  add('chain',3);
+  if(ev.daily)     add('daily',1);
+  if(ev.hits>=8)   add('clean',1);
+  if(ev.noHints)   add('hintless',1);
+  if(ev.mode && miss.ids.includes('modes')){
+    miss.modes=miss.modes||[];
+    if(!miss.modes.includes(ev.mode)) miss.modes.push(ev.mode);
+    miss.prog.modes=miss.modes.length;
+  }
+
+  const nuevas=[];
+  miss.ids.forEach(id=>{
+    const m=MISSIONS.find(x=>x.id===id);
+    if(m && !miss.done.includes(id) && (miss.prog[id]||0)>=m.goal){
+      miss.done.push(id); nuevas.push(m);
+    }
+  });
+  store.set('missions',JSON.stringify(miss));
+  paintMissions();
+  return nuevas;
+}
+
+/* =====================================================
    RETO DIARIO — una canción, una oportunidad
    ===================================================== */
 const hoy=()=>new Date().toISOString().slice(0,10);
@@ -3080,6 +3262,13 @@ document.addEventListener('keydown',e=>{
   applyMode(await store.get('mode')||'auto');
   await loadProfile();
   await loadDailyState();
+  await loadMissions();
+  // la bienvenida sólo aparece mientras no hayas jugado nada
+  if(!(await store.get('seen'))){
+    $('hello').hidden=false;
+    $('helloNo').onclick=()=>{$('hello').hidden=true;store.set('seen','1')};
+    $('helloGo').onclick=()=>{$('hello').hidden=true;store.set('seen','1');$('surprise').click()};
+  }
   muted=!!(await store.get('muted'));
   $('sfxState').textContent=muted?'off':'on';
 })();
