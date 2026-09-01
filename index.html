@@ -3194,7 +3194,15 @@ function hostGot(conn,m){
     pl.answeredRound=PT.round;
     // el invitado sólo dice qué pulsó y cuándo; el reparto se calcula aquí
     const ok=m.idx===PT.correct;
-    if(ok) pl.score=(pl.score||0)+worth(Math.max(0,m.ms||0));
+    const pts=ok?worth(Math.max(0,m.ms||0)):0;
+    if(ok) pl.score=(pl.score||0)+pts;
+
+    /* Respuesta personal inmediata: sabe si acertó sin que se destape
+       cuál era la buena para los que aún están pensando. */
+    send(conn,{t:'ack',ok,pts,score:pl.score||0});
+    broadcast({t:'scores',players:PT.players});
+    paintPlayers('pp-board',{scores:true});
+
     // si ya respondieron todos, no hay por qué esperar al reloj
     const total=Object.keys(PT.players).length;
     const listos=Object.values(PT.players).filter(x=>x.answeredRound===PT.round).length;
@@ -3237,6 +3245,19 @@ $('ppJoin').onclick=()=>{
 
 function guestGot(m){
   if(m.t==='lobby'){ PT.players=m.players; paintPlayers('ppList'); }
+  if(m.t==='scores'){
+    PT.players=m.players;
+    paintPlayers('pp-board',{scores:true});
+    $('pp-score').textContent=(PT.players[PT.id]||{}).score||0;
+  }
+  if(m.t==='ack'){
+    PT.pending=null;                 // ya no hace falta esperar al revelado
+    if(m.ok){ sfx.right(); $('pp-gain').textContent=`+${m.pts}`;
+              $('pp-gain').className='gain plus rise'; }
+    else    { sfx.wrong(); $('pp-gain').textContent='Nope';
+              $('pp-gain').className='gain zero'; }
+    $('pp-score').textContent=m.score;
+  }
   if(m.t==='round'){ showRound(m); }
   if(m.t==='reveal'){ revealRound(m); }
   if(m.t==='over'){ PT.players=m.players; ptEnd(); }
@@ -3340,8 +3361,11 @@ function ptAnswer(i,btn){
     const me=PT.players[PT.id];
     me.answeredRound=PT.round;
     if(ok) me.score=(me.score||0)+pts;
-    $('pp-gain').textContent=ok?`+${pts}`:'…';
+    $('pp-gain').textContent=ok?`+${pts}`:'Nope';
     $('pp-gain').className='gain '+(ok?'plus rise':'zero');
+    if(ok) sfx.right(); else sfx.wrong();
+    broadcast({t:'scores',players:PT.players});
+    paintPlayers('pp-board',{scores:true});
     const total=Object.keys(PT.players).length;
     const listos=Object.values(PT.players).filter(x=>x.answeredRound===PT.round).length;
     if(listos>=total) endRound();
@@ -3377,11 +3401,14 @@ function revealRound(m){
     if(i===m.correct){ b.classList.add('right'); b.querySelector('.k').textContent='✓'; }
   });
   if(!PT.host && PT.pending){
+    // no llegó confirmación: se resuelve con el revelado
     const ok=PT.pending.idx===m.correct;
     if(ok){ sfx.right(); $('pp-gain').textContent='Correct'; $('pp-gain').className='gain plus rise'; }
     else  { sfx.wrong(); $('pp-gain').textContent=m.title; $('pp-gain').className='gain zero'; }
     PT.pending=null;
   }
+  // quien no llegó a responder ve de quién era
+  if($('pp-gain').textContent==='') $('pp-gain').textContent=m.title;
   $('pp-score').textContent=(PT.players[PT.id]||{}).score||0;
   paintPlayers('pp-board',{scores:true});
 }
