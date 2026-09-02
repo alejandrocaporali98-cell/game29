@@ -160,40 +160,68 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .logo[aria-expanded="true"] .caret{transform:rotate(180deg)}
 .logo:hover .caret{color:var(--text)}
 
-.menu{position:absolute;top:calc(100% - 4px);left:0;z-index:30;width:260px;
-  background:var(--sheet);border:1px solid var(--line);border-radius:16px;
-  padding:6px;box-shadow:0 18px 44px rgba(0,0,0,.6);animation:fade .16s ease}
-.menu>button,.menu .settings button{display:flex;align-items:center;gap:12px;width:100%;
-  background:none;border:none;padding:12px 10px;border-radius:11px;cursor:pointer;
-  color:var(--text);font-family:var(--sans);font-size:14px;text-align:left}
-.menu .settings{display:block;border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
-.menu .ic{flex:none;width:20px;text-align:center;color:var(--muted);font-size:13px}
-.menu .tx{flex:1;min-width:0;white-space:nowrap}
-.menu .st{flex:none;font-family:var(--mono);font-size:10px;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--place)}
-.menu button:hover{background:var(--raise)}
-.lvtag{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.12em;
-  color:var(--place)}
-.lvtag b{color:var(--text);font-weight:700}
+/* Panel lateral: hay sitio de sobra para agrupar por secciones en vez
+   de amontonar todo en un desplegable de doscientos píxeles. */
+.scrim{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:fade .2s ease}
+.drawer{position:fixed;top:0;left:0;bottom:0;z-index:91;width:min(86vw,340px);
+  background:var(--sheet);border-right:1px solid var(--line);
+  padding:calc(18px + env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom));
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  box-shadow:26px 0 60px rgba(0,0,0,.55);animation:slidein .26s cubic-bezier(.2,.8,.3,1)}
+@keyframes slidein{from{transform:translateX(-100%)}}
 
-/* El avance no es una barra de aplicación: es un surco con la aguja
-   marcando por dónde va el brazo. */
-.groove{margin-bottom:20px}
-.groove .rail{display:block;position:relative;height:5px;border-radius:3px;
-  background:repeating-linear-gradient(90deg,
-    color-mix(in srgb,var(--text) 15%,transparent) 0 2px,
-    transparent 2px 7px)}
-.groove .rail i{display:block;height:100%;width:0;border-radius:3px;
-  background:repeating-linear-gradient(90deg,var(--accent) 0 2px,
-    color-mix(in srgb,var(--accent) 45%,transparent) 2px 7px);
-  transition:width .9s cubic-bezier(.2,.7,.2,1)}
-.groove .rail em{position:absolute;top:50%;left:0;width:13px;height:13px;border-radius:50%;
-  transform:translate(-50%,-50%);background:var(--accent);
-  box-shadow:0 0 0 3px var(--bg);transition:left .9s cubic-bezier(.2,.7,.2,1)}
-.groove .rail em::after{content:"";position:absolute;inset:36%;border-radius:50%;background:var(--bg)}
-.groove .gline{display:flex;justify-content:space-between;margin-top:9px;
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+.dcard{display:flex;align-items:center;gap:13px;width:100%;text-align:left;
+  background:var(--raise);border:1px solid var(--line);border-radius:18px;
+  padding:14px;color:var(--text);font-family:var(--sans);cursor:pointer;margin-bottom:12px}
+.dcard .dinfo{flex:1;min-width:0}
+.dcard .dinfo b{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dcard .dinfo span{display:block;font-family:var(--mono);font-size:10px;
+  color:var(--place);margin-top:3px;letter-spacing:.04em}
+.dcard .dgo{color:var(--place);font-size:20px;flex:none}
+
+.dstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.dstat{background:var(--raise);border:1px solid var(--line);border-radius:14px;
+  padding:11px 6px;text-align:center}
+.dstat b{display:block;font-size:20px;font-weight:600;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
+.dstat span{font-size:9px;color:var(--place);letter-spacing:.06em;text-transform:uppercase}
+
+.dsec{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--place);margin:20px 0 4px;padding-left:4px}
+.drow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:none;border:none;padding:14px 8px;border-radius:12px;cursor:pointer;
+  color:var(--text);font-family:var(--sans);font-size:14.5px}
+.drow .ic{flex:none;width:22px;text-align:center;color:var(--muted);font-size:14px}
+.drow .tx{flex:1;min-width:0;white-space:nowrap}
+.drow .st{flex:none;font-family:var(--mono);font-size:10px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--place)}
+.drow:hover{background:var(--raise)}
+.dfoot{font-size:11px;color:var(--place);text-align:center;margin-top:22px}
+.dver{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+  margin-top:6px;opacity:.6}
+.dfoot a{color:var(--muted)}
+/* El avance vive en el avatar: un aro que se llena y el nivel pegado.
+   Así la cabecera cabe en una sola fila. */
+.hplay{margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;
+  border:1px solid var(--line);background:none;color:var(--muted);
+  font-size:12px;cursor:pointer;display:grid;place-items:center;padding:0}
+.hplay:hover{color:var(--text);border-color:var(--text)}
+.hplay.on{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+
+.avawrap{position:relative;width:44px;height:44px;flex:none;background:none;
+  border:none;padding:0;cursor:pointer}
+.avaring{position:absolute;inset:-4px;width:52px;height:52px;transform:rotate(-90deg)}
+.avaring circle{fill:none;stroke-width:3;stroke-linecap:round}
+.avaring .ar-bg{stroke:color-mix(in srgb,var(--text) 13%,transparent)}
+.avaring .ar-fg{stroke:var(--accent);transition:stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1)}
+.avawrap .ava{width:44px;height:44px}
+.lvdot{position:absolute;right:-5px;bottom:-4px;min-width:19px;height:19px;padding:0 4px;
+  border-radius:980px;background:var(--accent);color:var(--on-accent);
+  font-family:var(--mono);font-size:10.5px;font-weight:700;line-height:19px;
+  box-shadow:0 0 0 2.5px var(--bg)}
+
 .brand{font-size:19px;font-weight:600;letter-spacing:-.02em;color:var(--text)}
 #avaBtn .ava{box-shadow:inset 0 0 0 2px rgba(0,0,0,.25),0 0 0 2px var(--line)}
 #avaBtn:hover .ava{box-shadow:inset 0 0 0 2px rgba(0,0,0,.25),0 0 0 2px var(--accent)}
@@ -216,19 +244,6 @@ header{position:relative;display:flex;align-items:center;gap:10px;
    El fondo es la carátula de lo que está sonando, desenfocada. La
    pantalla cambia de color con cada canción sin que haya que decorar
    nada más. */
-.np{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
-  background:color-mix(in srgb,var(--text) 10%,transparent);
-  border:1px solid var(--line);border-radius:16px;padding:10px 12px;
-  color:var(--text);font-family:var(--sans);cursor:pointer;margin-bottom:20px}
-.np .mini{display:block;width:36px;height:36px;flex:none;position:relative}
-.np .mini .disc{width:100%;height:100%}
-.np.spin .mini{animation:spin 2.6s linear infinite}
-.np .lab2{font-family:var(--mono);font-size:9px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:3px}
-.np .tit{font-size:13px;font-weight:500;display:block;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.np .grow{flex:1;min-width:0}
-.np .ctl{font-size:17px;color:var(--muted);flex:none;width:26px;text-align:center}
 
 /* El disco se dibuja con CSS: surcos con un degradado radial repetido
    y la carátula recortada en círculo como etiqueta. */
@@ -712,6 +727,7 @@ input::placeholder{color:var(--place)}
 .sheet img.card{width:100%;border-radius:14px;display:block;margin-bottom:12px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+html.nomotion *{animation:none!important;transition:none!important}
 
 /* Proyección: en una pantalla grande hay que leerlo desde el fondo
    del aula, así que todo sube de tamaño en vez de quedarse en una
@@ -815,37 +831,68 @@ input::placeholder{color:var(--place)}
     <span class="caret">▾</span>
   </button>
 
-  <span class="lvtag">LV <b id="xpLvl">1</b></span>
-  <button id="avaBtn" aria-label="Your profile"><span class="ava" id="avaMini"></span></button>
+  <button id="npBtn" class="hplay" aria-label="Play the charts"><span id="npCtl">▶</span></button>
 
-  <nav class="menu" id="menu" hidden>
-    <button id="toProfile"><span class="ic">◍</span><span class="tx">Profile</span>
-      <span class="st"><span id="menuStreak">0</span>d streak</span></button>
-    <div class="settings">
-      <button id="sfxBtn"><span class="ic">♪</span><span class="tx">Sound</span><span class="st" id="sfxState">on</span></button>
-      <button id="modeBtn"><span class="ic">◐</span><span class="tx">Appearance</span><span class="st" id="modeState">auto</span></button>
-      <button id="infoBtn"><span class="ic">?</span><span class="tx">How it works</span><span class="st">read</span></button>
-      <button id="installBtn"><span class="ic">⬇</span><span class="tx">Install app</span><span class="st">home screen</span></button>
-    </div>
-  </nav>
+  <button id="avaBtn" class="avawrap" aria-label="Your profile">
+    <svg class="avaring" viewBox="0 0 52 52" aria-hidden="true">
+      <circle class="ar-bg" cx="26" cy="26" r="24"></circle>
+      <circle class="ar-fg" id="xpFill" cx="26" cy="26" r="24"
+              stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle>
+    </svg>
+    <span class="ava" id="avaMini"></span>
+    <span class="lvdot" id="xpLvl">1</span>
+  </button>
+
 </header>
 
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="menu" hidden aria-label="Menu">
+
+  <button class="dcard" id="toProfile">
+    <span class="avawrap" style="pointer-events:none">
+      <svg class="avaring" viewBox="0 0 52 52" aria-hidden="true">
+        <circle class="ar-bg" cx="26" cy="26" r="24"></circle>
+        <circle class="ar-fg" id="xpFill2" cx="26" cy="26" r="24"
+                stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle>
+      </svg>
+      <span class="ava" id="avaBig2"></span>
+    </span>
+    <span class="dinfo">
+      <b id="dName">Player</b>
+      <span id="dLevel">Level 1 · 0 / 300 XP</span>
+    </span>
+    <span class="dgo">›</span>
+  </button>
+
+  <div class="dstats">
+    <div class="dstat"><b id="dStreak">0</b><span>day streak</span></div>
+    <div class="dstat"><b id="dBest">0</b><span>best score</span></div>
+    <div class="dstat"><b id="dRounds">0</b><span>rounds</span></div>
+  </div>
+
+  <div class="dsec">Game</div>
+  <button class="drow" id="setDiff"><span class="ic">◑</span><span class="tx">Difficulty</span><span class="st" id="diffState">Classic</span></button>
+  <button class="drow" id="setRounds"><span class="ic">#</span><span class="tx">Rounds per game</span><span class="st" id="roundsState">10</span></button>
+  <button class="drow" id="setMusic"><span class="ic">♫</span><span class="tx">Home music</span><span class="st" id="musicState">on</span></button>
+
+  <div class="dsec">App</div>
+  <button class="drow" id="sfxBtn"><span class="ic">♪</span><span class="tx">Sound effects</span><span class="st" id="sfxState">on</span></button>
+  <button class="drow" id="modeBtn"><span class="ic">◐</span><span class="tx">Appearance</span><span class="st" id="modeState">auto</span></button>
+  <button class="drow" id="setMotion"><span class="ic">≈</span><span class="tx">Animations</span><span class="st" id="motionState">on</span></button>
+  <button class="drow" id="infoBtn"><span class="ic">?</span><span class="tx">How it works</span><span class="st">read</span></button>
+  <button class="drow" id="installBtn"><span class="ic">⬇</span><span class="tx">Install app</span><span class="st">home screen</span></button>
+
+  <p class="dfoot">Music and previews from
+    <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a>
+    <span class="dver" id="verState"></span></p>
+</aside>
+
 <div class="groove">
-  <span class="rail"><i id="xpFill"></i><em id="needle"></em></span>
-  <span class="gline"><span id="xpAmt">0 / 300 XP</span><span id="xpNext">Next: level 2</span></span>
+  <span class="rail"><i id="xpFill"></i><em id="needle"></em></span><span id="xpNext">Next: level 2</span></span>
 </div>
 
 <!-- HOME -->
 <section class="screen on" id="s-home">
-  <button class="np" id="npBtn">
-    <span class="mini"><span class="disc"><span class="lab"><img id="npArt" alt=""></span></span></span>
-    <span class="grow">
-      <span class="lab2" id="npLab">Tap to play</span>
-      <span class="tit" id="npTit">A song from today's charts</span>
-    </span>
-    <span class="ctl" id="npCtl">▶</span>
-  </button>
-
   <h1>Guess the song</h1>
   <p class="lede">Real 30-second previews, pulled live. Four ways to play.</p>
 
@@ -1209,16 +1256,7 @@ input::placeholder{color:var(--place)}
   <div class="tiles2" id="avaPick" style="grid-template-columns:repeat(3,1fr);gap:12px"></div>
   <input type="text" id="pfNameIn" placeholder="Your name" autocomplete="off" maxlength="14">
 
-  <div class="eyebrow">Backup</div>
-  <p class="foot" style="text-align:left;margin:0 0 10px">Your progress lives in this browser only. Copy this code to keep it safe or move it to another device.</p>
-  <div class="actions" style="margin-top:0">
-    <button id="pfExport">Copy my code</button>
-    <button id="pfImport">Restore</button>
-  </div>
 
-  <div class="actions" style="margin-top:22px">
-    <button class="ghost" id="pfReset">Reset all progress</button>
-  </div>
 </section>
 
 <!-- GÉNEROS: elegir -->
@@ -1589,9 +1627,8 @@ function homeArt(t){
 function setHomeTrack(t){
   if(!t)return;
   const art=homeArt(t);
-  $('npTit').textContent=`${t.title} · ${t.artist?t.artist.name:''}`;
+  $('npBtn').title=`${t.title} · ${t.artist?t.artist.name:''}`;
   if(art){
-    $('npArt').src=art;
     const bg=$('ambientArt');
     bg.src=art; bg.classList.add('on','home');
   }
@@ -1601,9 +1638,8 @@ function setHomeTrack(t){
 function homeStop(){
   HOME.on=false;
   if(HOME.audio) HOME.audio.pause();
-  $('npBtn').classList.remove('spin');
+  $('npBtn').classList.remove('on');
   $('npCtl').textContent='▶';
-  $('npLab').textContent='Tap to play';
 }
 
 function homePlay(){
@@ -1614,9 +1650,8 @@ function homePlay(){
   HOME.audio.onended=()=>{ HOME.i=(HOME.i+1)%HOME.list.length; setHomeTrack(HOME.list[HOME.i]); homePlay(); };
   HOME.audio.play().then(()=>{
     HOME.on=true;
-    $('npBtn').classList.add('spin');
+    $('npBtn').classList.add('on');
     $('npCtl').textContent='⏸';
-    $('npLab').textContent='Now playing';
   }).catch(()=>{});
 }
 
@@ -2807,6 +2842,47 @@ $('sysShare').onclick=async()=>{
   }else $('saveImg').click();
 };
 
+/* ---------- ajustes del panel ----------
+   Cada uno guarda su estado y se aplica al momento. */
+const APP_VER='v36';
+const OPT={music:true,motion:true};
+
+$('setDiff').onclick=()=>{
+  S.diff=S.diff==='classic'?'hardcore':'classic';
+  document.querySelectorAll('.modes [data-diff]').forEach(x=>
+    x.classList.toggle('sel',x.dataset.diff===S.diff));
+  $('subType').textContent = S.diff==='hardcore' ? '3 tries · 6s' : '6 tries · 12s';
+  $('subBlitz').textContent = `${cfg().limit}s · 4 options`;
+  store.set('diff',S.diff);
+  paintDrawer();
+};
+
+/* Menos rondas para una partida rápida, más para una larga. */
+$('setRounds').onclick=()=>{
+  const opciones=[6,8,10,12];
+  const i=(opciones.indexOf(DIFF.classic.rounds)+1)%opciones.length;
+  DIFF.classic.rounds=DIFF.hardcore.rounds=opciones[i];
+  store.set('rounds',String(opciones[i]));
+  paintDrawer();
+};
+
+$('setMusic').onclick=()=>{
+  OPT.music=!OPT.music;
+  if(!OPT.music) homeStop();
+  $('npBtn').hidden=!OPT.music;
+  store.set('music',OPT.music?'1':'');
+  paintDrawer();
+};
+
+/* Apagar animaciones ayuda en teléfonos justos: cuatro discos girando
+   con carátulas es trabajo continuo para la pantalla. */
+$('setMotion').onclick=()=>{
+  OPT.motion=!OPT.motion;
+  document.documentElement.classList.toggle('nomotion',!OPT.motion);
+  store.set('motion',OPT.motion?'1':'');
+  paintDrawer();
+};
+
 /* ---------- claro / oscuro ----------
    Tres estados: auto sigue al sistema, los otros dos lo fuerzan. */
 const ICON={auto:'◐',light:'☀',dark:'☾'};
@@ -2932,18 +3008,16 @@ const needFor=lv=>300+(lv-1)*150;
 const avaOf=id=>AVATARS.find(a=>a.id===id)||AVATARS[0];
 const avaSvg=a=>`<svg viewBox="0 0 48 48" aria-hidden="true">${a.svg}</svg>`;
 
+const AVA_RING=150.8;                    // perímetro del aro del avatar
 function paintXp(){
   const need=needFor(P.level);
-  const pct=Math.min(100,P.xp/need*100);
+  const pct=Math.min(1,P.xp/need);
   $('xpLvl').textContent=P.level;
-  $('xpAmt').textContent=`${P.xp} / ${need} XP`;
-  $('xpNext').textContent='Next: level '+(P.level+1);
+  if(!$('menu').hidden) paintDrawer();
   requestAnimationFrame(()=>{
-    $('xpFill').style.width=pct+'%';
-    $('needle').style.left=pct+'%';      // la aguja va donde acaba el surco
+    $('xpFill').style.strokeDashoffset=AVA_RING*(1-pct);
   });
-  const st=$('menuStreak');
-  if(st) st.textContent=P.streak;
+
 }
 
 function paintAva(){
@@ -3071,21 +3145,44 @@ function confetti(){
 $('avaBtn').onclick=()=>{closeMenu();go('s-prof');paintProfile()};
 $('toProfile').onclick=()=>{closeMenu();go('s-prof');paintProfile()};
 
-/* El menú se cierra al elegir algo, al tocar fuera o con Escape. */
+/* El panel se cierra al elegir algo, tocando el velo o con Escape. */
 function closeMenu(){
   $('menu').hidden=true;
+  $('scrim').hidden=true;
   $('menuBtn').setAttribute('aria-expanded','false');
+  document.body.style.overflow='';
+}
+function openMenu(){
+  $('menu').hidden=false;
+  $('scrim').hidden=false;
+  $('menuBtn').setAttribute('aria-expanded','true');
+  document.body.style.overflow='hidden';   // el fondo no debe moverse
+  paintDrawer();
 }
 $('menuBtn').onclick=e=>{
   e.stopPropagation();
-  const abierto=!$('menu').hidden;
-  $('menu').hidden=abierto;
-  $('menuBtn').setAttribute('aria-expanded',String(!abierto));
-  if(!abierto) $('menuStreak').textContent=P.streak;
+  $('menu').hidden ? openMenu() : closeMenu();
 };
-document.addEventListener('click',e=>{
-  if(!$('menu').hidden && !$('menu').contains(e.target)) closeMenu();
-});
+$('scrim').onclick=closeMenu;
+
+/* Todo lo que enseña el panel se recalcula al abrirlo. */
+function paintDrawer(){
+  const a=avaOf(P.ava);
+  const av=$('avaBig2');
+  av.style.background=a.bg; av.innerHTML=avaSvg(a);
+  $('dName').textContent=P.name;
+  const need=needFor(P.level);
+  $('dLevel').textContent=`Level ${P.level} · ${P.xp} / ${need} XP`;
+  $('xpFill2').style.strokeDashoffset=AVA_RING*(1-Math.min(1,P.xp/need));
+  $('dStreak').textContent=P.streak;
+  $('dBest').textContent=Math.max(S.bestScore||0,G.best||0);
+  $('dRounds').textContent=P.rounds;
+  $('diffState').textContent=S.diff==='hardcore'?'Hardcore':'Classic';
+  $('roundsState').textContent=DIFF.classic.rounds;
+  $('musicState').textContent=OPT.music?'on':'off';
+  $('motionState').textContent=OPT.motion?'on':'off';
+  $('verState').textContent=APP_VER;
+}
 
 function paintProfile(){
   paintAva();
@@ -3124,48 +3221,6 @@ function paintProfile(){
     $('avaPick').appendChild(el);
   });
 }
-/* Si el guardado se corrompe no hay forma de arreglarlo desde dentro:
-   este botón es la salida de emergencia. Pide confirmación porque no
-   se puede deshacer. */
-let resetArmed=false;
-$('pfReset').onclick=async()=>{
-  if(!resetArmed){
-    resetArmed=true;
-    $('pfReset').textContent='Erase everything? Tap again';
-    setTimeout(()=>{resetArmed=false;$('pfReset').textContent='Reset all progress'},4000);
-    return;
-  }
-  for(const k of BACKUP_KEYS){
-    try{ localStorage.removeItem('m29:'+k); }catch(e){}
-    await store.set(k,'');
-  }
-  location.reload();
-};
-
-$('pfExport').onclick=async()=>{
-  const code=await makeBackup();
-  try{
-    await navigator.clipboard.writeText(code);
-    $('pfExport').textContent='Copied ✓';
-  }catch(e){
-    // sin permiso de portapapeles, se enseña para copiarlo a mano
-    prompt('Your backup code:',code);
-  }
-  setTimeout(()=>{$('pfExport').textContent='Copy my code'},1800);
-};
-
-$('pfImport').onclick=async()=>{
-  const code=prompt('Paste your backup code:');
-  if(!code)return;
-  try{
-    await useBackup(code);
-    location.reload();
-  }catch(e){
-    $('pfImport').textContent='Invalid code';
-    setTimeout(()=>{$('pfImport').textContent='Restore'},1800);
-  }
-};
-
 $('pfNameIn').oninput=e=>{
   P.name=e.target.value.trim()||'Player';
   $('pfName').textContent=P.name;
@@ -4067,6 +4122,18 @@ setTimeout(bootOut,3200);
     $('helloNo').onclick=()=>{$('hello').hidden=true;store.set('seen','1')};
     $('helloGo').onclick=()=>{$('hello').hidden=true;store.set('seen','1');$('surprise').click()};
   }
+  const d=await store.get('diff');
+  if(d==='hardcore'||d==='classic'){
+    S.diff=d;
+    document.querySelectorAll('.modes [data-diff]').forEach(x=>
+      x.classList.toggle('sel',x.dataset.diff===S.diff));
+  }
+  const r=+(await store.get('rounds')||0);
+  if(r) DIFF.classic.rounds=DIFF.hardcore.rounds=r;
+  OPT.music=(await store.get('music'))!=='';
+  OPT.motion=(await store.get('motion'))!=='';
+  $('npBtn').hidden=!OPT.music;
+  document.documentElement.classList.toggle('nomotion',!OPT.motion);
   muted=!!(await store.get('muted'));
   $('sfxState').textContent=muted?'off':'on';
 })();
