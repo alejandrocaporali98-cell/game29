@@ -240,6 +240,22 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .hello button:first-child{background:var(--accent);color:var(--on-accent);
   border-color:transparent;font-weight:600}
 
+/* ---- cuánto me conoces ---- */
+.qstep{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--place);margin-bottom:8px}
+.qprompt{font-size:22px;font-weight:600;letter-spacing:-.025em;line-height:1.25;
+  margin-bottom:16px}
+.qpicked{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.qpicked li{display:flex;align-items:center;gap:11px;background:var(--raise);
+  border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.qpicked img{width:38px;height:38px;border-radius:8px;object-fit:cover;flex:none;background:var(--sugg)}
+.qpicked .qt{min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qpicked .qp{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--place);margin-bottom:2px}
+.qpicked .qx{margin-left:auto;color:var(--place);background:none;border:none;
+  font-size:16px;cursor:pointer;flex:none}
+.qask{font-size:15px;color:var(--muted);text-align:center;margin-bottom:14px;line-height:1.4}
+
 /* ---- multijugador ---- */
 .code{font-family:var(--mono);font-size:clamp(38px,13vw,58px);font-weight:700;
   letter-spacing:.22em;text-align:center;color:var(--accent);margin:6px 0 4px}
@@ -258,6 +274,8 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .pinput{font-family:var(--mono);font-size:26px;letter-spacing:.28em;text-align:center;
   text-transform:uppercase}
 .netmsg{font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5}
+.note2{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--place);min-height:16px;margin-top:4px}
 
 /* ---- misiones del día ---- */
 .miss{margin-bottom:24px}
@@ -790,6 +808,18 @@ input::placeholder{color:var(--place)}
     </button>
   </div>
 
+  <button class="tile" id="quizBtn" style="margin-bottom:10px">
+    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9.2 9a2.9 2.9 0 1 1 3.9 2.7c-.7.3-1.1 1-1.1 1.8v.5"/>
+      <circle cx="12" cy="18" r="1.1" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="12" r="9.5"/></svg></span>
+    <span>
+      <h3>How well do you know me</h3>
+      <p>Pick five songs · your friends guess you</p>
+    </span>
+    <span class="arrow">→</span>
+  </button>
+
   <button class="tile" id="partyBtn" style="margin-bottom:22px">
     <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/>
@@ -1000,6 +1030,30 @@ input::placeholder{color:var(--place)}
   </div>
 </section>
 
+<!-- CUÁNTO ME CONOCES: construir -->
+<section class="screen" id="s-quiz">
+  <button class="back" data-go="s-home" aria-label="Back">←</button>
+  <h1>Know me?</h1>
+  <p class="lede">Answer five questions about your own taste. Then your friends try to guess what you picked.</p>
+
+  <div id="qBuild">
+    <div class="qstep" id="qStep">Question 1 of 5</div>
+    <div class="qprompt" id="qPrompt"></div>
+    <input type="text" id="qSearch" placeholder="Search a song" autocomplete="off">
+    <ul class="list" id="qResults"></ul>
+  </div>
+
+  <div id="qDone" hidden>
+    <div class="eyebrow" style="margin-top:0">Your answers</div>
+    <ul class="qpicked" id="qList"></ul>
+    <div class="actions">
+      <button class="primary" id="qHost">Open a room</button>
+      <button id="qRedo">Start over</button>
+    </div>
+  </div>
+  <p class="netmsg" id="qMsg"></p>
+</section>
+
 <!-- PARTY: entrar o crear -->
 <section class="screen" id="s-party">
   <button class="back" data-go="s-home" aria-label="Back">←</button>
@@ -1041,8 +1095,10 @@ input::placeholder{color:var(--place)}
     <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
   </div>
   <div class="live"><span id="pp-worth">1000 pts</span><span id="pp-time">12.0s</span></div>
+  <div class="qask" id="pp-ask" hidden></div>
   <div class="opts" id="pp-opts"></div>
   <div class="gain" id="pp-gain" role="status" aria-live="polite"></div>
+  <div class="note2" id="pp-note"></div>
   <ul class="who3" id="pp-board" style="margin-top:18px"></ul>
 </section>
 
@@ -3088,6 +3144,135 @@ const sfx={
 };
 
 /* =====================================================
+   CUÁNTO ME CONOCES
+   =====================================================
+   Cinco preguntas sobre tu propio gusto. La respuesta correcta no es
+   un dato de Deezer: es la que tú elegiste. Los señuelos salen del
+   mismo artista, para que acertar exija conocerte a ti y no sólo
+   reconocer un estilo. */
+const PROMPTS=[
+  'My all-time favourite song',
+  'The one I have on repeat right now',
+  'The song that always makes me dance',
+  'My guilty pleasure',
+  'The song I want playing at my party'
+];
+
+const QZ={i:0,items:[],busy:false};
+
+$('quizBtn').onclick=()=>{go('s-quiz');qStart()};
+
+function qStart(){
+  QZ.i=0;QZ.items=[];
+  $('qBuild').hidden=false;$('qDone').hidden=true;
+  $('qMsg').textContent='';$('qSearch').value='';$('qResults').innerHTML='';
+  qPaintStep();
+}
+$('qRedo').onclick=qStart;
+
+function qPaintStep(){
+  $('qStep').textContent=`Question ${QZ.i+1} of ${PROMPTS.length}`;
+  $('qPrompt').textContent=PROMPTS[QZ.i];
+}
+
+let qT;
+$('qSearch').oninput=e=>{
+  clearTimeout(qT);
+  const q=e.target.value.trim();
+  if(q.length<2){$('qResults').innerHTML='';return}
+  qT=setTimeout(()=>qFind(q),320);
+};
+
+async function qFind(q){
+  $('qResults').innerHTML='<div class="load">searching…</div>';
+  try{
+    const d=await deezer('/search',{q,limit:8});
+    const list=(d.data||[]).filter(t=>t.preview&&t.title);
+    if(!list.length){$('qResults').innerHTML='<div class="load">Nothing found.</div>';return}
+    $('qResults').innerHTML='';
+    list.forEach(t=>{
+      const li=document.createElement('li');
+      li.innerHTML='<img alt=""><div><div class="nm"></div><div class="sub"></div></div>';
+      const im=li.querySelector('img');
+      im.style.borderRadius='8px';
+      im.onerror=()=>{im.style.visibility='hidden'};
+      if(t.album&&t.album.cover_small) im.src=t.album.cover_small;
+      li.querySelector('.nm').textContent=t.title;
+      li.querySelector('.sub').textContent=t.artist?t.artist.name:'';
+      li.onclick=()=>qPick(t);
+      $('qResults').appendChild(li);
+    });
+  }catch(e){
+    $('qResults').innerHTML='<div class="err">Could not search right now.</div>';
+    retryBtn($('qResults'),()=>qFind(q));
+  }
+}
+
+/* Los señuelos salen del catálogo del mismo artista. Si no se pueden
+   sacar, la pregunta se descarta antes que ofrecer opciones absurdas. */
+async function qPick(t){
+  if(QZ.busy)return;
+  QZ.busy=true;
+  $('qResults').innerHTML='<div class="load">building the options…</div>';
+  try{
+    let otros=[];
+    if(t.artist&&t.artist.id){
+      const top=await deezer(`/artist/${t.artist.id}/top`,{limit:20});
+      const vistos=new Set([norm(t.title)]);
+      (top.data||[]).forEach(x=>{
+        const k=norm(x.title);
+        if(!k||vistos.has(k))return;
+        vistos.add(k);otros.push(x.title);
+      });
+    }
+    otros=otros.sort(()=>Math.random()-0.5).slice(0,3);
+    if(otros.length<3) throw new Error('thin');
+
+    QZ.items.push({
+      prompt:PROMPTS[QZ.i],
+      title:t.title,
+      artist:t.artist?t.artist.name:'',
+      preview:t.preview,
+      cover:t.album?(t.album.cover_big||t.album.cover_medium):null,
+      decoys:otros
+    });
+    QZ.i++;
+    $('qSearch').value='';$('qResults').innerHTML='';
+    if(QZ.i>=PROMPTS.length) qFinish(); else qPaintStep();
+  }catch(e){
+    $('qResults').innerHTML='<div class="err">Not enough songs by that artist to build options. Pick another.</div>';
+  } finally { QZ.busy=false; }
+}
+
+function qFinish(){
+  $('qBuild').hidden=true;$('qDone').hidden=false;
+  store.set('quiz',JSON.stringify(QZ.items));
+  $('qList').innerHTML='';
+  QZ.items.forEach((it,n)=>{
+    const li=document.createElement('li');
+    li.innerHTML='<img alt=""><div class="qt"><span class="qp"></span></div><button class="qx" aria-label="Remove">×</button>';
+    const im=li.querySelector('img');
+    im.onerror=()=>{im.style.visibility='hidden'};
+    if(it.cover) im.src=it.cover;
+    li.querySelector('.qp').textContent=it.prompt;
+    li.querySelector('.qt').append(document.createTextNode(it.title+' · '+it.artist));
+    li.querySelector('.qx').onclick=()=>{
+      QZ.items.splice(n,1);QZ.i=QZ.items.length;
+      $('qDone').hidden=true;$('qBuild').hidden=false;qPaintStep();
+    };
+    $('qList').appendChild(li);
+  });
+}
+
+/* Abrir sala con el cuestionario cargado: el motor de Party sirve
+   igual, sólo cambia de dónde sale la respuesta correcta. */
+$('qHost').onclick=()=>{
+  if(QZ.items.length<PROMPTS.length){$('qMsg').textContent='Finish the five questions first.';return}
+  PT.quiz=QZ.items.slice();
+  $('ppHost').click();
+};
+
+/* =====================================================
    PARTY — cada quien en su teléfono
    =====================================================
    Los teléfonos hablan directos por WebRTC. PeerJS sólo los presenta
@@ -3161,7 +3346,9 @@ $('ppHost').onclick=async()=>{
     PT.players={host:{id:'host',...ptMe(),host:true,score:0}};
     $('ppShow').textContent=PT.code;
     $('ppStart').hidden=false;
-    $('ppHint').textContent='Share this code. Everyone joins from their own phone.';
+    $('ppHint').textContent=PT.quiz
+      ? 'Share this code. They guess what you picked.'
+      : 'Share this code. Everyone joins from their own phone.';
     paintPlayers('ppList');
     go('s-lobby');
   });
@@ -3182,6 +3369,15 @@ $('ppHost').onclick=async()=>{
   });
 };
 
+/* Puesto de llegada y posición en la tabla, para poder decirle algo
+   con sentido a cada quien y no un simple «correcto». */
+function standing(pl,place){
+  const arr=Object.values(PT.players).sort((a,b)=>(b.score||0)-(a.score||0));
+  const rank=arr.findIndex(x=>x.id===pl.id)+1;
+  const lider=arr[0]?(arr[0].score||0):0;
+  return {place,rank,total:arr.length,gap:Math.max(0,lider-(pl.score||0))};
+}
+
 function hostGot(conn,m){
   if(m.t==='hello'){
     PT.players[conn.peer]={id:conn.peer,name:m.name,ava:m.ava,score:0};
@@ -3196,10 +3392,14 @@ function hostGot(conn,m){
     const ok=m.idx===PT.correct;
     const pts=ok?worth(Math.max(0,m.ms||0)):0;
     if(ok) pl.score=(pl.score||0)+pts;
+    pl.chain=ok?(pl.chain||0)+1:0;
+    // orden de llegada entre los que acertaron
+    if(ok){ PT.order=PT.order||[]; PT.order.push(conn.peer); }
+    const extra=standing(pl,ok?PT.order.length:0);
 
     /* Respuesta personal inmediata: sabe si acertó sin que se destape
        cuál era la buena para los que aún están pensando. */
-    send(conn,{t:'ack',ok,pts,score:pl.score||0});
+    send(conn,{t:'ack',ok,pts,score:pl.score||0,...extra,chain:pl.chain});
     broadcast({t:'scores',players:PT.players});
     paintPlayers('pp-board',{scores:true});
 
@@ -3252,10 +3452,7 @@ function guestGot(m){
   }
   if(m.t==='ack'){
     PT.pending=null;                 // ya no hace falta esperar al revelado
-    if(m.ok){ sfx.right(); $('pp-gain').textContent=`+${m.pts}`;
-              $('pp-gain').className='gain plus rise'; }
-    else    { sfx.wrong(); $('pp-gain').textContent='Nope';
-              $('pp-gain').className='gain zero'; }
+    ptFeedback(m);
     $('pp-score').textContent=m.score;
   }
   if(m.t==='round'){ showRound(m); }
@@ -3277,19 +3474,30 @@ $('ppStart').onclick=()=>{
 
 function nextPtRound(){
   PT.round++;
-  if(PT.round>PT.rounds){
+  const total=PT.quiz?PT.quiz.length:PT.rounds;
+  if(PT.round>total){
     broadcast({t:'over',players:PT.players});
     ptEnd();
     return;
   }
-  const t=PT.pool[Math.floor(Math.random()*PT.pool.length)];
+  PT.order=[];
+  let t,opts,ask=null;
+  if(PT.quiz){
+    // la respuesta correcta es la que eligió quien montó el cuestionario
+    const it=PT.quiz[PT.round-1];
+    t=it;
+    opts=[it.title,...it.decoys].sort(()=>Math.random()-0.5);
+    ask=it.prompt;
+  }else{
+    t=PT.pool[Math.floor(Math.random()*PT.pool.length)];
+    const otros=PT.pool.filter(x=>x.title!==t.title).sort(()=>Math.random()-0.5).slice(0,3);
+    opts=[t.title,...otros.map(x=>x.title)].sort(()=>Math.random()-0.5);
+  }
   PT.track=t;
-  const otros=PT.pool.filter(x=>x.title!==t.title).sort(()=>Math.random()-0.5).slice(0,3);
-  const opts=[t.title,...otros.map(x=>x.title)].sort(()=>Math.random()-0.5);
   PT.correct=opts.indexOf(t.title);
 
-  const msg={t:'round',n:PT.round,total:PT.rounds,preview:t.preview,
-             cover:t.cover,opts,limit:PT.limit};
+  const msg={t:'round',n:PT.round,total,preview:t.preview,
+             cover:t.cover,opts,limit:PT.limit,ask};
   broadcast(msg);
   showRound(msg);
 }
@@ -3301,6 +3509,7 @@ function showRound(m){
   $('pp-round').textContent=`Round ${m.n} of ${m.total}`;
   $('pp-score').textContent=(PT.players[PT.id]||{}).score||0;
   $('pp-gain').textContent='';
+  $('pp-note').textContent='';
   $('pp-deck').classList.remove('warn');
   $('pp-art').classList.remove('reveal');
   $('pp-art').style.setProperty('--blur','30px');
@@ -3318,12 +3527,31 @@ function showRound(m){
     $('pp-opts').appendChild(b);
   });
 
+  if(m.ask){
+    $('pp-ask').hidden=false;
+    $('pp-ask').textContent=m.ask;
+  }else $('pp-ask').hidden=true;
+
   audio.src=m.preview;audio.load();
   audio.play().then(()=>{
     $('pp-art').classList.add('spin');
     $('pp-deck').classList.add('spin');
   }).catch(()=>{});
   PT.startAt=performance.now();
+
+  // el autor conoce sus propias respuestas: mira, no juega
+  if(PT.host&&PT.quiz){
+    PT.answered=true;
+    const me=PT.players[PT.id];
+    if(me) me.answeredRound=PT.round;
+    [...$('pp-opts').children].forEach((b,i)=>{
+      b.disabled=true;
+      if(i===PT.correct) b.classList.add('right');
+    });
+    $('pp-gain').textContent='Your answer';
+    $('pp-gain').className='gain';
+    $('pp-note').textContent='waiting for the others';
+  }
 
   cancelAnimationFrame(PT.raf);
   (function tick(){
@@ -3344,6 +3572,32 @@ function showRound(m){
   }
 }
 
+const ORD=['','First in!','Second in','Third in','Fourth in','Fifth in'];
+const NOPE=['Not that one','Nope','Wrong groove','Missed it'];
+
+/* Un «correcto» no dice nada. Saber que llegaste primero, que
+   encadenas tres o que estás a 200 del líder, sí. */
+function ptFeedback({ok,pts,place,rank,total,gap,chain}){
+  const g=$('pp-gain'), n=$('pp-note');
+  if(ok){
+    sfx.right();
+    g.textContent=(place&&place<=5?ORD[place]:'Got it')+`  +${pts}`;
+    g.className='gain plus rise';
+  }else{
+    sfx.wrong();
+    g.textContent=NOPE[Math.floor(Math.random()*NOPE.length)];
+    g.className='gain zero';
+  }
+  const bits=[];
+  if(chain>=3) bits.push(`${chain} in a row`);
+  if(rank){
+    const suf=['th','st','nd','rd'][(rank%10<4&&Math.floor(rank%100/10)!==1)?rank%10:0]||'th';
+    bits.push(rank===1?'You are leading':`${rank}${suf} of ${total}`);
+  }
+  if(gap>0 && rank>1) bits.push(`${gap} behind`);
+  n.textContent=bits.join(' · ');
+}
+
 function ptAnswer(i,btn){
   if(PT.answered)return;
   PT.answered=true;
@@ -3361,9 +3615,9 @@ function ptAnswer(i,btn){
     const me=PT.players[PT.id];
     me.answeredRound=PT.round;
     if(ok) me.score=(me.score||0)+pts;
-    $('pp-gain').textContent=ok?`+${pts}`:'Nope';
-    $('pp-gain').className='gain '+(ok?'plus rise':'zero');
-    if(ok) sfx.right(); else sfx.wrong();
+    me.chain=ok?(me.chain||0)+1:0;
+    if(ok){ PT.order=PT.order||[]; PT.order.push(PT.id); }
+    ptFeedback({ok,pts,chain:me.chain,...standing(me,ok?PT.order.length:0)});
     broadcast({t:'scores',players:PT.players});
     paintPlayers('pp-board',{scores:true});
     const total=Object.keys(PT.players).length;
@@ -3408,7 +3662,11 @@ function revealRound(m){
     PT.pending=null;
   }
   // quien no llegó a responder ve de quién era
-  if($('pp-gain').textContent==='') $('pp-gain').textContent=m.title;
+  if($('pp-gain').textContent===''){
+    $('pp-gain').textContent='Too slow';
+    $('pp-gain').className='gain zero';
+    $('pp-note').textContent=m.title;
+  }
   $('pp-score').textContent=(PT.players[PT.id]||{}).score||0;
   paintPlayers('pp-board',{scores:true});
 }
@@ -3418,8 +3676,16 @@ function ptEnd(){
   audio.pause();
   const arr=Object.values(PT.players).sort((a,b)=>(b.score||0)-(a.score||0));
   const top=arr[0]||{name:'—',score:0};
-  $('pp-winner').textContent=top.id===PT.id?'You win':top.name+' wins';
-  $('pp-sub').textContent=`${top.score} points over ${PT.rounds} rounds`;
+  if(PT.quiz){
+    const otros=arr.filter(x=>x.id!==PT.id||!PT.host);
+    const mejor=PT.host?(arr.find(x=>x.id!=='host')||top):top;
+    $('pp-winner').textContent=PT.host?`${mejor.name} knows you best`
+      :(top.id===PT.id?'You know them best':`${top.name} knows them best`);
+    $('pp-sub').textContent=`${mejor.score} points over ${PT.quiz.length} questions`;
+  }else{
+    $('pp-winner').textContent=top.id===PT.id?'You win':top.name+' wins';
+    $('pp-sub').textContent=`${top.score} points over ${PT.rounds} rounds`;
+  }
   paintPlayers('pp-final',{scores:true});
   $('ppAgain').hidden=!PT.host;
   go('s-pend');
@@ -3437,7 +3703,7 @@ function ptQuit(){
   try{ if(PT.peer) PT.peer.destroy(); }catch(e){}
   cancelAnimationFrame(PT.raf); clearTimeout(PT.tmr);
   audio.pause();
-  PT.peer=null;PT.conns=[];PT.players={};PT.round=0;PT.host=false;
+  PT.peer=null;PT.conns=[];PT.players={};PT.round=0;PT.host=false;PT.quiz=null;
 }
 
 /* =====================================================
