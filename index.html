@@ -385,20 +385,33 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .note2{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
   text-transform:uppercase;color:var(--place);min-height:16px;margin-top:4px}
 
+/* Los modos sociales son dos discos apilados: se lee «más de uno»
+   sin necesidad de un icono de personas. */
+.dsec2{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--place);margin:26px 0 14px}
+.rack2{margin-bottom:26px}
+.stack{position:relative;display:block;width:100%;aspect-ratio:1}
+.stack .disc{position:absolute;inset:0;width:auto}
+.stack .disc.back{transform:translate(9%,-7%) scale(.9);filter:brightness(.62);
+  animation:spin 30s linear infinite reverse}
+
 /* ---- misiones del día ---- */
 .miss{margin-bottom:24px}
-.miss .mrow{display:flex;align-items:center;gap:12px;padding:12px 2px;
+.miss .mrow{display:flex;align-items:center;gap:14px;padding:14px 2px;
   border-bottom:1px solid var(--line)}
 .miss .mrow:last-child{border-bottom:none}
-.miss .mtick{width:20px;height:20px;flex:none;border-radius:50%;
-  border:1.5px solid var(--line);display:grid;place-items:center;
-  font-size:11px;color:var(--bg)}
-.miss .mrow.on .mtick{background:var(--green);border-color:var(--green)}
+/* un punto como el agujero de un disco: lleno cuando está hecho */
+.miss .mtick{width:14px;height:14px;flex:none;border-radius:50%;
+  box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;
+  font-size:0;color:transparent}
+.miss .mrow.on .mtick{background:var(--green);box-shadow:inset 0 0 0 1.5px var(--green)}
 .miss .mtx{flex:1;min-width:0;font-size:13.5px}
 .miss .mrow.on .mtx{color:var(--muted);text-decoration:line-through}
-.miss .mct{font-family:var(--mono);font-size:10.5px;color:var(--place);flex:none}
-.miss .mbar{display:block;height:3px;border-radius:2px;background:var(--raise);
-  margin-top:6px;overflow:hidden}
+.miss .mct{font-family:var(--mono);font-size:10.5px;color:var(--place);flex:none;
+  font-variant-numeric:tabular-nums}
+.miss .mbar{display:block;height:4px;border-radius:2px;margin-top:7px;overflow:hidden;
+  background:repeating-linear-gradient(90deg,
+    color-mix(in srgb,var(--text) 14%,transparent) 0 2px, transparent 2px 6px)}
 .miss .mbar i{display:block;height:100%;background:var(--accent);width:0;
   transition:width .5s ease}
 
@@ -779,6 +792,11 @@ input::placeholder{color:var(--place)}
 .gain{text-align:center;font-size:15px;font-weight:600;margin-top:14px;min-height:22px}
 .gain.plus{color:var(--green)}
 .gain.zero{color:var(--red)}
+.skiprow{text-align:center;margin-top:10px}
+.skiprow button{background:none;border:none;color:var(--place);cursor:pointer;
+  font-family:var(--sans);font-size:12.5px;padding:8px 12px}
+.skiprow button:hover{color:var(--text)}
+.flash{color:var(--amber);font-weight:700}
 .final{text-align:center;padding:14px 0}
 .final .big{font-size:clamp(56px,17vw,88px);font-weight:600;letter-spacing:-.045em;line-height:1}
 .final .sub{color:var(--muted);font-size:14px;margin-top:10px;line-height:1.5}
@@ -1010,7 +1028,7 @@ html.nomotion *{animation:none!important;transition:none!important}
 
   <p class="dfoot">Music and previews from
     <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a>
-    <span class="dver">M29 · v47</span></p>
+    <span class="dver">M29 · v49</span></p>
 </aside>
 
 <div class="groove">
@@ -1046,28 +1064,23 @@ html.nomotion *{animation:none!important;transition:none!important}
     </button>
   </div>
 
-  <button class="tile" id="quizBtn" style="margin-bottom:10px">
-    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M9.2 9a2.9 2.9 0 1 1 3.9 2.7c-.7.3-1.1 1-1.1 1.8v.5"/>
-      <circle cx="12" cy="18" r="1.1" fill="currentColor" stroke="none"/>
-      <circle cx="12" cy="12" r="9.5"/></svg></span>
-    <span>
-      <h3>How well do you know me</h3>
-      <p>Pick five songs · your friends guess you</p>
-    </span>
-    <span class="arrow">→</span>
-  </button>
-
-  <button class="tile" id="partyBtn" style="margin-bottom:22px">
-    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/>
-      <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5M15 14.2c2.6.3 4.5 2.2 4.5 4.8"/></svg></span>
-    <span>
-      <h3>Party</h3>
-      <p>Everyone on their own phone · same songs</p>
-    </span>
-    <span class="arrow">→</span>
-  </button>
+  <div class="dsec2">With other people</div>
+  <div class="rack rack2">
+    <button class="slot2" id="quizBtn">
+      <span class="stack">
+        <span class="disc back"><span class="lab"><img id="lab5" alt=""></span></span>
+        <span class="disc"><span class="lab"><img id="lab6" alt=""><span class="no">05</span></span></span>
+      </span>
+      <span class="nm">Know Me</span><span class="meta">10 songs · they guess you</span>
+    </button>
+    <button class="slot2" id="partyBtn">
+      <span class="stack">
+        <span class="disc back"><span class="lab"><img id="lab7" alt=""></span></span>
+        <span class="disc"><span class="lab"><img id="lab8" alt=""><span class="no">06</span></span></span>
+      </span>
+      <span class="nm">Party</span><span class="meta">one code · everyone plays</span>
+    </button>
+  </div>
 
   <div class="miss" id="miss">
     <div class="cuthead" style="color:var(--place)">Today's goals</div>
@@ -1179,6 +1192,7 @@ html.nomotion *{animation:none!important;transition:none!important}
     <div class="live"><span id="b-worth">1000 pts</span><span id="b-time">12.0s</span></div>
     <div class="opts" id="b-opts"></div>
     <div class="gain" id="b-gain" role="status" aria-live="polite"></div>
+    <div class="skiprow"><button id="b-skip">Skip this one →</button></div>
   </div>
 
   <div id="b-final" hidden>
@@ -1638,6 +1652,8 @@ const DIFF={
 const REWARD=15, PREVIEW=30;   // premio al acertar y largo del preview
 const TOP=1000, FLOOR=100;     // puntos de Blitz al empezar y al final
 const COMBO=[1,1,1.25,1.5,2];  // multiplicador según aciertos seguidos
+const CASTIGO=3;               // segundos que cuesta fallar
+const RELAMPAGO=4;             // cada cuántas rondas toca una a doble o nada
 
 const S={diff:'classic',game:'type',artist:null,pool:[],titles:[],used:new Set(),queued:null,
   track:null,stage:0,over:false,hints:0,gaveUp:false,
@@ -1892,7 +1908,7 @@ function arranqueAutomatico(){
   HOME.list=lista.sort(()=>Math.random()-0.5);
   HOME.i=0;
   setHomeTrack(HOME.list[0]);
-  [1,2,3,4].forEach((n,k)=>{
+  [1,2,3,4,5,6,7,8].forEach((n,k)=>{
     const t=HOME.list[(k+1)%HOME.list.length];
     const u=homeArt(t);
     if(u) $('lab'+n).src=u;
@@ -2066,9 +2082,22 @@ async function loadArtist(a){
   }
 }
 
+/* El catálogo viene ordenado por popularidad. Se reparte en tres
+   tramos y se avanza de los himnos a las rarezas, para que la partida
+   suba de dificultad sola en vez de darte la más famosa al final. */
 function pick(){
   if(S.used.size>=S.pool.length)S.used=new Set();
-  let t;do{t=S.pool[Math.floor(Math.random()*S.pool.length)]}while(S.used.has(t.id));
+  const n=S.pool.length;
+  const hechas=S.used.size;
+  let desde=0, hasta=n;
+  if(n>=12){
+    const tramo=hechas<3?0:hechas<7?1:2;
+    desde=Math.floor(n*[0,.2,.45][tramo]);
+    hasta=Math.ceil(n*[.35,.7,1][tramo]);
+  }
+  let libres=S.pool.slice(desde,hasta).filter(t=>!S.used.has(t.id));
+  if(!libres.length) libres=S.pool.filter(t=>!S.used.has(t.id));
+  const t=libres[Math.floor(Math.random()*libres.length)];
   S.used.add(t.id);
   return t;
 }
@@ -2291,6 +2320,7 @@ const worth=el=>{
 
 function bStart(){
   S.round=0;S.score=0;S.hits=0;S.log=[];S.used=new Set();S.bestHit=0;S.chain=0;S.bestChain=0;
+  S.flash=false;S.perdido=0;S.limit=cfg().limit;
   $('b-combo').textContent='';
   $('b-final').hidden=true;$('b-live').hidden=false;
   bRound();
@@ -2311,7 +2341,13 @@ function bRound(){
   }
   const opts=[t,...decoys].sort(()=>Math.random()-0.5);
 
-  $('b-round').textContent=`Round ${S.round} of ${cfg().rounds}`;
+  // una de cada cuatro es relámpago: la mitad de tiempo, el doble de puntos
+  S.flash = S.round % RELAMPAGO === 0;
+  S.limit = S.flash ? cfg().limit/2 : cfg().limit;
+  S.perdido = 0;
+  $('b-round').innerHTML = S.flash
+    ? `Round ${S.round} of ${cfg().rounds} <b class="flash">· double or nothing</b>`
+    : `Round ${S.round} of ${cfg().rounds}`;
   $('b-score').textContent=S.score;
   $('b-cover').src=t.album?t.album.cover_big:'';
   $('b-art').classList.remove('reveal');
@@ -2322,6 +2358,7 @@ function bRound(){
   $('b-deck').classList.remove('warn');
   setRing('b-ring',1);
   $('b-foot').textContent=`${S.artist.name} · ${S.pool.length} songs in rotation`;
+  $('b-skip').disabled=false;
 
   $('b-opts').innerHTML='';
   opts.forEach((o,i)=>{
@@ -2340,9 +2377,9 @@ function bRound(){
     $('b-deck').classList.add('spin');
     bStartT=performance.now();
     (function tick(){
-      const el=(performance.now()-bStartT)/1000;
-      const left=Math.max(0,cfg().limit-el);
-      setRing('b-ring',left/cfg().limit);
+      const el=(performance.now()-bStartT)/1000 + (S.perdido||0);
+      const left=Math.max(0,(S.limit||cfg().limit)-el);
+      setRing('b-ring',left/(S.limit||cfg().limit));
       $('b-time').textContent=left.toFixed(1)+'s';
       $('b-worth').textContent=worth(el)+' pts';
       // la imagen se va aclarando: cuanto más tardas, más pista tienes
@@ -2357,10 +2394,27 @@ function bRound(){
   });
 }
 
-function bAnswer(btn,ok){
+function bAnswer(btn,ok,saltada){
   if(bLocked)return;
+  const el=(performance.now()-bStartT)/1000 + S.perdido;
+
+  /* Fallar no acaba la ronda: cuesta tres segundos de reloj. Así cada
+     respuesta es una apuesta y no un trámite. */
+  if(!ok && btn && el < S.limit-1.2){
+    S.perdido += CASTIGO;
+    btn.classList.add('wrong','shake');
+    btn.disabled=true;
+    setTimeout(()=>btn.classList.remove('shake'),320);
+    sfx.wrong();
+    S.chain=0; $('b-combo').textContent='';
+    $('b-gain').textContent=`−${CASTIGO}s`;
+    $('b-gain').className='gain zero rise';
+    return;
+  }
+
   bLocked=true;
-  const el=(performance.now()-bStartT)/1000;
+  ticStop();
+  $('b-skip').disabled=true;
   bHalt();
   $('b-art').classList.add('reveal');
   if(ok) $('b-art').classList.add('spin');   // celebra girando
@@ -2378,7 +2432,7 @@ function bAnswer(btn,ok){
     sfx.right();
     S.chain=(S.chain||0)+1;
     S.bestChain=Math.max(S.bestChain||0,S.chain);
-    const mult=COMBO[Math.min(S.chain,COMBO.length-1)];
+    const mult=COMBO[Math.min(S.chain,COMBO.length-1)]*(S.flash?2:1);
     const pts=Math.round(worth(el)*mult);
     S.score+=pts;S.hits++;
     S.bestHit=Math.max(S.bestHit||0,pts);
@@ -2390,7 +2444,7 @@ function bAnswer(btn,ok){
     sfx.wrong();
     S.chain=0;
     $('b-combo').textContent='';
-    $('b-gain').textContent=btn?'Nope':"Time's up";
+    $('b-gain').textContent=saltada?'Skipped':(btn?'Nope':"Time's up");
     $('b-gain').className='gain zero';
   }
   S.log.push(ok);chips();
@@ -2401,6 +2455,7 @@ function bAnswer(btn,ok){
 }
 
 function bHalt(){
+  ticStop();
   clearTimeout(bT);cancelAnimationFrame(bRaf);
   audio.pause();
   const a=$('b-art'); if(a) a.classList.remove('spin');
@@ -2428,6 +2483,10 @@ async function bFinish(){
     $('b-tape').appendChild(i);
   });
 }
+/* Si no la conoces, pasar mantiene el ritmo. Cuesta los puntos de la
+   ronda, no el tiempo de todos. */
+$('b-skip').onclick=()=>bAnswer(null,false,true);
+
 $('b-again').onclick=bStart;
 $('b-change').onclick=()=>{bHalt();go('s-pick')};
 $('b-share').onclick=async()=>{$('shareSheet').classList.add('on');await drawCard()};
@@ -2842,7 +2901,9 @@ function gRound(){
       setRing('g-ring',left/cfg().limit);
       $('g-time').textContent=left.toFixed(1)+'s';
       $('g-worth').textContent=worth(el)+' pts';
-      $('g-deck').classList.toggle('warn',left<cfg().limit/3.5);
+      const apremioG=left<4;
+      $('g-deck').classList.toggle('warn',apremioG);
+      if(apremioG && !ticTmr) ticStart();
       $('g-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
       if(left<=0){gAnswer(null,false);return}
       gRaf=requestAnimationFrame(tick);
@@ -2856,6 +2917,7 @@ function gRound(){
 function gAnswer(btn,ok){
   if(gLocked)return;
   gLocked=true;
+  ticStop();
   const el=(performance.now()-gStart)/1000;
   gHalt();
   $('g-art').classList.add('reveal');
@@ -2897,6 +2959,7 @@ function gAnswer(btn,ok){
 }
 
 function gHalt(){
+  ticStop();
   clearTimeout(gT);cancelAnimationFrame(gRaf);
   audio.pause();
   const a=$('g-art'); if(a) a.classList.remove('spin');
@@ -3555,6 +3618,24 @@ function pulsoStart(){
   pulsoTmr=setInterval(golpe,500);
 }
 function pulsoStop(){ clearInterval(pulsoTmr); pulsoTmr=null; }
+
+/* Los últimos segundos suenan: un tictac que aprieta el ritmo. Sin
+   esto, el segundo dos y el diez se sienten igual de planos. */
+let ticTmr=null, ticPaso=0;
+function ticStart(){
+  ticStop();
+  if(muted) return;
+  ticPaso=0;
+  const golpe=()=>{
+    // cada vez más rápido y más agudo conforme se acaba
+    beep(880+ticPaso*70,.05,'square',.075);
+    ticPaso++;
+    clearTimeout(ticTmr);
+    ticTmr=setTimeout(golpe,Math.max(150,420-ticPaso*40));
+  };
+  golpe();
+}
+function ticStop(){ clearTimeout(ticTmr); ticTmr=null; }
 
 const sfx={
   right(){ beep(660,.12,'sine',.16); beep(990,.16,'sine',.13,.09); },
@@ -4340,9 +4421,9 @@ function resumeClock(){
   audio.play().catch(()=>{});
   if(m==='blitz'){
     (function t(){
-      const el=(performance.now()-bStartT)/1000;
-      const left=Math.max(0,cfg().limit-el);
-      setRing('b-ring',left/cfg().limit);
+      const el=(performance.now()-bStartT)/1000 + (S.perdido||0);
+      const left=Math.max(0,(S.limit||cfg().limit)-el);
+      setRing('b-ring',left/(S.limit||cfg().limit));
       $('b-time').textContent=left.toFixed(1)+'s';
       $('b-worth').textContent=worth(el)+' pts';
       $('b-art').style.setProperty('--blur',(30-22*Math.min(el/cfg().limit,1)).toFixed(1)+'px');
