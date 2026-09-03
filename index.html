@@ -810,6 +810,11 @@ input::placeholder{color:var(--place)}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 html.nomotion *{animation:none!important;transition:none!important}
 
+/* El giro lo usan los discos de la portada, el plato del juego y los
+   avatares. Vive aquí, suelto, para que no se lo lleve por delante
+   una reescritura de otro bloque. */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
 /* Proyección: en una pantalla grande hay que leerlo desde el fondo
    del aula, así que todo sube de tamaño en vez de quedarse en una
    columna de móvil centrada. */
@@ -1002,7 +1007,7 @@ html.nomotion *{animation:none!important;transition:none!important}
 
   <p class="dfoot">Music and previews from
     <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a>
-    <span class="dver">M29 · v43</span></p>
+    <span class="dver">M29 · v44</span></p>
 </aside>
 
 <div class="groove">
