@@ -417,13 +417,19 @@ header{position:relative;display:flex;align-items:center;gap:10px;
   text-transform:uppercase;color:var(--place);margin-top:10px}
 .pick .meta2{display:block;font-family:var(--mono);font-size:9px;color:var(--place);
   opacity:.7;margin-top:3px}
+/* Los tres giran siempre; el elegido, más rápido y a plena luz.
+   Un disco quieto en una app de vinilos parece un error. */
 .pick .disc{box-shadow:0 0 0 2px color-mix(in srgb,var(--ring) 40%,transparent),
-  0 8px 22px rgba(0,0,0,.5)}
+  0 8px 22px rgba(0,0,0,.5);
+  animation:spin 24s linear infinite}
+.pick:nth-child(2) .disc{animation-duration:28s}
+.pick:nth-child(3) .disc{animation-duration:21s}
 .pick:nth-child(1){--ring:#E8813A}
 .pick:nth-child(2){--ring:#FF453A}
 .pick:nth-child(3){--ring:#64D2FF}
 .pick.sel .disc{box-shadow:0 0 0 2.5px var(--ring),0 10px 30px rgba(0,0,0,.6);
   animation:spin 5.5s linear infinite}
+.pick:hover .disc{animation-duration:4s}
 .pick.sel .nm2{color:var(--ring);font-weight:700}
 .pick:not(.sel) .disc{filter:brightness(.8) saturate(.75)}
 .pick:hover .nm2{color:var(--text)}
@@ -434,7 +440,7 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .cutrow .disc{width:110px;flex:none;animation:spin 7s linear infinite;
   box-shadow:0 0 0 2.5px var(--amber),0 10px 30px rgba(0,0,0,.6)}
 .cutrow .disc .lab{background:var(--amber);display:grid;place-items:center}
-.cutrow .disc{animation:none}
+.cutrow .disc{animation:spin 30s linear infinite}
 .cutrow .disc .lab b{font-family:var(--mono);font-size:15px;font-weight:700;
   color:#1B1400;line-height:1.05;text-align:center}
 .cutrow .disc .lab b span{display:block;font-size:8px;letter-spacing:.14em;margin-top:2px}
@@ -1007,7 +1013,7 @@ html.nomotion *{animation:none!important;transition:none!important}
 
   <p class="dfoot">Music and previews from
     <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a>
-    <span class="dver">M29 · v44</span></p>
+    <span class="dver">M29 · v45</span></p>
 </aside>
 
 <div class="groove">
