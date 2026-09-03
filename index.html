@@ -1002,7 +1002,7 @@ html.nomotion *{animation:none!important;transition:none!important}
 
   <p class="dfoot">Music and previews from
     <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a>
-    <span class="dver">M29 · v41</span></p>
+    <span class="dver">M29 · v42</span></p>
 </aside>
 
 <div class="groove">
@@ -1654,6 +1654,9 @@ function go(id){
   if(s){s.setAttribute('tabindex','-1');setTimeout(()=>s.focus({preventScroll:true}),0)}
   if(id==='s-pick') resetAccent();
   if(id!=='s-home' && typeof homeStop==='function') homeStop();
+  // al volver a la portada, el hilo musical continúa donde estaba
+  else if(id==='s-home' && typeof homePlay==='function'
+          && OPT.music && HOME.arrancado && !HOME.on) setTimeout(homePlay,220);
   const salas=['s-party','s-lobby','s-pgame','s-pend'];
   if(!salas.includes(id) && typeof ptQuit==='function' && PT.peer) ptQuit();
   if(id!=='s-type') stopAudio();
@@ -1733,10 +1736,16 @@ function resetAccent(){
 }
 
 /* ---------- la portada suena ----------
-   Un fragmento de la lista de éxitos, a volumen bajo, con su carátula
-   de fondo. Nunca arranca sola: sonar sin permiso a alguien que va en
-   el metro es la forma más rápida de que cierre la app. */
-const HOME={list:[],i:0,audio:null,on:false};
+   Hilo musical continuo, como el de una tienda: quince segundos de
+   cada tema y encadenado con el siguiente, así nunca se hace largo ni
+   se corta en seco. Dos reproductores que se turnan y se cruzan.
+
+   Los navegadores no permiten que una web suene sola al abrirse, así
+   que arranca con el primer toque en cualquier parte de la pantalla. */
+const HOME={list:[],i:0,on:false,a:null,b:null,cual:0,tmr:null,fade:null,arrancado:false};
+const TRAMO=15000;      // cuánto suena cada tema
+const CRUCE=2200;       // cuánto dura el encadenado
+const VOL=0.30;
 
 function homeArt(t){
   return t && t.album ? (t.album.cover_big||t.album.cover_medium) : null;
@@ -1753,50 +1762,135 @@ function setHomeTrack(t){
   accentFrom(art);
 }
 
+function nuevoAudio(){
+  const a=new Audio();
+  a.preload='auto'; a.volume=0; a.crossOrigin='anonymous';
+  return a;
+}
+
+/* Sube o baja el volumen poco a poco: cortar de golpe se oye como un
+   chasquido y rompe la sensación de continuidad. */
+function rampa(a,desde,hasta,ms,alTerminar){
+  const t0=performance.now();
+  a.volume=Math.max(0,Math.min(1,desde));
+  const paso=()=>{
+    const k=Math.min(1,(performance.now()-t0)/ms);
+    a.volume=Math.max(0,Math.min(1,desde+(hasta-desde)*k));
+    if(k<1) requestAnimationFrame(paso);
+    else if(alTerminar) alTerminar();
+  };
+  requestAnimationFrame(paso);
+}
+
+function siguienteTema(){
+  if(!HOME.list.length)return null;
+  HOME.i=(HOME.i+1)%HOME.list.length;
+  return HOME.list[HOME.i];
+}
+
+function cruzar(){
+  if(!HOME.on)return;
+  const t=siguienteTema();
+  if(!t)return;
+  const saliendo = HOME.cual===0 ? HOME.a : HOME.b;
+  const entrando = HOME.cual===0 ? HOME.b : HOME.a;
+  HOME.cual = 1-HOME.cual;
+
+  entrando.src=t.preview;
+  entrando.currentTime=0;
+  entrando.play().then(()=>{
+    setHomeTrack(t);
+    rampa(entrando,0,VOL,CRUCE);
+    rampa(saliendo,saliendo.volume,0,CRUCE,()=>saliendo.pause());
+    clearTimeout(HOME.tmr);
+    HOME.tmr=setTimeout(cruzar,TRAMO);
+  }).catch(()=>{});
+}
+
 function homeStop(){
   HOME.on=false;
-  if(HOME.audio) HOME.audio.pause();
+  clearTimeout(HOME.tmr);
+  [HOME.a,HOME.b].forEach(a=>{ if(a){ rampa(a,a.volume,0,400,()=>a.pause()); } });
   $('npBtn').classList.remove('on');
   $('npCtl').textContent='▶';
 }
 
 function homePlay(){
+  if(!HOME.list.length)return;
+  if(!HOME.a){ HOME.a=nuevoAudio(); HOME.b=nuevoAudio(); }
+  const act = HOME.cual===0 ? HOME.a : HOME.b;
   const t=HOME.list[HOME.i];
-  if(!t)return;
-  if(!HOME.audio){ HOME.audio=new Audio(); HOME.audio.volume=0.34; }
-  HOME.audio.src=t.preview;
-  HOME.audio.onended=()=>{ HOME.i=(HOME.i+1)%HOME.list.length; setHomeTrack(HOME.list[HOME.i]); homePlay(); };
-  HOME.audio.play().then(()=>{
-    HOME.on=true;
+  if(act.src!==t.preview){ act.src=t.preview; act.currentTime=0; }
+  act.play().then(()=>{
+    HOME.on=true; HOME.arrancado=true;
+    setHomeTrack(t);
+    rampa(act,act.volume,VOL,900);
     $('npBtn').classList.add('on');
     $('npCtl').textContent='⏸';
+    clearTimeout(HOME.tmr);
+    HOME.tmr=setTimeout(cruzar,TRAMO);
   }).catch(()=>{});
 }
 
 $('npBtn').onclick=()=>{ HOME.on ? homeStop() : homePlay(); };
 
+/* Primer toque en cualquier parte: es lo más cerca que se puede estar
+   de que suene sola al abrir. */
+function arranqueAutomatico(){
+  if(HOME.arrancado || !OPT.music) return;
+  if(!$('s-home').classList.contains('on')) return;
+  homePlay();
+}
+['pointerdown','keydown','touchstart'].forEach(ev=>
+  document.addEventListener(ev,arranqueAutomatico,{once:false,passive:true}));
+
+/* La lista sale de las radios de baile de Deezer, que sí están
+   curadas por estilo, con un tope por artista para que no se repita. */
 (async()=>{
+  let lista=[];
   try{
-    const d=await cached('chart:0',()=>deezer('/chart/0/tracks',{limit:100}));
-    const list=(d.data||[]).filter(t=>t.preview&&t.album);
-    if(!list.length)return;
-    HOME.list=list.sort(()=>Math.random()-0.5);
-    HOME.i=0;
-    setHomeTrack(HOME.list[0]);
-    bootOut();                      // ya hay música que enseñar
-    // cada disco de la rejilla lleva una carátula distinta de etiqueta
-    [1,2,3,4].forEach((n,k)=>{
-      const t=HOME.list[(k+1)%HOME.list.length];
-      const u=homeArt(t);
-      if(u) $('lab'+n).src=u;
-    });
-    // las cintas también llevan carátula bajo el papel
-    ['tapeArt1','tapeArt2','tapeArt3'].forEach((id,k)=>{
-      const el=$(id);
-      const u=homeArt(HOME.list[(k+5)%HOME.list.length]);
-      if(el&&u) el.src=u;
-    });
+    const g=await cached('radiogen',()=>deezer('/radio/genres'));
+    const baile=(g.data||[]).find(x=>/dance|electro|house/i.test(x.title||''));
+    if(baile && (baile.radios||[]).length){
+      const radios=baile.radios.slice(0,3);
+      const tandas=await Promise.all(radios.map(r=>
+        cached('radio:'+r.id,()=>deezer(`/radio/${r.id}/tracks`)).catch(()=>null)));
+      const porArtista=new Map();
+      tandas.forEach(l=>((l&&l.data)||[]).forEach(t=>{
+        if(!t.preview||!t.album)return;
+        const n=t.artist?t.artist.name:'?';
+        const arr=porArtista.get(n)||[];
+        if(arr.length>=2)return;
+        arr.push(t); porArtista.set(n,arr);
+      }));
+      porArtista.forEach(arr=>lista.push(...arr));
+    }
   }catch(e){}
+
+  // si las radios fallan, la lista de éxitos sirve igual
+  if(lista.length<8){
+    try{
+      const d=await cached('chart:0',()=>deezer('/chart/0/tracks',{limit:100}));
+      lista=(d.data||[]).filter(t=>t.preview&&t.album);
+    }catch(e){}
+  }
+  if(!lista.length){ bootOut(); return; }
+
+  HOME.list=lista.sort(()=>Math.random()-0.5);
+  HOME.i=0;
+  setHomeTrack(HOME.list[0]);
+  [1,2,3,4].forEach((n,k)=>{
+    const t=HOME.list[(k+1)%HOME.list.length];
+    const u=homeArt(t);
+    if(u) $('lab'+n).src=u;
+  });
+  ['tapeArt1','tapeArt2','tapeArt3'].forEach((id,k)=>{
+    const el=$(id);
+    const u=homeArt(HOME.list[(k+5)%HOME.list.length]);
+    if(el&&u) el.src=u;
+  });
+  bootOut();
+  arranqueAutomatico();     // por si ya hubo un toque antes de cargar
 })();
 
 /* El aro es un círculo SVG al que se le recorta el trazo: con
