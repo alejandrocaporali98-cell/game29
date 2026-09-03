@@ -338,18 +338,15 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .slot2:active .disc{animation-play-state:paused;transform:scale(.97)}
 .slot2:hover .nm{color:var(--accent)}
 
-/* Sólo la primera vez: sin esto, alguien que entra ve cuatro discos
-   y no sabe por dónde empezar. */
-.hello{display:block;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
-  background:var(--tint);border-radius:18px;padding:16px;margin-bottom:20px}
-.hello .ht{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--accent);margin-bottom:6px}
-.hello .hd{display:block;font-size:14px;line-height:1.45;color:var(--text)}
-.hello .hb{display:flex;gap:8px;margin-top:12px}
-.hello button{border:1px solid var(--line);background:none;color:var(--text);
-  font-family:var(--sans);font-size:12.5px;padding:9px 14px;border-radius:980px;cursor:pointer}
-.hello button:first-child{background:var(--accent);color:var(--on-accent);
-  border-color:transparent;font-weight:600}
+/* Sólo la primera vez, y en una línea: la portada ya se explica con
+   los cuatro discos. Una caja con botones ahí sobra. */
+.hello{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);
+  margin:-8px 0 20px}
+.hello button{background:none;border:none;padding:0;cursor:pointer;
+  font-family:var(--sans);font-size:13.5px;color:var(--accent);font-weight:600}
+.hello #helloNo{margin-left:auto;color:var(--place);font-size:17px;line-height:1;
+  padding:0 4px}
+.hello #helloNo:hover{color:var(--text)}
 
 /* ---- cuánto me conoces ---- */
 .qstep{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
@@ -1013,7 +1010,7 @@ html.nomotion *{animation:none!important;transition:none!important}
 
   <p class="dfoot">Music and previews from
     <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a>
-    <span class="dver">M29 · v45</span></p>
+    <span class="dver">M29 · v47</span></p>
 </aside>
 
 <div class="groove">
@@ -1025,11 +1022,10 @@ html.nomotion *{animation:none!important;transition:none!important}
   <h1>Guess the song</h1>
   <p class="lede">Real 30-second previews, pulled live. Four ways to play.</p>
 
-  <div class="hello" id="hello" hidden>
-    <span class="ht">New here?</span>
-    <span class="hd">Blitz is the easiest start — four options, nothing to type.</span>
-    <span class="hb"><button id="helloGo">Start one</button><button id="helloNo">Dismiss</button></span>
-  </div>
+  <p class="hello" id="hello" hidden>
+    New here? <button id="helloGo">Start with Blitz →</button>
+    <button id="helloNo" aria-label="Dismiss">×</button>
+  </p>
 
   <div class="rack">
     <button class="slot2" data-game="type">
@@ -3538,6 +3534,28 @@ function beep(freq, dur=0.12, type='sine', vol=0.16, delay=0){
   osc.start(t); osc.stop(t+dur+0.02);
 }
 
+/* Latido de tensión mientras se decide, al estilo de un concurso:
+   bombo a negras, charles a contratiempo y una nota que sube cada
+   ocho tiempos. Sintetizado, así que no hay archivo ni derechos. */
+let pulsoTmr=null, pulsoN=0;
+function pulsoStart(){
+  pulsoStop();
+  if(muted) return;
+  pulsoN=0;
+  const golpe=()=>{
+    const b=pulsoN++;
+    beep(55,.20,'sine',.20);                       // bombo
+    if(b%2===1) beep(1500,.035,'square',.035);     // charles
+    if(b%4===0){                                   // nota que asciende
+      const notas=[196,220,247,262,294];
+      beep(notas[Math.min(notas.length-1,Math.floor(b/8))],.46,'triangle',.055);
+    }
+  };
+  golpe();
+  pulsoTmr=setInterval(golpe,500);
+}
+function pulsoStop(){ clearInterval(pulsoTmr); pulsoTmr=null; }
+
 const sfx={
   right(){ beep(660,.12,'sine',.16); beep(990,.16,'sine',.13,.09); },
   wrong(){ beep(180,.20,'sawtooth',.09); },
@@ -3557,7 +3575,12 @@ const PROMPTS=[
   'The one I have on repeat right now',
   'The song that always makes me dance',
   'My guilty pleasure',
-  'The song I want playing at my party'
+  'The song I want playing at my party',
+  'The one that always makes me cry',
+  'My song for a long drive',
+  'The one I sing in the shower',
+  'A song that takes me back to school',
+  'The one I would put on our wedding'
 ];
 
 const QZ={i:0,items:[],busy:false};
@@ -3669,7 +3692,7 @@ function qFinish(){
 /* Abrir sala con el cuestionario cargado: el motor de Party sirve
    igual, sólo cambia de dónde sale la respuesta correcta. */
 $('qHost').onclick=()=>{
-  if(QZ.items.length<PROMPTS.length){$('qMsg').textContent='Finish the five questions first.';return}
+  if(QZ.items.length<PROMPTS.length){$('qMsg').textContent=`Finish all ${PROMPTS.length} questions first.`;return}
   PT.quiz=QZ.items.slice();
   $('ppHost').click();
 };
@@ -3937,10 +3960,18 @@ function showRound(m){
   }else $('pp-ask').hidden=true;
 
   audio.src=m.preview;audio.load();
-  audio.play().then(()=>{
+  if(m.ask){
+    /* Aquí la canción no es la pista: la pista es conocer a quien montó
+       el cuestionario. Si sonara, sería un chivatazo. */
+    pulsoStart();
     $('pp-art').classList.add('spin');
     $('pp-deck').classList.add('spin');
-  }).catch(()=>{});
+  }else{
+    audio.play().then(()=>{
+      $('pp-art').classList.add('spin');
+      $('pp-deck').classList.add('spin');
+    }).catch(()=>{});
+  }
   PT.startAt=performance.now();
 
   // el autor conoce sus propias respuestas: mira, no juega
@@ -3972,7 +4003,7 @@ function showRound(m){
 
   if(PT.host){
     clearTimeout(PT.tmr);
-    PT.tmr=setTimeout(endRound,(PT.limit+1.2)*1000);
+    PT.tmr=setTimeout(endRound,(PT.limit+1.4)*1000);
   }
 }
 
@@ -4007,7 +4038,8 @@ function ptAnswer(i,btn){
   PT.answered=true;
   const el=(performance.now()-PT.startAt)/1000;
   cancelAnimationFrame(PT.raf);
-  audio.pause();
+  pulsoStop();
+  if(!PT.quiz) audio.pause();   // en el cuestionario aún no ha sonado
   $('pp-art').classList.remove('spin');
   $('pp-deck').classList.remove('spin');
   [...$('pp-opts').children].forEach(b=>b.disabled=true);
@@ -4044,14 +4076,21 @@ function endRound(){
              artist:PT.track.artist,players:PT.players};
   broadcast(msg);
   revealRound(msg);
-  setTimeout(()=>nextPtRound(),2600);
+  // en el cuestionario se deja sonar la canción antes de seguir
+  setTimeout(()=>nextPtRound(), PT.quiz?9000:2600);
 }
 
 function revealRound(m){
   PT.players=m.players;
   cancelAnimationFrame(PT.raf);
-  audio.pause();
+  pulsoStop();
   $('pp-art').classList.add('reveal');
+  if(PT.quiz){
+    // el premio de la ronda: por fin se oye la canción elegida
+    audio.currentTime=0;
+    audio.play().then(()=>$('pp-art').classList.add('spin')).catch(()=>{});
+    if(m.title) $('pp-ask').textContent=`${m.title} · ${m.artist||''}`;
+  }else audio.pause();
   $('pp-art').classList.remove('spin');
   $('pp-deck').classList.remove('spin');
   [...$('pp-opts').children].forEach((b,i)=>{
@@ -4103,6 +4142,7 @@ $('ppHome').onclick=()=>{ptQuit();go('s-home')};
 $('ppLeave').onclick=()=>{ptQuit();go('s-home')};
 
 function ptQuit(){
+  pulsoStop();
   try{ PT.conns.forEach(c=>c.close()); }catch(e){}
   try{ if(PT.peer) PT.peer.destroy(); }catch(e){}
   cancelAnimationFrame(PT.raf); clearTimeout(PT.tmr);
