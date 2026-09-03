@@ -1002,7 +1002,7 @@ html.nomotion *{animation:none!important;transition:none!important}
 
   <p class="dfoot">Music and previews from
     <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a>
-    <span class="dver">M29 · v42</span></p>
+    <span class="dver">M29 · v43</span></p>
 </aside>
 
 <div class="groove">
@@ -1763,8 +1763,10 @@ function setHomeTrack(t){
 }
 
 function nuevoAudio(){
+  // sin crossOrigin: el CDN de audio de Deezer no da ese permiso y la
+  // petición falla en silencio. El elemento del juego tampoco lo lleva.
   const a=new Audio();
-  a.preload='auto'; a.volume=0; a.crossOrigin='anonymous';
+  a.preload='auto'; a.volume=0;
   return a;
 }
 
@@ -1816,7 +1818,7 @@ function homeStop(){
 }
 
 function homePlay(){
-  if(!HOME.list.length)return;
+  if(!HOME.list.length){ HOME.pedido=true; return; }   // aún sin lista: queda pedido
   if(!HOME.a){ HOME.a=nuevoAudio(); HOME.b=nuevoAudio(); }
   const act = HOME.cual===0 ? HOME.a : HOME.b;
   const t=HOME.list[HOME.i];
@@ -1829,7 +1831,11 @@ function homePlay(){
     $('npCtl').textContent='⏸';
     clearTimeout(HOME.tmr);
     HOME.tmr=setTimeout(cruzar,TRAMO);
-  }).catch(()=>{});
+  }).catch(e=>{
+    console.warn('M29: el navegador bloqueó el audio de la portada',e);
+    $('npBtn').classList.remove('on');
+    $('npCtl').textContent='▶';
+  });
 }
 
 $('npBtn').onclick=()=>{ HOME.on ? homeStop() : homePlay(); };
@@ -1890,7 +1896,9 @@ function arranqueAutomatico(){
     if(el&&u) el.src=u;
   });
   bootOut();
-  arranqueAutomatico();     // por si ya hubo un toque antes de cargar
+  // si ya tocaste antes de que llegara la lista, arranca ahora
+  if(HOME.pedido){ HOME.pedido=false; homePlay(); }
+  else arranqueAutomatico();
 })();
 
 /* El aro es un círculo SVG al que se le recorta el trazo: con
