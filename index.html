@@ -321,10 +321,13 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .disc .lab{display:block;position:absolute;inset:29%;border-radius:50%;overflow:hidden;
   background:var(--sugg);display:grid;place-items:center}
 .disc .lab img{width:100%;height:100%;object-fit:cover}
-.disc .lab .no{position:absolute;left:50%;top:9%;transform-origin:50% 455%;
-  margin-left:-9px;width:18px;text-align:center;
-  font-family:var(--mono);font-size:10px;font-weight:700;
-  color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9);letter-spacing:.08em}
+/* El número ya no va sobre la carátula: acompaña al nombre, como en
+   el reverso de un disco. Sobre la portada estorbaba y giraba. */
+.disc .lab .no{display:none}
+.play2 .nm::before{content:attr(data-no) "  ";font-family:var(--mono);
+  font-size:.52em;font-weight:700;letter-spacing:.1em;
+  color:color-mix(in srgb,var(--vin,#8A8A94) 75%, var(--place));
+  vertical-align:.28em}
 .disc::after{content:"";position:absolute;left:50%;top:50%;width:7%;height:7%;
   transform:translate(-50%,-50%);border-radius:50%;background:var(--bg)}
 
@@ -458,7 +461,9 @@ header{position:relative;display:flex;align-items:center;gap:10px;
   opacity:.7;margin-top:3px}
 /* Los tres giran siempre; el elegido, más rápido y a plena luz.
    Un disco quieto en una app de vinilos parece un error. */
-.pick .disc{box-shadow:0 0 0 2px color-mix(in srgb,var(--ring) 40%,transparent),
+/* Mismo aro para todos: 2px en su color. Lo que distingue al elegido
+   es el resplandor y la velocidad, no un aro más fuerte. */
+.pick .disc{box-shadow:0 0 0 2px color-mix(in srgb,var(--ring) 70%,transparent),
   0 8px 22px rgba(0,0,0,.5);
   animation:spin 24s linear infinite}
 .pick:nth-child(2) .disc{animation-duration:28s}
@@ -469,11 +474,13 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 /* si la carátula no carga, la etiqueta se queda del color del disco
    en vez de un hueco gris */
 .pick .disc .lab{background:color-mix(in srgb,var(--vin) 30%,var(--sugg))}
-.pick.sel .disc{box-shadow:0 0 0 2.5px var(--ring),0 10px 30px rgba(0,0,0,.6);
+.pick.sel .disc{box-shadow:0 0 0 2px var(--ring),
+  0 0 22px color-mix(in srgb,var(--ring) 45%,transparent),
+  0 10px 30px rgba(0,0,0,.6);
   animation:spin 5.5s linear infinite}
 .pick:hover .disc{animation-duration:4s}
 .pick.sel .nm2{color:var(--ring);font-weight:700}
-.pick:not(.sel) .disc{filter:brightness(.8) saturate(.75)}
+.pick:not(.sel) .disc{filter:brightness(.86) saturate(.85)}
 .pick:hover .nm2{color:var(--text)}
 
 /* el corte del día: un sencillo con la fecha en la etiqueta */
@@ -486,7 +493,9 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .cutrow .disc .lab b{font-family:var(--mono);font-size:15px;font-weight:700;
   color:#1B1400;line-height:1.05;text-align:center}
 .cutrow .disc .lab b span{display:block;font-size:8px;letter-spacing:.14em;margin-top:2px}
-.cutwrap.done .cutrow .disc{box-shadow:0 0 0 2.5px var(--green),0 10px 30px rgba(0,0,0,.6)}
+.cutwrap.done .cutrow .disc{box-shadow:0 0 0 2px var(--green),
+  0 0 22px color-mix(in srgb,var(--green) 40%,transparent),
+  0 10px 30px rgba(0,0,0,.6)}
 .cutwrap.done .cutrow .disc .lab{background:var(--green)}
 .cutinfo{min-width:0}
 .cuthead{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
@@ -1061,7 +1070,7 @@ html.nomotion *{animation:none!important;transition:none!important}
 
   <p class="dfoot">Music and previews from
     <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a>
-    <span class="dver">M29 · v54</span></p>
+    <span class="dver">M29 · v55</span></p>
 </aside>
 
 <!-- HOME -->
@@ -1078,25 +1087,25 @@ html.nomotion *{animation:none!important;transition:none!important}
     <div class="slot2">
       <button class="play2" data-game="type">
       <span class="disc"><span class="lab"><img id="lab1" alt=""><span class="no">01</span></span></span>
-      <span class="nm">Name It</span><span class="meta" id="subType">6 tries · hints</span></button>
+      <span class="nm" data-no="01">Name It</span><span class="meta" id="subType">6 tries · hints</span></button>
       <button class="info2" data-info="type" aria-label="What is this mode?">i</button>
     </div>
     <div class="slot2">
       <button class="play2" data-game="blitz">
       <span class="disc"><span class="lab"><img id="lab2" alt=""><span class="no">02</span></span></span>
-      <span class="nm">Blitz</span><span class="meta" id="subBlitz">12s · 4 options</span></button>
+      <span class="nm" data-no="02">Blitz</span><span class="meta" id="subBlitz">12s · 4 options</span></button>
       <button class="info2" data-info="blitz" aria-label="What is this mode?">i</button>
     </div>
     <div class="slot2">
       <button class="play2" data-game="line">
       <span class="disc"><span class="lab"><img id="lab3" alt=""><span class="no">03</span></span></span>
-      <span class="nm">Eras</span><span class="meta" id="subLine">2–4 players</span></button>
+      <span class="nm" data-no="03">Eras</span><span class="meta" id="subLine">2–4 players</span></button>
       <button class="info2" data-info="line" aria-label="What is this mode?">i</button>
     </div>
     <div class="slot2">
       <button class="play2" data-game="genre">
       <span class="disc"><span class="lab"><img id="lab4" alt=""><span class="no">04</span></span></span>
-      <span class="nm">Who's This</span><span class="meta">by genre</span></button>
+      <span class="nm" data-no="04">Who's This</span><span class="meta">by genre</span></button>
       <button class="info2" data-info="genre" aria-label="What is this mode?">i</button>
     </div>
   </div>
@@ -1109,7 +1118,7 @@ html.nomotion *{animation:none!important;transition:none!important}
           <span class="disc back"><span class="lab"><img id="lab5" alt=""></span></span>
           <span class="disc"><span class="lab"><img id="lab6" alt=""><span class="no">05</span></span></span>
         </span>
-        <span class="nm">Know Me</span><span class="meta">10 songs · they guess you</span>
+        <span class="nm" data-no="05">Know Me</span><span class="meta">10 songs · they guess you</span>
       </button>
       <button class="info2" data-info="quiz" aria-label="What is this mode?">i</button>
     </div>
@@ -1119,7 +1128,7 @@ html.nomotion *{animation:none!important;transition:none!important}
           <span class="disc back"><span class="lab"><img id="lab7" alt=""></span></span>
           <span class="disc"><span class="lab"><img id="lab8" alt=""><span class="no">06</span></span></span>
         </span>
-        <span class="nm">Party</span><span class="meta">one code · everyone plays</span>
+        <span class="nm" data-no="06">Party</span><span class="meta">one code · everyone plays</span>
       </button>
       <button class="info2" data-info="party" aria-label="What is this mode?">i</button>
     </div>
