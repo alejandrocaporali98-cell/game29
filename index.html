@@ -1264,6 +1264,9 @@ html.nomotion *{animation:none!important;transition:none!important}
   <div class="seats" id="seats"></div>
   <div class="names" id="names"></div>
   <div class="actions"><button class="primary" id="l-go">Pick an artist →</button></div>
+  <div class="actions" style="margin-top:8px">
+    <button id="mixBtn">Any music</button>
+  </div>
 </section>
 
 <!-- TIMELINE: pasar el teléfono -->
@@ -1920,8 +1923,6 @@ document.querySelectorAll('.modes [data-diff]').forEach(b=>b.onclick=()=>{
 });
 document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{
   S.game=b.dataset.game; chips();
-  const mix=$('mixBtn');
-  if(mix) mix.parentNode.style.display = S.game==='line' ? '' : 'none';
   // Timeline necesita saber cuántos juegan antes de elegir artista
   if(S.game==='line'){go('s-seats');seats();return}
   // este modo no arranca por artista, sino por género
@@ -2582,27 +2583,17 @@ function seats(){
 }
 $('l-go').onclick=()=>{
   S.game='line';go('s-pick');$('q').focus();
-  ponerMezcla();
   if(!$('artists').children.length) suggestArtists();
 };
 
-/* Jugar con un solo artista se aprende en dos partidas: en cuanto
-   conoces su carrera, las décadas cantan. Mezclando varios, hay que
-   reconocer la época por cómo suena. */
-function ponerMezcla(){
-  if($('mixBtn'))return;
-  const wrap=document.createElement('div');
-  wrap.className='actions';
-  wrap.style.margin='0 0 16px';
-  wrap.innerHTML='<button class="primary" id="mixBtn">🎲 Any music · harder</button>';
-  $('q').parentNode.insertBefore(wrap,$('q'));
-  $('mixBtn').onclick=cargarMezcla;
-}
+/* Con un solo artista aprendes su carrera en dos partidas; mezclando
+   varios hay que reconocer la época por cómo suena. */
+$('mixBtn').onclick=cargarMezcla;
 
 async function cargarMezcla(){
   const b=$('mixBtn');
   b.disabled=true; b.textContent='Building the deck…';
-  $('artists').innerHTML='';
+  S.game='line';
   try{
     const nombres=LONG_CAREERS.slice().sort(()=>Math.random()-0.5).slice(0,4);
     const artistas=[];
@@ -2634,10 +2625,11 @@ async function cargarMezcla(){
     S.artist={name:'Mixed'};
     startLine(pool);
   }catch(e){
-    $('artists').innerHTML='<div class="err">Could not build a mixed deck right now.</div>';
-    retryBtn($('artists'),cargarMezcla);
+    b.textContent='Could not build it · try again';
+    setTimeout(()=>{b.textContent='Any music'},2200);
   } finally {
-    b.disabled=false; b.textContent='🎲 Any music · harder';
+    b.disabled=false;
+    if(b.textContent==='Building the deck…') b.textContent='Any music';
   }
 }
 
