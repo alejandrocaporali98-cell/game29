@@ -601,7 +601,7 @@ input::placeholder{color:var(--place)}
   animation:spin 3.4s linear infinite;animation-play-state:paused}
 .art.spin{animation-play-state:running}
 /* la etiqueta lleva la carátula, difuminada según lo que lleves */
-.art img{position:absolute;top:50%;left:50%;width:42%;height:42%;
+.art img{position:absolute;top:50%;left:50%;width:42%;aspect-ratio:1;height:auto;
   transform:translate(-50%,-50%);border-radius:50%;object-fit:cover;
   filter:blur(var(--blur,26px)) saturate(1.25);transition:filter .45s ease}
 .art.reveal img{filter:none}
@@ -890,7 +890,7 @@ html.nomotion *{animation:none!important;transition:none!important}
   .tile p{font-size:14px}
   .tile .ico{width:58px;height:58px;border-radius:19px}
   .tile .ico svg{width:27px;height:27px}
-  .art{width:min(100%,300px)}
+  .deck{width:min(100%,340px)}
   .opts button{font-size:21px;padding:22px;border-radius:20px}
   .opts button .k{width:34px;height:34px;font-size:15px}
   .bhead .pts{font-size:64px}
@@ -931,7 +931,6 @@ html.nomotion *{animation:none!important;transition:none!important}
     padding:0 26px 30px;box-shadow:0 28px 90px rgba(0,0,0,.55)}
   header{padding-top:22px}
   .tile,.list li,.opts button,.clock,.bar,input[type=text],.rows li{background-color:var(--bg)}
-  .art{width:min(100%,210px)}
 }
 </style>
 </head>
