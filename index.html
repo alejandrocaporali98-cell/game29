@@ -1881,7 +1881,7 @@ function setRing(id,frac){
 const MODOS={
   type:{n:'Name It',t:'One second of a song. Type the title. Miss and you unlock more audio — 1, 2, 4, 7, 11 and 16 seconds across six tries. Three hints are there if you need them, and getting it right plays you fifteen more seconds.',no:'01'},
   blitz:{n:'Blitz',t:'Ten rounds against the clock. Four titles, one right. Points fall from 1000 as the timer runs, a wrong answer costs three seconds instead of ending the round, and every fourth round is double or nothing.',no:'02'},
-  line:{n:'Eras',t:"Two to four players sharing one phone. A song plays and you call the decade it came out. Exact is 100 points, one decade off is 40. Five turns each, and the songs are dated from the artist's real discography.",no:'03'},
+  line:{n:'Eras',t:"Two to four players sharing one phone. A song plays and you call the decade it came out. Exact is 100 points, one decade off is 40. Five turns each. Pick one artist, or choose 'any music' to mix several careers and make the decades much harder to call.",no:'03'},
   genre:{n:"Who's This",t:'Pick a genre and name the artist. All four options come from that same genre, so telling them apart takes an ear — not just recognising a style.',no:'04'},
   quiz:{n:'Know Me',t:'You answer ten questions about your own taste: your favourite song, your guilty pleasure, the one for a long drive. Then friends join with a code and try to guess what you picked. You watch.',no:'05'},
   party:{n:'Party',t:'One phone hosts and everyone joins from their own with a four-letter code. Same song at the same time, four options each, and a live scoreboard. Answering first is worth more.',no:'06'}
@@ -1921,6 +1921,8 @@ document.querySelectorAll('.modes [data-diff]').forEach(b=>b.onclick=()=>{
 });
 document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{
   S.game=b.dataset.game; chips();
+  const mix=$('mixBtn');
+  if(mix) mix.parentNode.style.display = S.game==='line' ? '' : 'none';
   // Timeline necesita saber cuántos juegan antes de elegir artista
   if(S.game==='line'){go('s-seats');seats();return}
   // este modo no arranca por artista, sino por género
@@ -1932,7 +1934,9 @@ document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>{
    con otro» sin decir cuál deja al jugador probando a ciegas. */
 const LONG_CAREERS=['Radiohead','Soda Stereo','Shakira','Café Tacvba','Oasis',
   'Madonna','Metallica','U2','Maná','Depeche Mode','Los Fabulosos Cadillacs',
-  'Red Hot Chili Peppers','Juan Gabriel','The Cure'];
+  'Red Hot Chili Peppers','Juan Gabriel','The Cure','Queen','Michael Jackson',
+  'Coldplay','Daft Punk','Gloria Trevi','Luis Miguel','The Killers','Blur',
+  'Alejandro Sanz','Beastie Boys','Björk','Green Day'];
 
 function suggestArtists(){
   const tres=LONG_CAREERS.slice().sort(()=>Math.random()-0.5).slice(0,3);
@@ -2483,8 +2487,8 @@ const REISSUE=/remaster|deluxe|anniversar|edition|reissue|live|karaoke|instrumen
 
 /* Elegimos álbumes repartidos por toda la carrera y nos quedamos con
    la aparición más antigua de cada canción. */
-async function loadDated(a){
-  const hit=cache.get('dated:'+a.id);
+async function loadDated(a, maxAlbums=16){
+  const hit=cache.get('dated:'+a.id+':'+maxAlbums);
   if(hit) return hit.slice();
   $('artists').innerHTML='<div class="load">reading discography…</div>';
   const alb=await deezer(`/artist/${a.id}/albums`,{limit:100});
@@ -2505,7 +2509,7 @@ async function loadDated(a){
   const picks=[...byYear.values()];
   if(picks.length<3) throw new Error('no dates');
 
-  const N=Math.min(16,picks.length), step=picks.length/N, chosen=[];
+  const N=Math.min(maxAlbums,picks.length), step=picks.length/N, chosen=[];
   for(let i=0;i<N;i++) chosen.push(picks[Math.floor(i*step)]);
 
   $('artists').innerHTML='<div class="load">dating the songs…</div>';
@@ -2554,7 +2558,7 @@ async function loadDated(a){
   });
 
   if(pool.length<10||perYear.size<3) throw new Error('thin');
-  cache.set('dated:'+a.id,pool.slice());
+  cache.set('dated:'+a.id+':'+maxAlbums,pool.slice());
   return pool;
 }
 
@@ -2579,8 +2583,64 @@ function seats(){
 }
 $('l-go').onclick=()=>{
   S.game='line';go('s-pick');$('q').focus();
+  ponerMezcla();
   if(!$('artists').children.length) suggestArtists();
 };
+
+/* Jugar con un solo artista se aprende en dos partidas: en cuanto
+   conoces su carrera, las décadas cantan. Mezclando varios, hay que
+   reconocer la época por cómo suena. */
+function ponerMezcla(){
+  if($('mixBtn'))return;
+  const wrap=document.createElement('div');
+  wrap.className='actions';
+  wrap.style.margin='0 0 16px';
+  wrap.innerHTML='<button class="primary" id="mixBtn">🎲 Any music · harder</button>';
+  $('q').parentNode.insertBefore(wrap,$('q'));
+  $('mixBtn').onclick=cargarMezcla;
+}
+
+async function cargarMezcla(){
+  const b=$('mixBtn');
+  b.disabled=true; b.textContent='Building the deck…';
+  $('artists').innerHTML='';
+  try{
+    const nombres=LONG_CAREERS.slice().sort(()=>Math.random()-0.5).slice(0,4);
+    const artistas=[];
+    for(const n of nombres){
+      const d=await cached('busca:'+n,()=>deezer('/search/artist',{q:n,limit:1}));
+      const a=(d.data||[])[0];
+      if(a) artistas.push(a);
+    }
+    if(!artistas.length) throw new Error('thin');
+
+    // menos álbumes por artista: son cuatro, y la espera se multiplica
+    const tandas=await Promise.all(artistas.map(a=>loadDated(a,5).catch(()=>[])));
+    let pool=[];
+    tandas.forEach(t=>pool.push(...t));
+
+    // tope por año para que ningún artista domine una década
+    const porAno=new Map();
+    pool.forEach(t=>{
+      const arr=porAno.get(t.year)||[];
+      if(arr.length>=4)return;
+      arr.push(t); porAno.set(t.year,arr);
+    });
+    pool=[];
+    porAno.forEach(arr=>pool.push(...arr));
+
+    const decadas=new Set(pool.map(t=>Math.floor(t.year/10)));
+    if(pool.length<12||decadas.size<3) throw new Error('thin');
+
+    S.artist={name:'Mixed'};
+    startLine(pool);
+  }catch(e){
+    $('artists').innerHTML='<div class="err">Could not build a mixed deck right now.</div>';
+    retryBtn($('artists'),cargarMezcla);
+  } finally {
+    b.disabled=false; b.textContent='🎲 Any music · harder';
+  }
+}
 
 const TURNS=5;   // rondas por jugador
 
