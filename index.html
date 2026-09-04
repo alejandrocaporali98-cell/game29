@@ -319,7 +319,11 @@ header{position:relative;display:flex;align-items:center;gap:10px;
   box-shadow:0 8px 26px rgba(0,0,0,.55)}
 .disc .lab{display:block;position:absolute;inset:29%;border-radius:50%;overflow:hidden;
   background:var(--sugg);display:grid;place-items:center}
-.disc .lab img{width:100%;height:100%;object-fit:cover}
+/* Colocada de forma absoluta y con recorte circular: si la imagen es
+   más chica que el hueco, se estira; y al girar no asoman esquinas. */
+.disc .lab img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;
+  -webkit-clip-path:circle(50% at 50% 50%);clip-path:circle(50% at 50% 50%)}
 /* El número ya no va sobre la carátula: acompaña al nombre, como en
    el reverso de un disco. Sobre la portada estorbaba y giraba. */
 .disc .lab .no{display:none}
