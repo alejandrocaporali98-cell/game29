@@ -600,11 +600,16 @@ input::placeholder{color:var(--place)}
   display:grid;place-items:center;
   animation:spin 3.4s linear infinite;animation-play-state:paused}
 .art.spin{animation-play-state:running}
-/* la etiqueta lleva la carátula, difuminada según lo que lleves */
-.art img{position:absolute;top:50%;left:50%;width:42%;aspect-ratio:1;height:auto;
-  transform:translate(-50%,-50%);border-radius:50%;object-fit:cover;
-  filter:blur(var(--blur,26px)) saturate(1.25);transition:filter .45s ease}
-.art.reveal img{filter:none}
+/* La etiqueta va dentro de un contenedor circular que recorta la
+   imagen. Redondear la propia imagen dejaba esquinas visibles cuando
+   el desenfoque o la proporción no cuadraban. */
+.art .labwrap{position:absolute;top:50%;left:50%;width:42%;aspect-ratio:1;
+  transform:translate(-50%,-50%);border-radius:50%;overflow:hidden;
+  background:#0B0B0D;display:block}
+.art .labwrap img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:blur(var(--blur,26px)) saturate(1.25);transition:filter .45s ease;
+  transform:scale(1.25)}
+.art.reveal .labwrap img{filter:none;transform:none}
 .art::after{content:"";position:absolute;left:50%;top:50%;width:5.5%;height:5.5%;
   transform:translate(-50%,-50%);border-radius:50%;background:var(--bg);z-index:2}
 .art .vinyl{display:none}
@@ -674,7 +679,9 @@ input::placeholder{color:var(--place)}
 .pass{text-align:center;padding:36px 0}
 .pass .big{font-size:clamp(34px,9vw,46px);font-weight:600;letter-spacing:-.035em;line-height:1.05}
 .pass .sub{color:var(--muted);font-size:14px;margin-top:12px;line-height:1.5}
-.seats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.seats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:8px}
+.seats button{padding:15px 0;font-size:17px;font-weight:600}
+.seats button{padding:16px 0;font-size:18px}
 .seats button{padding:18px 0;border-radius:18px;border:1px solid var(--line);background:var(--raise);
   color:var(--text);font-family:var(--sans);font-size:19px;font-weight:600;cursor:pointer}
 .seats button.sel{background:var(--accent);color:var(--on-accent);border-color:transparent}
@@ -1053,6 +1060,14 @@ html.nomotion *{animation:none!important;transition:none!important}
   </button>
 
   <div class="ctrl">
+    <span class="cinfo"><b>Language</b><span>app-wide</span></span>
+    <span class="seg" id="langSeg">
+      <button data-lang="en" class="sel">EN</button>
+      <button data-lang="es">ES</button>
+    </span>
+  </div>
+
+  <div class="ctrl">
     <span class="cinfo"><b>Appearance</b><span>follows your phone</span></span>
     <span class="seg" id="modeSeg">
       <button data-mode="auto" class="sel">Auto</button>
@@ -1096,7 +1111,7 @@ html.nomotion *{animation:none!important;transition:none!important}
     <div class="slot2">
       <button class="play2" data-game="line">
       <span class="disc"><span class="lab"><img id="lab3" alt=""><span class="no">03</span></span></span>
-      <span class="nm" data-no="03">Eras</span><span class="meta" id="subLine">2–4 players</span></button>
+      <span class="nm" data-no="03">Eras</span><span class="meta" id="subLine">2–6 players</span></button>
       <button class="info2" data-info="line" aria-label="What is this mode?">i</button>
     </div>
     <div class="slot2">
@@ -1179,7 +1194,7 @@ html.nomotion *{animation:none!important;transition:none!important}
       <circle class="fill2" id="a-ring" cx="50" cy="50" r="47"
               stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
     </svg>
-    <div class="art" id="a-art"><img id="a-cover" alt=""></div>
+    <div class="art" id="a-art"><span class="labwrap"><img id="a-cover" alt=""></span></div>
     <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
   </div>
   <div class="times"><span id="a-left">0:00</span><span id="a-right">1s unlocked</span></div>
@@ -1231,7 +1246,7 @@ html.nomotion *{animation:none!important;transition:none!important}
       <circle class="fill2" id="b-ring" cx="50" cy="50" r="47"
               stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
     </svg>
-    <div class="art" id="b-art"><img id="b-cover" alt=""></div>
+    <div class="art" id="b-art"><span class="labwrap"><img id="b-cover" alt=""></span></div>
     <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
   </div>
     <div class="live"><span id="b-worth">1000 pts</span><span id="b-time">12.0s</span></div>
@@ -1260,12 +1275,12 @@ html.nomotion *{animation:none!important;transition:none!important}
 <section class="screen" id="s-seats">
   <button class="back" data-go="s-home" aria-label="Back">←</button>
   <h1>Who's playing?</h1>
-  <p class="lede">Everyone shares this phone. On your turn you hear a song and call the decade it came out.</p>
+  <p class="lede">Everyone shares this phone — up to six of you. On your turn you hear a song and call the decade it came out.</p>
   <div class="seats" id="seats"></div>
   <div class="names" id="names"></div>
   <div class="actions"><button class="primary" id="l-go">Pick an artist →</button></div>
   <div class="actions" style="margin-top:8px">
-    <button id="mixBtn">Any music</button>
+    <button class="ghost2" id="mixBtn">Any music</button>
   </div>
 </section>
 
@@ -1293,7 +1308,7 @@ html.nomotion *{animation:none!important;transition:none!important}
       <circle class="fill2" id="l-ring" cx="50" cy="50" r="47"
               stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
     </svg>
-    <div class="art" id="l-art"><img id="l-cover" alt=""></div>
+    <div class="art" id="l-art"><span class="labwrap"><img id="l-cover" alt=""></span></div>
     <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
   </div>
   <button class="play" id="l-play">▶ Play</button>
@@ -1391,7 +1406,7 @@ html.nomotion *{animation:none!important;transition:none!important}
       <circle class="fill2" id="pp-ring" cx="50" cy="50" r="47"
               stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
     </svg>
-    <div class="art" id="pp-art"><img id="pp-cover" alt=""></div>
+    <div class="art" id="pp-art"><span class="labwrap"><img id="pp-cover" alt=""></span></div>
     <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
   </div>
   <div class="live"><span id="pp-worth">1000 pts</span><span id="pp-time">12.0s</span></div>
@@ -1470,7 +1485,7 @@ html.nomotion *{animation:none!important;transition:none!important}
       <circle class="fill2" id="g-ring" cx="50" cy="50" r="47"
               stroke-dasharray="295.3" stroke-dashoffset="295.3"></circle>
     </svg>
-    <div class="art" id="g-art"><img id="g-cover" alt=""></div>
+    <div class="art" id="g-art"><span class="labwrap"><img id="g-cover" alt=""></span></div>
     <div class="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
   </div>
     <div class="live"><span id="g-worth">1000 pts</span><span id="g-time">12.0s</span></div>
@@ -1536,7 +1551,7 @@ html.nomotion *{animation:none!important;transition:none!important}
       <li><span class="n">01</span><span>Everything is pulled <b>live</b> — real catalogs, real 30-second previews. Nothing is stored.</span></li>
       <li><span class="n">02</span><span><b>Name It</b> — type the title. One second to start, growing with each guess. Hints cost nothing but get noted.</span></li>
       <li><span class="n">03</span><span><b>Blitz</b> — four titles, ten rounds. Points fall from 1000 to 100 as the clock runs.</span></li>
-      <li><span class="n">04</span><span><b>Eras</b> — 2–4 players share one phone. Call the decade: exact is 100, one off is 40.</span></li>
+      <li><span class="n">04</span><span><b>Eras</b> — 2–6 players share one phone. Call the decade: exact is 100, one off is 40.</span></li>
       <li><span class="n">05</span><span><b>Who's This</b> — pick a genre and name the artist. All four options come from that genre.</span></li>
     </ol>
     <p class="foot" style="margin:0 0 14px">Music data and previews from
@@ -1883,7 +1898,7 @@ function setRing(id,frac){
 const MODOS={
   type:{n:'Name It',t:'One second of a song. Type the title. Miss and you unlock more audio — 1, 2, 4, 7, 11 and 16 seconds across six tries. Three hints are there if you need them, and getting it right plays you fifteen more seconds.',no:'01'},
   blitz:{n:'Blitz',t:'Ten rounds against the clock. Four titles, one right. Points fall from 1000 as the timer runs, a wrong answer costs three seconds instead of ending the round, and every fourth round is double or nothing.',no:'02'},
-  line:{n:'Eras',t:"Two to four players sharing one phone. A song plays and you call the decade it came out. Exact is 100 points, one decade off is 40. Five turns each. Pick one artist, or choose 'any music' to mix several careers and make the decades much harder to call.",no:'03'},
+  line:{n:'Eras',t:"Two to six players sharing one phone. A song plays and you call the decade it came out. Exact is 100 points, one decade off is 40. Five turns each. Pick one artist, or choose 'any music' to mix several careers and make the decades much harder to call.",no:'03'},
   genre:{n:"Who's This",t:'Pick a genre and name the artist. All four options come from that same genre, so telling them apart takes an ear — not just recognising a style.',no:'04'},
   quiz:{n:'Know Me',t:'You answer ten questions about your own taste: your favourite song, your guilty pleasure, the one for a long drive. Then friends join with a code and try to guess what you picked. You watch.',no:'05'},
   party:{n:'Party',t:'One phone hosts and everyone joins from their own with a four-letter code. Same song at the same time, four options each, and a live scoreboard. Answering first is worth more.',no:'06'}
@@ -1900,8 +1915,8 @@ document.querySelectorAll('[data-info]').forEach(b=>b.onclick=e=>{
   modoElegido=k;
   $('msNum').textContent=m.no;
   $('msNum').style.setProperty('--vinInfo',VINILOS[k]);
-  $('msName').textContent=m.n;
-  $('msText').textContent=m.t;
+  $('msName').textContent=T(m.n);
+  $('msText').textContent=T(m.t);
   $('modeSheet').classList.add('on');
 });
 
@@ -1913,6 +1928,52 @@ $('msGo').onclick=()=>{
   else if(modoElegido==='party') $('partyBtn').click();
   else document.querySelector(`[data-game="${modoElegido}"]`).click();
 };
+
+/* ---------- idioma ----------
+   Se guarda el texto original en el propio elemento la primera vez, así
+   se puede volver al inglés sin recargar. */
+const ES={"Guess the song": "Adivina la canción", "Real 30-second previews, pulled live. Four ways to play.": "Fragmentos reales de 30 segundos, en vivo. Cuatro formas de jugar.", "New here?": "¿Primera vez?", "Start with Blitz →": "Empieza por Blitz →", "With other people": "Con más gente", "Today's goals": "Objetivos de hoy", "Today's cut": "El corte de hoy", "One track, one shot": "Una canción, un intento", "Same for everyone. Back tomorrow.": "La misma para todos. Vuelve mañana.", "They change every day. Same three for everyone.": "Cambian cada día. Los mismos tres para todos.", "Name It": "Adivínala", "Blitz": "Relámpago", "Eras": "Épocas", "Who's This": "¿Quién es?", "Know Me": "¿Me conoces?", "Know me?": "¿Me conoces?", "Party": "Fiesta", "6 tries · hints": "6 intentos · pistas", "12s · 4 options": "12s · 4 opciones", "2–6 players": "2–6 jugadores", "by genre": "por género", "10 songs · they guess you": "10 canciones · te adivinan", "one code · everyone plays": "un código · juegan todos", "6 tries": "6 intentos", "3 tries": "3 intentos", "surprise me": "sorpréndeme", "Classic": "Clásico", "Hardcore": "Difícil", "Random": "Aleatorio", "Play": "Reproducir", "Guess": "Adivinar", "Give up": "Rendirse", "Hint": "Pista", "Skip this one →": "Saltar esta →", "Next song →": "Otra canción →", "Change artist": "Cambiar artista", "Change genre": "Cambiar género", "Play again": "Jugar otra vez", "Home": "Inicio", "Share": "Compartir", "Close": "Cerrar", "Got it": "Entendido", "Quit game": "Salir", "When did this come out?": "¿De qué década es?", "Who's playing?": "¿Quiénes juegan?", "I'm ready →": "Listo →", "Pick an artist →": "Elegir artista →", "Any music": "Música variada", "Pick an artist": "Elige artista", "Pick a genre": "Elige género", "Start typing — Drake, Adele, Tame Impala, anyone on Deezer.": "Escribe un nombre — Drake, Adele, Tame Impala, quien sea.", "Everyone shares this phone — up to six of you. On your turn you hear a song and call the decade it came out.": "Comparten un solo teléfono, hasta seis. En tu turno suena una canción y dices de qué década es.", "Keep going": "Seguir", "Level up": "Subiste de nivel", "Look": "Mira", "Time's up": "Se acabó", "Nope": "No", "Correct": "Correcto", "Skipped": "Saltada", "Too slow": "Muy lento", "Your answer": "Tu respuesta", "waiting for the others": "esperando a los demás", "Game": "Juego", "App": "Aplicación", "Speed": "Velocidad", "tries and clock": "intentos y reloj", "Rounds": "Rondas", "per game": "por partida", "Sound effects": "Sonidos", "hits, misses, level ups": "aciertos, fallos, niveles", "Animations": "Animaciones", "spinning discs, confetti": "discos girando, confeti", "Appearance": "Apariencia", "follows your phone": "sigue a tu teléfono", "Auto": "Auto", "Light": "Claro", "Dark": "Oscuro", "How it works": "Cómo funciona", "Install app": "Instalar app", "Music and previews from": "Música y fragmentos de", "day streak": "días seguidos", "best score": "mejor puntaje", "rounds": "rondas", "Your name": "Tu nombre", "Profile": "Perfil", "Badges": "Logros", "Language": "Idioma", "Add M29 to your Home Screen": "Añade M29 a tu pantalla de inicio", "Create a room": "Crear sala", "Or join one": "O entra a una", "Join": "Entrar", "Room code": "Código de sala", "Start the game": "Empezar", "Share this code. Everyone joins from their own phone.": "Comparte este código. Cada quien entra desde su teléfono.", "Share this code. They guess what you picked.": "Comparte este código. Adivinarán lo que elegiste.", "Waiting for the host to start…": "Esperando a que empiecen…", "One phone hosts, everyone else joins with a code. Same songs, same time, four options each.": "Un teléfono crea la sala y los demás entran con un código. Mismas canciones, al mismo tiempo, cuatro opciones cada uno.", "Nobody has joined yet.": "Todavía no ha entrado nadie.", "The host left. The room is closed.": "Quien creó la sala se fue. Se cerró.", "No room with that code.": "No hay ninguna sala con ese código.", "Looking for the room…": "Buscando la sala…", "Opening the room…": "Abriendo la sala…", "The code has four characters.": "El código tiene cuatro caracteres.", "Answer five questions about your own taste. Then your friends try to guess what you picked.": "Contesta diez preguntas sobre tu propio gusto. Luego tus amigos intentan adivinar qué elegiste.", "Your answers": "Tus respuestas", "Open a room": "Abrir sala", "Start over": "Empezar de nuevo", "Search a song": "Busca una canción", "Search artists": "Busca artistas", "My all-time favourite song": "Mi canción favorita de siempre", "The one I have on repeat right now": "La que traigo en repetición", "The song that always makes me dance": "La que siempre me hace bailar", "My guilty pleasure": "Mi placer culpable", "The song I want playing at my party": "La que quiero en mi fiesta", "The one that always makes me cry": "La que siempre me hace llorar", "My song for a long drive": "Mi canción de carretera", "The one I sing in the shower": "La que canto en la regadera", "A song that takes me back to school": "Una que me regresa a la escuela", "The one I would put on our wedding": "La que pondría en mi boda", "Try again": "Reintentar", "Nothing found.": "Sin resultados.", "Could not search right now.": "No se pudo buscar ahora.", "Building the deck…": "Armando el mazo…", "Everything is pulled": "Todo viene"};
+let LANG='en';
+
+function T(s){
+  if(LANG!=='es'||!s)return s;
+  return ES[s] || ES[String(s).trim()] || s;
+}
+
+function traducir(){
+  const raiz=document.body;
+  const it=document.createTreeWalker(raiz,NodeFilter.SHOW_TEXT,{
+    acceptNode(n){
+      const p=n.parentNode;
+      if(!p||['SCRIPT','STYLE'].includes(p.tagName))return NodeFilter.FILTER_REJECT;
+      return n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const nodos=[];
+  while(it.nextNode()) nodos.push(it.currentNode);
+  nodos.forEach(n=>{
+    const p=n.parentNode;
+    if(p.dataset && p.dataset.en===undefined && p.childNodes.length===1)
+      p.dataset.en=n.nodeValue;
+    const orig=(p.dataset && p.dataset.en!==undefined) ? p.dataset.en : n.nodeValue;
+    const t=orig.trim();
+    if(LANG==='es' && ES[t]) n.nodeValue=orig.replace(t,ES[t]);
+    else if(LANG==='en' && p.dataset && p.dataset.en!==undefined) n.nodeValue=p.dataset.en;
+  });
+  document.querySelectorAll('[placeholder]').forEach(el=>{
+    if(el.dataset.enPh===undefined) el.dataset.enPh=el.placeholder;
+    el.placeholder = LANG==='es' ? (ES[el.dataset.enPh]||el.dataset.enPh) : el.dataset.enPh;
+  });
+  document.documentElement.lang=LANG;
+}
+
+async function setLang(l){
+  LANG=l;
+  await store.set('lang',l);
+  traducir();
+  if(typeof paintMissions==='function') paintMissions();
+  if(!$('menu').hidden) paintDrawer();
+}
 
 /* ---------- portada ---------- */
 document.querySelectorAll('.modes [data-diff]').forEach(b=>b.onclick=()=>{
@@ -2565,7 +2626,7 @@ async function loadDated(a, maxAlbums=16){
 /* ---------- preparar la mesa ---------- */
 function seats(){
   $('seats').innerHTML='';
-  [2,3,4].forEach(n=>{
+  [2,3,4,5,6].forEach(n=>{
     const b=document.createElement('button');
     b.textContent=n;
     b.className=n===H.n?'sel':'';
@@ -3210,6 +3271,9 @@ function applyMode(m){
 }
 document.querySelectorAll('#modeSeg [data-mode]').forEach(b=>
   b.onclick=()=>{applyMode(b.dataset.mode);paintDrawer()});
+
+document.querySelectorAll('#langSeg [data-lang]').forEach(b=>
+  b.onclick=()=>setLang(b.dataset.lang));
 const ICON_UNUSED=ICON;   // el icono ya no se pinta: el estado va en texto
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{
   if(mode==='auto') applyMode('auto');
@@ -3545,6 +3609,8 @@ function paintDrawer(){
   $('motionSw').classList.toggle('on',OPT.motion);
   document.querySelectorAll('#modeSeg [data-mode]').forEach(b=>
     b.classList.toggle('sel',b.dataset.mode===mode));
+  document.querySelectorAll('#langSeg [data-lang]').forEach(b=>
+    b.classList.toggle('sel',b.dataset.lang===LANG));
 }
 
 function paintProfile(){
@@ -3703,7 +3769,7 @@ $('qRedo').onclick=qStart;
 
 function qPaintStep(){
   $('qStep').textContent=`Question ${QZ.i+1} of ${PROMPTS.length}`;
-  $('qPrompt').textContent=PROMPTS[QZ.i];
+  $('qPrompt').textContent=T(PROMPTS[QZ.i]);
 }
 
 let qT;
@@ -4062,7 +4128,7 @@ function showRound(m){
 
   if(m.ask){
     $('pp-ask').hidden=false;
-    $('pp-ask').textContent=m.ask;
+    $('pp-ask').textContent=T(m.ask);
   }else $('pp-ask').hidden=true;
 
   audio.src=m.preview;audio.load();
@@ -4321,7 +4387,7 @@ function paintMissions(){
     const tick=row.querySelector('.mtick');
     tick.style.setProperty('--p',Math.round(p/m.goal*100));
     tick.querySelector('span').textContent=hecho?'✓':'';
-    row.querySelector('.mtx').textContent=m.n;
+    row.querySelector('.mtx').textContent=T(m.n);
     row.querySelector('.mct').textContent=hecho?`+${MISS_XP} XP`:`${p}/${m.goal}`;
     host.appendChild(row);
   });
@@ -4561,6 +4627,9 @@ setTimeout(bootOut,3800);
   if(r) DIFF.classic.rounds=DIFF.hardcore.rounds=r;
   OPT.motion=(await store.get('motion'))!=='';
   document.documentElement.classList.toggle('nomotion',!OPT.motion);
+  const idioma=await store.get('lang');
+  if(idioma==='es'||idioma==='en'){ LANG=idioma; traducir(); }
+  else if((navigator.language||'').startsWith('es')){ LANG='es'; traducir(); }
   muted=!!(await store.get('muted'));
 })();
 
