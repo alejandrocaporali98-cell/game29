@@ -2213,7 +2213,10 @@ async function loadArtist(a){
       $('artists').innerHTML='<div class="err">Too few previews for that artist. Try another one.</div>';
       return;
     }
+    // baraja limpia: nada del artista anterior sobrevive
+    try{ audio.pause(); audio.removeAttribute('src'); audio.load(); }catch(e){}
     S.artist=a;S.pool=pool;S.titles=pool.map(t=>t.title);S.used=new Set();
+    S.session=[];S.track=null;S.stage=0;S.hints=0;
     if(S.game==='line'){
       // este modo no usa el top: necesita fechas de lanzamiento
       const dated=await loadDated(a);
@@ -2827,6 +2830,7 @@ async function cargarMezcla(){
     if(pool.length<12||decadas.size<3) throw new Error('thin');
 
     S.artist={name:'Mixed'};
+    S.pool=pool;S.titles=pool.map(t=>t.title);S.used=new Set();
     startLine(pool);
   }catch(e){
     b.textContent='Could not build it · try again';
