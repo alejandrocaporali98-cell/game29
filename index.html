@@ -373,15 +373,6 @@ header{position:relative;display:flex;align-items:center;gap:10px;
 .play2:active .disc{animation-play-state:paused;transform:scale(.97)}
 .play2:hover .nm{color:var(--vin,var(--accent))}
 
-/* Sólo la primera vez, y en una línea: la portada ya se explica con
-   los cuatro discos. Una caja con botones ahí sobra. */
-.hello{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);
-  margin:-8px 0 20px}
-.hello button{background:none;border:none;padding:0;cursor:pointer;
-  font-family:var(--sans);font-size:13.5px;color:var(--accent);font-weight:600}
-.hello #helloNo{margin-left:auto;color:var(--place);font-size:17px;line-height:1;
-  padding:0 4px}
-.hello #helloNo:hover{color:var(--text)}
 
 /* rejilla de artistas: caras reales en vez de una pantalla vacía */
 .agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 10px}
@@ -426,6 +417,7 @@ header{position:relative;display:flex;align-items:center;gap:10px;
   border:1px solid var(--line);border-radius:14px;padding:11px 13px;font-size:14px}
 .who3 li .ava{width:28px;height:28px}
 .who3 li .nm3{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who3 li .pos{width:20px;flex:none;font-family:var(--mono);font-size:11px;color:var(--place)}
 .who3 li .pts2{margin-left:auto;font-family:var(--mono);font-size:12px;
   color:var(--text);font-weight:700}
 .who3 li.me{border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
@@ -1112,11 +1104,6 @@ html.nomotion *{animation:none!important;transition:none!important}
   <h1>Guess the song</h1>
   <p class="lede">Real 30-second previews, pulled live. Four ways to play.</p>
 
-  <p class="hello" id="hello" hidden>
-    New here? <button id="helloGo">Start with Blitz →</button>
-    <button id="helloNo" aria-label="Dismiss">×</button>
-  </p>
-
   <div class="rack">
     <div class="slot2">
       <button class="play2" data-game="type">
@@ -1471,6 +1458,11 @@ html.nomotion *{animation:none!important;transition:none!important}
     <div class="stat fire"><b id="pfStreak">0</b><span>day streak</span></div>
     <div class="stat"><b id="pfRounds">0</b><span>rounds</span></div>
     <div class="stat"><b id="pfAcc">0%</b><span>accuracy</span></div>
+  </div>
+
+  <div id="ligaWrap" hidden>
+    <div class="eyebrow">This week with friends</div>
+    <ul class="who3" id="ligaBox"></ul>
   </div>
 
   <div class="eyebrow">Your record</div>
@@ -1958,7 +1950,7 @@ $('msGo').onclick=()=>{
 /* ---------- idioma ----------
    Se guarda el texto original en el propio elemento la primera vez, así
    se puede volver al inglés sin recargar. */
-const ES={"Guess the song": "Adivina la canción", "Real 30-second previews, pulled live. Four ways to play.": "Fragmentos reales de 30 segundos, en vivo. Cuatro formas de jugar.", "New here?": "¿Primera vez?", "Start with Blitz →": "Empieza por Blitz →", "With other people": "Con más gente", "Today's goals": "Objetivos de hoy", "Today's cut": "El corte de hoy", "One track, one shot": "Una canción, un intento", "Same for everyone. Back tomorrow.": "La misma para todos. Vuelve mañana.", "They change every day. Same three for everyone.": "Cambian cada día. Los mismos tres para todos.", "Name It": "Adivínala", "Blitz": "Relámpago", "Eras": "Épocas", "Who's This": "¿Quién es?", "Know Me": "¿Me conoces?", "Know me?": "¿Me conoces?", "Party": "Fiesta", "6 tries · hints": "6 intentos · pistas", "12s · 4 options": "12s · 4 opciones", "2–6 players": "2–6 jugadores", "by genre": "por género", "10 songs · they guess you": "10 canciones · te adivinan", "one code · everyone plays": "un código · juegan todos", "6 tries": "6 intentos", "3 tries": "3 intentos", "surprise me": "sorpréndeme", "Classic": "Clásico", "Hardcore": "Difícil", "Random": "Aleatorio", "Play": "Reproducir", "Guess": "Adivinar", "Give up": "Rendirse", "Hint": "Pista", "Skip this one →": "Saltar esta →", "Next song →": "Otra canción →", "Change artist": "Cambiar artista", "Change genre": "Cambiar género", "Play again": "Jugar otra vez", "Home": "Inicio", "Share": "Compartir", "Close": "Cerrar", "Got it": "Entendido", "Quit game": "Salir", "When did this come out?": "¿De qué década es?", "Who's playing?": "¿Quiénes juegan?", "I'm ready →": "Listo →", "Pick an artist →": "Elegir artista →", "Any music": "Música variada", "Pick an artist": "Elige artista", "Pick a genre": "Elige género", "Start typing — Drake, Adele, Tame Impala, anyone on Deezer.": "Escribe un nombre — Drake, Adele, Tame Impala, quien sea.", "Everyone shares this phone — up to six of you. On your turn you hear a song and call the decade it came out.": "Comparten un solo teléfono, hasta seis. En tu turno suena una canción y dices de qué década es.", "Keep going": "Seguir", "Level up": "Subiste de nivel", "Look": "Avatar", "Time's up": "Se acabó", "Nope": "No", "Correct": "Correcto", "Skipped": "Saltada", "Too slow": "Muy lento", "Your answer": "Tu respuesta", "waiting for the others": "esperando a los demás", "Game": "Juego", "App": "Aplicación", "Speed": "Velocidad", "tries and clock": "intentos y reloj", "Rounds": "Rondas", "per game": "por partida", "Sound effects": "Sonidos", "hits, misses, level ups": "aciertos, fallos, niveles", "Animations": "Animaciones", "spinning discs, confetti": "discos girando, confeti", "Appearance": "Apariencia", "follows your phone": "sigue a tu teléfono", "Auto": "Auto", "Light": "Claro", "Dark": "Oscuro", "How it works": "Cómo funciona", "Install app": "Instalar app", "Music and previews from": "Música y fragmentos de", "day streak": "días seguidos", "best score": "mejor puntaje", "rounds": "rondas", "Your name": "Tu nombre", "Profile": "Perfil", "Badges": "Logros", "Language": "Idioma", "Add M29 to your Home Screen": "Añade M29 a tu pantalla de inicio", "Create a room": "Crear sala", "Or join one": "O entra a una", "Join": "Entrar", "Room code": "Código de sala", "Start the game": "Empezar", "Share this code. Everyone joins from their own phone.": "Comparte este código. Cada quien entra desde su teléfono.", "Share this code. They guess what you picked.": "Comparte este código. Adivinarán lo que elegiste.", "Waiting for the host to start…": "Esperando a que empiecen…", "One phone hosts, everyone else joins with a code. Same songs, same time, four options each.": "Un teléfono crea la sala y los demás entran con un código. Mismas canciones, al mismo tiempo, cuatro opciones cada uno.", "Nobody has joined yet.": "Todavía no ha entrado nadie.", "The host left. The room is closed.": "Quien creó la sala se fue. Se cerró.", "No room with that code.": "No hay ninguna sala con ese código.", "Looking for the room…": "Buscando la sala…", "Opening the room…": "Abriendo la sala…", "The code has four characters.": "El código tiene cuatro caracteres.", "Answer five questions about your own taste. Then your friends try to guess what you picked.": "Contesta diez preguntas sobre tu propio gusto. Luego tus amigos intentan adivinar qué elegiste.", "Your answers": "Tus respuestas", "Open a room": "Abrir sala", "Start over": "Empezar de nuevo", "Search a song": "Busca una canción", "Search artists": "Busca artistas", "My all-time favourite song": "Mi canción favorita de siempre", "The one I have on repeat right now": "La que traigo en repetición", "The song that always makes me dance": "La que siempre me hace bailar", "My guilty pleasure": "Mi placer culpable", "The song I want playing at my party": "La que quiero en mi fiesta", "The one that always makes me cry": "La que siempre me hace llorar", "My song for a long drive": "Mi canción de carretera", "The one I sing in the shower": "La que canto en la regadera", "A song that takes me back to school": "Una que me regresa a la escuela", "The one I would put on our wedding": "La que pondría en mi boda", "Try again": "Reintentar", "Nothing found.": "Sin resultados.", "Could not search right now.": "No se pudo buscar ahora.", "Building the deck…": "Armando el mazo…", "Everything is pulled": "Todo se trae en", "One second of a song. Type the title. Miss and you unlock more audio — 1, 2, 4, 7, 11 and 16 seconds across six tries. Three hints are there if you need them, and getting it right plays you fifteen more seconds.": "Un segundo de canción. Escribe el título. Si fallas desbloqueas más audio — 1, 2, 4, 7, 11 y 16 segundos en seis intentos. Hay tres pistas si las necesitas, y al acertar suenan quince segundos más.", "Ten rounds against the clock. Four titles, one right. Points fall from 1000 as the timer runs, a wrong answer costs three seconds instead of ending the round, and every fourth round is double or nothing.": "Diez rondas contra el reloj. Cuatro títulos, uno correcto. Los puntos bajan desde 1000 mientras corre el tiempo, fallar cuesta tres segundos en vez de acabar la ronda, y cada cuarta ronda vale doble o nada.", "Two to six players sharing one phone. A song plays and you call the decade it came out. Exact is 100 points, one decade off is 40. Five turns each. Pick one artist, or choose 'any music' to mix several careers and make the decades much harder to call.": "De dos a seis jugadores con un solo teléfono. Suena una canción y dices de qué década es. Exacta son 100 puntos, fallar por una son 40. Cinco turnos cada quien. Elige un artista o usa «música variada» para mezclar varias carreras y complicarlo mucho más.", "Pick a genre and name the artist. All four options come from that same genre, so telling them apart takes an ear — not just recognising a style.": "Elige un género y nombra al artista. Las cuatro opciones son del mismo género, así que distinguirlos exige oído y no solo reconocer un estilo.", "You answer ten questions about your own taste: your favourite song, your guilty pleasure, the one for a long drive. Then friends join with a code and try to guess what you picked. You watch.": "Contestas diez preguntas sobre tu propio gusto: tu canción favorita, tu placer culpable, la de carretera. Luego tus amigos entran con un código e intentan adivinar qué elegiste. Tú miras.", "One phone hosts and everyone joins from their own with a four-letter code. Same song at the same time, four options each, and a live scoreboard. Answering first is worth more.": "Un teléfono crea la sala y los demás entran con un código de cuatro letras. La misma canción al mismo tiempo, cuatro opciones cada uno y marcador en vivo. Responder primero vale más.", "Play 5 rounds": "Juega 5 rondas", "Get 6 right": "Acierta 6", "Play 2 different modes": "Juega 2 modos distintos", "Get 3 right in a row": "Acierta 3 seguidas", "Answer worth 800+ points": "Una respuesta de 800+ puntos", "Solve today's cut": "Resuelve el corte de hoy", "Finish a game with 8+": "Termina una partida con 8+", "Name a song with no hints": "Adivina sin usar pistas", "First spin": "Primer giro", "Play your first round": "Juega tu primera ronda", "Reflexes": "Reflejos", "Answer worth 900 points or more": "Una respuesta de 900 puntos o más", "Flawless": "Impecable", "Ten out of ten in one game": "Diez de diez en una partida", "Time traveller": "Viajero del tiempo", "Five decades called exactly": "Cinco décadas exactas", "Explorer": "Explorador", "Play all four modes": "Juega los cuatro modos", "Seven days": "Siete días", "A seven-day streak": "Siete días seguidos", "Your record": "Tus logros", "Accuracy": "Aciertos", "Reset all progress": "Borrar todo el progreso", "XP": "XP", "to level": "para el nivel", "Level": "Nivel", "Daily goal cleared": "Objetivo del día cumplido", "accuracy": "aciertos", "Day streak": "Días seguidos", "Best score": "Mejor puntaje", "live": "vivo", "— real catalogs, real 30-second previews. Nothing is stored.": "— catálogos reales, fragmentos reales de 30 segundos. No se guarda nada.", "— type the title. One second to start, growing with each guess. Hints cost nothing but get noted.": "— escribe el título. Empieza con un segundo y crece con cada intento. Las pistas no cuestan puntos, pero quedan anotadas.", "— four titles, ten rounds. Points fall from 1000 to 100 as the clock runs.": "— cuatro títulos, diez rondas. Los puntos bajan de 1000 a 100 mientras corre el reloj.", "— 2–6 players share one phone. Call the decade: exact is 100, one off is 40.": "— de 2 a 6 jugadores con un teléfono. Di la década: exacta 100, fallar por una 40.", "— pick a genre and name the artist. All four options come from that genre.": "— elige un género y nombra al artista. Las cuatro opciones son de ese género.", "Music data and previews from": "Datos y fragmentos musicales de", "Recently played": "Jugados hace poco", "Popular right now": "Sonando ahora", "Long careers, good for Eras": "Carreras largas, buenas para Épocas", "decades of albums": "décadas de discos"};
+const ES={"Guess the song": "Adivina la canción", "Real 30-second previews, pulled live. Four ways to play.": "Fragmentos reales de 30 segundos, en vivo. Cuatro formas de jugar.", "New here?": "¿Primera vez?", "Start with Blitz →": "Empieza por Blitz →", "With other people": "Con más gente", "Today's goals": "Objetivos de hoy", "Today's cut": "El corte de hoy", "One track, one shot": "Una canción, un intento", "Same for everyone. Back tomorrow.": "La misma para todos. Vuelve mañana.", "They change every day. Same three for everyone.": "Cambian cada día. Los mismos tres para todos.", "Name It": "Adivínala", "Blitz": "Relámpago", "Eras": "Épocas", "Who's This": "¿Quién es?", "Know Me": "¿Me conoces?", "Know me?": "¿Me conoces?", "Party": "Fiesta", "6 tries · hints": "6 intentos · pistas", "12s · 4 options": "12s · 4 opciones", "2–6 players": "2–6 jugadores", "by genre": "por género", "10 songs · they guess you": "10 canciones · te adivinan", "one code · everyone plays": "un código · juegan todos", "6 tries": "6 intentos", "3 tries": "3 intentos", "surprise me": "sorpréndeme", "Classic": "Clásico", "Hardcore": "Difícil", "Random": "Aleatorio", "Play": "Reproducir", "Guess": "Adivinar", "Give up": "Rendirse", "Hint": "Pista", "Skip this one →": "Saltar esta →", "Next song →": "Otra canción →", "Change artist": "Cambiar artista", "Change genre": "Cambiar género", "Play again": "Jugar otra vez", "Home": "Inicio", "Share": "Compartir", "Close": "Cerrar", "Got it": "Entendido", "Quit game": "Salir", "When did this come out?": "¿De qué década es?", "Who's playing?": "¿Quiénes juegan?", "I'm ready →": "Listo →", "Pick an artist →": "Elegir artista →", "Any music": "Música variada", "Pick an artist": "Elige artista", "Pick a genre": "Elige género", "Start typing — Drake, Adele, Tame Impala, anyone on Deezer.": "Escribe un nombre — Drake, Adele, Tame Impala, quien sea.", "Everyone shares this phone — up to six of you. On your turn you hear a song and call the decade it came out.": "Comparten un solo teléfono, hasta seis. En tu turno suena una canción y dices de qué década es.", "Keep going": "Seguir", "Level up": "Subiste de nivel", "Look": "Avatar", "Time's up": "Se acabó", "Nope": "No", "Correct": "Correcto", "Skipped": "Saltada", "Too slow": "Muy lento", "Your answer": "Tu respuesta", "waiting for the others": "esperando a los demás", "Game": "Juego", "App": "Aplicación", "Speed": "Velocidad", "tries and clock": "intentos y reloj", "Rounds": "Rondas", "per game": "por partida", "Sound effects": "Sonidos", "hits, misses, level ups": "aciertos, fallos, niveles", "Animations": "Animaciones", "spinning discs, confetti": "discos girando, confeti", "Appearance": "Apariencia", "follows your phone": "sigue a tu teléfono", "Auto": "Auto", "Light": "Claro", "Dark": "Oscuro", "How it works": "Cómo funciona", "Install app": "Instalar app", "Music and previews from": "Música y fragmentos de", "day streak": "días seguidos", "best score": "mejor puntaje", "rounds": "rondas", "Your name": "Tu nombre", "Profile": "Perfil", "Badges": "Logros", "Language": "Idioma", "Add M29 to your Home Screen": "Añade M29 a tu pantalla de inicio", "Create a room": "Crear sala", "Or join one": "O entra a una", "Join": "Entrar", "Room code": "Código de sala", "Start the game": "Empezar", "Share this code. Everyone joins from their own phone.": "Comparte este código. Cada quien entra desde su teléfono.", "Share this code. They guess what you picked.": "Comparte este código. Adivinarán lo que elegiste.", "Waiting for the host to start…": "Esperando a que empiecen…", "One phone hosts, everyone else joins with a code. Same songs, same time, four options each.": "Un teléfono crea la sala y los demás entran con un código. Mismas canciones, al mismo tiempo, cuatro opciones cada uno.", "Nobody has joined yet.": "Todavía no ha entrado nadie.", "The host left. The room is closed.": "Quien creó la sala se fue. Se cerró.", "No room with that code.": "No hay ninguna sala con ese código.", "Looking for the room…": "Buscando la sala…", "Opening the room…": "Abriendo la sala…", "The code has four characters.": "El código tiene cuatro caracteres.", "Answer five questions about your own taste. Then your friends try to guess what you picked.": "Contesta diez preguntas sobre tu propio gusto. Luego tus amigos intentan adivinar qué elegiste.", "Your answers": "Tus respuestas", "Open a room": "Abrir sala", "Start over": "Empezar de nuevo", "Search a song": "Busca una canción", "Search artists": "Busca artistas", "My all-time favourite song": "Mi canción favorita de siempre", "The one I have on repeat right now": "La que traigo en repetición", "The song that always makes me dance": "La que siempre me hace bailar", "My guilty pleasure": "Mi placer culpable", "The song I want playing at my party": "La que quiero en mi fiesta", "The one that always makes me cry": "La que siempre me hace llorar", "My song for a long drive": "Mi canción de carretera", "The one I sing in the shower": "La que canto en la regadera", "A song that takes me back to school": "Una que me regresa a la escuela", "The one I would put on our wedding": "La que pondría en mi boda", "Try again": "Reintentar", "Nothing found.": "Sin resultados.", "Could not search right now.": "No se pudo buscar ahora.", "Building the deck…": "Armando el mazo…", "Everything is pulled": "Todo se trae en", "One second of a song. Type the title. Miss and you unlock more audio — 1, 2, 4, 7, 11 and 16 seconds across six tries. Three hints are there if you need them, and getting it right plays you fifteen more seconds.": "Un segundo de canción. Escribe el título. Si fallas desbloqueas más audio — 1, 2, 4, 7, 11 y 16 segundos en seis intentos. Hay tres pistas si las necesitas, y al acertar suenan quince segundos más.", "Ten rounds against the clock. Four titles, one right. Points fall from 1000 as the timer runs, a wrong answer costs three seconds instead of ending the round, and every fourth round is double or nothing.": "Diez rondas contra el reloj. Cuatro títulos, uno correcto. Los puntos bajan desde 1000 mientras corre el tiempo, fallar cuesta tres segundos en vez de acabar la ronda, y cada cuarta ronda vale doble o nada.", "Two to six players sharing one phone. A song plays and you call the decade it came out. Exact is 100 points, one decade off is 40. Five turns each. Pick one artist, or choose 'any music' to mix several careers and make the decades much harder to call.": "De dos a seis jugadores con un solo teléfono. Suena una canción y dices de qué década es. Exacta son 100 puntos, fallar por una son 40. Cinco turnos cada quien. Elige un artista o usa «música variada» para mezclar varias carreras y complicarlo mucho más.", "Pick a genre and name the artist. All four options come from that same genre, so telling them apart takes an ear — not just recognising a style.": "Elige un género y nombra al artista. Las cuatro opciones son del mismo género, así que distinguirlos exige oído y no solo reconocer un estilo.", "You answer ten questions about your own taste: your favourite song, your guilty pleasure, the one for a long drive. Then friends join with a code and try to guess what you picked. You watch.": "Contestas diez preguntas sobre tu propio gusto: tu canción favorita, tu placer culpable, la de carretera. Luego tus amigos entran con un código e intentan adivinar qué elegiste. Tú miras.", "One phone hosts and everyone joins from their own with a four-letter code. Same song at the same time, four options each, and a live scoreboard. Answering first is worth more.": "Un teléfono crea la sala y los demás entran con un código de cuatro letras. La misma canción al mismo tiempo, cuatro opciones cada uno y marcador en vivo. Responder primero vale más.", "Play 5 rounds": "Juega 5 rondas", "Get 6 right": "Acierta 6", "Play 2 different modes": "Juega 2 modos distintos", "Get 3 right in a row": "Acierta 3 seguidas", "Answer worth 800+ points": "Una respuesta de 800+ puntos", "Solve today's cut": "Resuelve el corte de hoy", "Finish a game with 8+": "Termina una partida con 8+", "Name a song with no hints": "Adivina sin usar pistas", "First spin": "Primer giro", "Play your first round": "Juega tu primera ronda", "Reflexes": "Reflejos", "Answer worth 900 points or more": "Una respuesta de 900 puntos o más", "Flawless": "Impecable", "Ten out of ten in one game": "Diez de diez en una partida", "Time traveller": "Viajero del tiempo", "Five decades called exactly": "Cinco décadas exactas", "Explorer": "Explorador", "Play all four modes": "Juega los cuatro modos", "Seven days": "Siete días", "A seven-day streak": "Siete días seguidos", "Your record": "Tus logros", "Accuracy": "Aciertos", "Reset all progress": "Borrar todo el progreso", "XP": "XP", "to level": "para el nivel", "Level": "Nivel", "Daily goal cleared": "Objetivo del día cumplido", "accuracy": "aciertos", "Day streak": "Días seguidos", "Best score": "Mejor puntaje", "live": "vivo", "— real catalogs, real 30-second previews. Nothing is stored.": "— catálogos reales, fragmentos reales de 30 segundos. No se guarda nada.", "— type the title. One second to start, growing with each guess. Hints cost nothing but get noted.": "— escribe el título. Empieza con un segundo y crece con cada intento. Las pistas no cuestan puntos, pero quedan anotadas.", "— four titles, ten rounds. Points fall from 1000 to 100 as the clock runs.": "— cuatro títulos, diez rondas. Los puntos bajan de 1000 a 100 mientras corre el reloj.", "— 2–6 players share one phone. Call the decade: exact is 100, one off is 40.": "— de 2 a 6 jugadores con un teléfono. Di la década: exacta 100, fallar por una 40.", "— pick a genre and name the artist. All four options come from that genre.": "— elige un género y nombra al artista. Las cuatro opciones son de ese género.", "Music data and previews from": "Datos y fragmentos musicales de", "Recently played": "Jugados hace poco", "Popular right now": "Sonando ahora", "Long careers, good for Eras": "Carreras largas, buenas para Épocas", "decades of albums": "décadas de discos", "This week with friends": "Esta semana con amigos", "Picked up where you left off.": "Seguimos donde lo dejaste.", "Copied": "Copiado"};
 let LANG='en';
 const ORIG=new WeakMap();   // texto original de cada nodo
 
@@ -2464,7 +2456,41 @@ async function aEnd(won){
 }
 $('a-next').onclick=aRound;
 $('a-change').onclick=()=>{stopAudio();go('s-pick')};
-$('a-share').onclick=async()=>{$('shareSheet').classList.add('on');await drawCard()};
+/* El reto diario es lo más compartible que tiene la app: una rejilla
+   que cuenta cómo te fue sin destripar la canción. */
+function rejillaDiaria(){
+  const usados=S.stage+1;
+  const total=cfg().stages.length;
+  let g='';
+  for(let i=0;i<total;i++){
+    if(i<usados-1) g+='🟥';
+    else if(i===usados-1 && S.won) g+='🟩';
+    else if(i===usados-1) g+='🟥';
+    else g+='⬛';
+  }
+  return g;
+}
+
+async function compartirDiario(){
+  const d=new Date();
+  const fecha=d.toLocaleDateString(LANG==='es'?'es':'en',{day:'numeric',month:'short'});
+  const linea = S.won
+    ? (LANG==='es'?`resuelto en ${S.stage+1}/${cfg().stages.length}`
+                  :`solved in ${S.stage+1}/${cfg().stages.length}`)
+    : (LANG==='es'?'sin acertar':'missed it');
+  const txt=`M29 · ${fecha} — ${linea}\n${rejillaDiaria()}\n${location.origin}${location.pathname}`;
+  try{
+    if(navigator.share) await navigator.share({text:txt});
+    else { await navigator.clipboard.writeText(txt);
+           $('a-share').textContent=T('Copied'); 
+           setTimeout(()=>{$('a-share').textContent=T('Share')},1600); }
+  }catch(e){}
+}
+
+$('a-share').onclick=async()=>{
+  if(S.game==='daily'){ compartirDiario(); return; }
+  $('shareSheet').classList.add('on'); await drawCard();
+};
 
 /* =====================================================
    BLITZ — cuatro opciones contra el reloj
@@ -2594,6 +2620,10 @@ function bAnswer(btn,ok,saltada){
     const pts=Math.round(worth(el)*mult);
     S.score+=pts;S.hits++;
     S.bestHit=Math.max(S.bestHit||0,pts);
+    /* Antes sólo se guardaba al terminar las diez rondas: quien salía
+       a media partida no dejaba récord, y por eso salía cero con
+       decenas de rondas jugadas. */
+    if(S.score>S.bestScore){ S.bestScore=S.score; store.set('bestScore',S.score); }
     $('b-score').textContent=S.score;
     $('b-gain').textContent=mult>1?`+${pts}  ×${mult}`:`+${pts}`;
     $('b-gain').className='gain plus rise';
@@ -3145,6 +3175,7 @@ function gAnswer(btn,ok){
     const pts=Math.round(worth(el)*mult);
     G.score+=pts;G.hits++;
     G.bestHit=Math.max(G.bestHit||0,pts);
+    if(G.score>(G.best||0)){ G.best=G.score; store.set('bestGenre',G.score); }
     $('g-score').textContent=G.score;
     $('g-gain').textContent=mult>1?`+${pts}  ×${mult}`:`+${pts}`;
     $('g-gain').className='gain plus rise';
@@ -3738,6 +3769,7 @@ function paintProfile(){
   $('pfNext').textContent=(need-P.xp)+' '+T('to level')+' '+(P.level+1);
   $('pfStreak').textContent=P.streak;
   $('pfRounds').textContent=P.rounds;
+  pintarLiga();
   $('pfAcc').textContent=(P.rounds?Math.round(P.hits/P.rounds*100):0)+'%';
 
   $('pfBadges').innerHTML='';
@@ -3870,15 +3902,31 @@ const PROMPTS=[
 
 const QZ={i:0,items:[],busy:false};
 
-$('quizBtn').onclick=()=>{go('s-quiz');qStart()};
+$('quizBtn').onclick=async()=>{
+  go('s-quiz');
+  /* Diez búsquedas seguidas son muchas para perderlas al salir. */
+  try{
+    const raw=await store.get('quizDraft');
+    const d = raw && raw!=='' ? JSON.parse(raw) : null;
+    if(d && d.length && d.length<PROMPTS.length){
+      QZ.items=d; QZ.i=d.length;
+      qStart(true);
+      $('qMsg').textContent=T('Picked up where you left off.');
+      setTimeout(()=>{$('qMsg').textContent=''},2600);
+      return;
+    }
+    if(d && d.length>=PROMPTS.length){ QZ.items=d; QZ.i=d.length; qFinish(); return; }
+  }catch(e){}
+  qStart();
+};
 
-function qStart(){
-  QZ.i=0;QZ.items=[];
+async function qStart(reanudar){
+  if(reanudar!==true){ QZ.i=0;QZ.items=[]; }
   $('qBuild').hidden=false;$('qDone').hidden=true;
   $('qMsg').textContent='';$('qSearch').value='';$('qResults').innerHTML='';
   qPaintStep();
 }
-$('qRedo').onclick=qStart;
+$('qRedo').onclick=()=>{store.set('quizDraft','');qStart()};
 
 function qPaintStep(){
   $('qStep').textContent=`Question ${QZ.i+1} of ${PROMPTS.length}`;
@@ -3947,6 +3995,7 @@ async function qPick(t){
       decoys:otros
     });
     QZ.i++;
+    store.set('quizDraft',JSON.stringify(QZ.items));   // por si te sales
     $('qSearch').value='';$('qResults').innerHTML='';
     if(QZ.i>=PROMPTS.length) qFinish(); else qPaintStep();
   }catch(e){
@@ -4399,6 +4448,55 @@ function revealRound(m){
   paintPlayers('pp-board',{scores:true});
 }
 
+/* Party se acaba al colgar y no deja poso. Esto guarda cada partida en
+   este teléfono y arma una tabla de la semana con quienes juegan
+   contigo. Sin servidor: vive donde se jugó. */
+async function guardarParty(arr){
+  try{
+    const raw=await store.get('ligas');
+    const hist = raw && raw!=='' ? JSON.parse(raw) : [];
+    hist.push({t:Date.now(), r:arr.map(p=>({n:p.name,s:p.score||0}))});
+    const semana=Date.now()-7*24*3600*1000;
+    await store.set('ligas',JSON.stringify(hist.filter(x=>x.t>semana).slice(-40)));
+  }catch(e){}
+}
+
+async function pintarLiga(){
+  const host=$('ligaBox');
+  if(!host)return;
+  let hist=[];
+  try{
+    const raw=await store.get('ligas');
+    hist = raw && raw!=='' ? JSON.parse(raw) : [];
+  }catch(e){}
+  const semana=Date.now()-7*24*3600*1000;
+  hist=hist.filter(x=>x.t>semana);
+  if(!hist.length){ host.parentNode.hidden=true; return; }
+  host.parentNode.hidden=false;
+
+  const tot=new Map();
+  hist.forEach(g=>g.r.forEach(p=>{
+    const v=tot.get(p.n)||{n:p.n,pts:0,ganadas:0,jugadas:0};
+    v.pts+=p.s; v.jugadas++;
+    tot.set(p.n,v);
+  }));
+  hist.forEach(g=>{
+    const top=g.r.slice().sort((a,b)=>b.s-a.s)[0];
+    if(top && tot.has(top.n)) tot.get(top.n).ganadas++;
+  });
+
+  const arr=[...tot.values()].sort((a,b)=>b.pts-a.pts);
+  host.innerHTML='';
+  arr.forEach((p,i)=>{
+    const li=document.createElement('li');
+    li.innerHTML='<span class="pos"></span><span class="nm3"></span><span class="pts2"></span>';
+    li.querySelector('.pos').textContent=i+1;
+    li.querySelector('.nm3').textContent=p.n;
+    li.querySelector('.pts2').textContent=`${p.pts} · ${p.ganadas}🏆`;
+    host.appendChild(li);
+  });
+}
+
 function ptEnd(){
   cancelAnimationFrame(PT.raf);
   audio.pause();
@@ -4415,6 +4513,7 @@ function ptEnd(){
     $('pp-sub').textContent=`${top.score} points over ${PT.rounds} rounds`;
   }
   paintPlayers('pp-final',{scores:true});
+  guardarParty(arr);
   $('ppAgain').hidden=!PT.host;
   go('s-pend');
   if(top.id===PT.id){ confetti(); sfx.level(); }
@@ -4725,12 +4824,6 @@ setTimeout(bootOut,3800);
   await loadDailyState();
   await loadMissions();
   await cargarRecientes();
-  // la bienvenida sólo aparece mientras no hayas jugado nada
-  if(!(await store.get('seen'))){
-    $('hello').hidden=false;
-    $('helloNo').onclick=()=>{$('hello').hidden=true;store.set('seen','1')};
-    $('helloGo').onclick=()=>{$('hello').hidden=true;store.set('seen','1');$('surprise').click()};
-  }
   const d=await store.get('diff');
   if(d==='hardcore'||d==='classic'){
     S.diff=d;
