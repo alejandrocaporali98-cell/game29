@@ -2217,6 +2217,7 @@ async function loadArtist(a){
     try{ audio.pause(); audio.removeAttribute('src'); audio.load(); }catch(e){}
     S.artist=a;S.pool=pool;S.titles=pool.map(t=>t.title);S.used=new Set();
     S.session=[];S.track=null;S.stage=0;S.hints=0;
+    S.queued=null;                       // fuera la canción precargada
     if(S.game==='line'){
       // este modo no usa el top: necesita fechas de lanzamiento
       const dated=await loadDated(a);
@@ -2259,8 +2260,12 @@ function pick(){
    actual. Sin esto hay un silencio de casi un segundo en datos
    móviles cada vez que cambia la canción. */
 function takeNext(){
-  const t=S.queued||pick();
+  /* La canción precargada puede ser del artista anterior: si ya no está
+     en la baraja actual, se descarta. Esto era lo que hacía que la
+     primera ronda tras cambiar de artista sonara a quien no debía. */
+  let t=S.queued;
   S.queued=null;
+  if(!t || !S.pool.some(o=>o.id===t.id)) t=pick();
   return t;
 }
 function queueNext(){
@@ -2830,7 +2835,7 @@ async function cargarMezcla(){
     if(pool.length<12||decadas.size<3) throw new Error('thin');
 
     S.artist={name:'Mixed'};
-    S.pool=pool;S.titles=pool.map(t=>t.title);S.used=new Set();
+    S.pool=pool;S.titles=pool.map(t=>t.title);S.used=new Set();S.queued=null;
     startLine(pool);
   }catch(e){
     b.textContent='Could not build it · try again';
